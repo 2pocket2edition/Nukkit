@@ -45,7 +45,7 @@ public class NoiseGeneratorOctaves3D {
         return ad;
     }
 
-    public double[] generateNoiseArray(double ad[], int x, int z, int xSize, int zSize,
+    public double[] generateNoiseArray2(double ad[], int x, int z, int xSize, int zSize,
                                        double gridX, double gridZ, double d2) {
         return generateNoiseArray(ad, x, 10D, z, xSize, 1, zSize, gridX, 1.0D, gridZ);
     }

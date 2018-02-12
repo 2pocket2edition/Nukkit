@@ -1,123 +1,118 @@
 package net.daporkchop.mcpe.betaterrain;
 
-import cn.nukkit.block.*;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockStone;
 import cn.nukkit.level.ChunkManager;
-import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.level.generator.object.ore.OreType;
-import cn.nukkit.level.generator.populator.*;
+import cn.nukkit.level.generator.populator.Populator;
+import cn.nukkit.level.generator.populator.PopulatorGroundCover;
+import cn.nukkit.level.generator.populator.PopulatorOre;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
-import net.daporkchop.mcpe.betaterrain.noise.NoiseGeneratorOctaves2D;
 import net.daporkchop.mcpe.betaterrain.noise.NoiseGeneratorOctaves3D;
 
 import java.util.*;
 
-import static cn.nukkit.block.Block.*;
-
 public class BetaGenerator extends Generator {
-    private final Set<Populator> generationPopulators = new HashSet<>();
-    private final Set<Populator> populators = new HashSet<>();
+    private PorkBiomeSelector selector;
     private ChunkManager level;
+    private Set<Populator> populators = new HashSet<>();
+    private Set<Populator> generationPopulators = new HashSet<>();
+    private Random random;
     private NukkitRandom nukkitRandom;
-    private NoiseGeneratorOctaves3D noiseGen1;
-    private NoiseGeneratorOctaves3D noiseGen2;
-    private NoiseGeneratorOctaves3D noiseGen3;
-    private NoiseGeneratorOctaves3D noiseGen4;
-    private NoiseGeneratorOctaves3D noiseGen5;
-    private NoiseGeneratorOctaves3D noiseGen6;
-    private NoiseGeneratorOctaves3D noiseGen7;
-    private NoiseGeneratorOctaves2D noiseGenTemp;
-    private NoiseGeneratorOctaves2D noiseGenRain;
-    private double noise[];
-    private double sandNoise[] = new double[256];
-    private double gravelNoise[] = new double[256];
-    private double stoneNoise[] = new double[256];
-    private double noise3[];
-    private double noise1[];
-    private double noise2[];
-    private double noise6[];
-    private double noise7[];
-    private double noiseTemp[];
-    private double noiseRain[];
-    private Random rand;
+    private double[] noise1;
+    private double[] noise2;
+    private double[] noise3;
+    private double[] noise;
+    private double[] sandNoise;
+    private double[] gravelNoise;
+    private double[] stoneNoise;
+    private double[] noise6;
+    private double[] noise7;
+    private NoiseGeneratorOctaves3D gen1;
+    private NoiseGeneratorOctaves3D gen2;
+    private NoiseGeneratorOctaves3D gen3;
+    private NoiseGeneratorOctaves3D gen4;
+    private NoiseGeneratorOctaves3D gen5;
+    private NoiseGeneratorOctaves3D gen6;
+    private NoiseGeneratorOctaves3D gen7;
+    private NoiseGeneratorOctaves3D genTrees;
 
     public BetaGenerator() {
         this(new HashMap<>());
     }
 
     public BetaGenerator(Map<String, Object> options) {
-
+        //Nothing here. Just used for future update.
     }
 
     @Override
     public int getId() {
-        return 0;
+        return TYPE_INFINITE;
     }
 
     @Override
-    public int getDimension() {
-        return Level.DIMENSION_OVERWORLD;
+    public Map<String, Object> getSettings() {
+        return null;
+    }
+
+    @Override
+    public ChunkManager getChunkManager() {
+        return level;
     }
 
     @Override
     public void init(ChunkManager level, NukkitRandom random) {
-        this.level = level;
         this.nukkitRandom = random;
-
-        rand = new Random(level.getSeed());
-        noiseGen1 = new NoiseGeneratorOctaves3D(rand, 16, false);
-        noiseGen2 = new NoiseGeneratorOctaves3D(rand, 16, false);
-        noiseGen3 = new NoiseGeneratorOctaves3D(rand, 8, false);
-        noiseGen4 = new NoiseGeneratorOctaves3D(rand, 4, false);
-        noiseGen5 = new NoiseGeneratorOctaves3D(rand, 4, false);
-        noiseGen6 = new NoiseGeneratorOctaves3D(rand, 10, false);
-        noiseGen7 = new NoiseGeneratorOctaves3D(rand, 16, false);
-        noiseGenTemp = new NoiseGeneratorOctaves2D(rand, 4);
-        noiseGenRain = new NoiseGeneratorOctaves2D(rand, 4);
-
+        random.setSeed(level.getSeed());
+        this.random = new Random(level.getSeed());
+        this.level = level;
+        this.selector = new PorkBiomeSelector(new NukkitRandom(level.getSeed()), Biome.getBiome(Biome.OCEAN));
         this.generationPopulators.add(new PopulatorGroundCover());
-        this.populators.add(new PopulatorCaves());
-        this.populators.add(new PopulatorRavines());
-
         PopulatorOre ores = new PopulatorOre();
         ores.setOreTypes(new OreType[]{
-                new OreType(new BlockOreCoal(), 20, 17, 0, 128),
-                new OreType(new BlockOreIron(), 20, 9, 0, 64),
-                new OreType(new BlockOreRedstone(), 8, 8, 0, 16),
-                new OreType(new BlockOreLapis(), 1, 7, 0, 16),
-                new OreType(new BlockOreGold(), 2, 9, 0, 32),
-                new OreType(new BlockOreDiamond(), 1, 8, 0, 16),
-                new OreType(new BlockDirt(), 10, 33, 0, 128),
-                new OreType(new BlockGravel(), 8, 33, 0, 128),
-                new OreType(new BlockStone(BlockStone.GRANITE), 10, 33, 0, 80),
-                new OreType(new BlockStone(BlockStone.DIORITE), 10, 33, 0, 80),
-                new OreType(new BlockStone(BlockStone.ANDESITE), 10, 33, 0, 80)
+                new OreType(Block.get(Block.COAL_ORE), 20, 16, 0, 128),
+                new OreType(Block.get(Block.IRON_ORE), 20, 8, 0, 64),
+                new OreType(Block.get(Block.REDSTONE_ORE), 1, 7, 0, 16),
+                new OreType(Block.get(Block.LAPIS_ORE), 2, 6, 0, 32),
+                new OreType(Block.get(Block.GOLD_ORE), 4, 8, 0, 32),
+                new OreType(Block.get(Block.DIAMOND_ORE), 2, 7, 0, 16),
+                new OreType(Block.get(Block.DIRT), 20, 32, 0, 128),
+                new OreType(Block.get(Block.GRAVEL), 10, 16, 0, 128),
+                new OreType(Block.get(Block.STONE, BlockStone.DIORITE), 6, 32, 0, 128),
+                new OreType(Block.get(Block.STONE, BlockStone.ANDESITE), 6, 32, 0, 128),
+                new OreType(Block.get(Block.STONE, BlockStone.GRANITE), 6, 32, 0, 128),
         });
         this.populators.add(ores);
+
+        this.random.setSeed(level.getSeed());
+        this.gen1 = new NoiseGeneratorOctaves3D(this.random, 16, false);
+        this.gen2 = new NoiseGeneratorOctaves3D(this.random, 16, false);
+        this.gen3 = new NoiseGeneratorOctaves3D(this.random, 8, false);
+        this.gen4 = new NoiseGeneratorOctaves3D(this.random, 4, false);
+        this.gen5 = new NoiseGeneratorOctaves3D(this.random, 4, false);
+        this.gen6 = new NoiseGeneratorOctaves3D(this.random, 10, false);
+        this.gen7 = new NoiseGeneratorOctaves3D(this.random, 16, false);
+        this.genTrees = new NoiseGeneratorOctaves3D(this.random, 8, false);
     }
 
-    @Override
-    public void generateChunk(int chunkX, int chunkZ) {
-        FullChunk chunk = this.level.getChunk(chunkX, chunkZ);
+    public String getName()
 
-        generateTerrain(chunkX, chunkZ, chunk);
-
-        for (Populator populator : this.generationPopulators) {
-            populator.populate(this.level, chunkX, chunkZ, this.nukkitRandom);
-        }
+    {
+        return "porkworld";
     }
 
-    public void initRand(int chunkX, int chunkZ) {
-        this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
+    public Vector3 getSpawn()
+
+    {
+        return new Vector3(0.5, 128, 0.5);
     }
 
-    @Override
     public void populateChunk(int chunkX, int chunkZ) {
-        initRand(chunkX, chunkZ);
-
+        this.random.setSeed(0xdeadbeef ^ (chunkX << 8) ^ chunkZ ^ this.level.getSeed());
         for (Populator populator : this.populators) {
             populator.populate(this.level, chunkX, chunkZ, this.nukkitRandom);
         }
@@ -127,47 +122,49 @@ public class BetaGenerator extends Generator {
         biome.populateChunk(this.level, chunkX, chunkZ, this.nukkitRandom);
     }
 
-    @Override
-    public Map<String, Object> getSettings() {
-        return null;
-    }
+    public void generateChunk(int x, int z) {
+        FullChunk chunk = this.level.getChunk(x, z);
+        this.random.setSeed(0xdeadbeef ^ (x << 8) ^ z ^ this.level.getSeed());
+        
+        /*
+         * temp = array(
+         * 256
+         * );
+         * rain = array(
+         * 256
+         * );
+         *
+         * for (xx = 0; xx < 16; ++ xx) {
+         * for (zz = 0; zz < 16; ++ zz) {
+         * out = this.pickBiome(x * 16 + xx, z * 16 + zz);
+         * chunk.setBiomeId(xx, zz, out.biome.getId());
+         * temp[xx * 16 + zz] = out.temp;
+         * rain[xx * 16 + zz] = out.rain;
+         * }
+         * }
+         */
 
-    @Override
-    public String getName() {
-        return "Overworld";
-    }
-
-    @Override
-    public Vector3 getSpawn() {
-        return new Vector3(0, 128, 0);
-    }
-
-    @Override
-    public ChunkManager getChunkManager() {
-        return level;
-    }
-
-    public void generateTerrain(int x, int z, FullChunk terrain) {
         byte byte0 = 4;
-        byte oceanHeight = 63;
-        int k = byte0 + 1;
+        byte oceanHeight = 64;
+        byte k = (byte) (byte0 + 1);
         byte b2 = 17;
-        int l = byte0 + 1;
-        noise = initNoiseField(noise, x * byte0, 0, z * byte0, k, b2, l);
+        byte l = (byte) (byte0 + 1);
+        this.initNoiseField(x * byte0, 0, z * byte0, k, b2, l);
+
         for (int xPiece = 0; xPiece < byte0; xPiece++) {
             for (int zPiece = 0; zPiece < byte0; zPiece++) {
                 for (int yPiece = 0; yPiece < 16; yPiece++) {
-                    double d = 0.125D;
-                    double d1 = noise[((xPiece) * l + (zPiece)) * b2 + (yPiece)];
-                    double d2 = noise[((xPiece) * l + (zPiece + 1)) * b2 + (yPiece)];
-                    double d3 = noise[((xPiece + 1) * l + (zPiece)) * b2 + (yPiece)];
-                    double d4 = noise[((xPiece + 1) * l + (zPiece + 1)) * b2 + (yPiece)];
-                    double d5 = (noise[((xPiece) * l + (zPiece)) * b2 + (yPiece + 1)] - d1) * d;
-                    double d6 = (noise[((xPiece) * l + (zPiece + 1)) * b2 + (yPiece + 1)] - d2) * d;
-                    double d7 = (noise[((xPiece + 1) * l + (zPiece)) * b2 + (yPiece + 1)] - d3) * d;
-                    double d8 = (noise[((xPiece + 1) * l + (zPiece + 1)) * b2 + (yPiece + 1)] - d4) * d;
+                    double d = 0.125d;
+                    double d1 = this.noise[((xPiece + 0) * l + (zPiece + 0)) * b2 + (yPiece + 0)];
+                    double d2 = this.noise[((xPiece + 0) * l + (zPiece + 1)) * b2 + (yPiece + 0)];
+                    double d3 = this.noise[((xPiece + 1) * l + (zPiece + 0)) * b2 + (yPiece + 0)];
+                    double d4 = this.noise[((xPiece + 1) * l + (zPiece + 1)) * b2 + (yPiece + 0)];
+                    double d5 = (this.noise[((xPiece + 0) * l + (zPiece + 0)) * b2 + (yPiece + 1)] - d1) * d;
+                    double d6 = (this.noise[((xPiece + 0) * l + (zPiece + 1)) * b2 + (yPiece + 1)] - d2) * d;
+                    double d7 = (this.noise[((xPiece + 1) * l + (zPiece + 0)) * b2 + (yPiece + 1)] - d3) * d;
+                    double d8 = (this.noise[((xPiece + 1) * l + (zPiece + 1)) * b2 + (yPiece + 1)] - d4) * d;
                     for (int l1 = 0; l1 < 8; l1++) {
-                        double d9 = 0.25D;
+                        double d9 = 0.25;
                         double d10 = d1;
                         double d11 = d2;
                         double d12 = (d3 - d1) * d9;
@@ -175,24 +172,24 @@ public class BetaGenerator extends Generator {
                         for (int i2 = 0; i2 < 4; i2++) {
                             int xLoc = i2 + xPiece * 4;
                             int yLoc = yPiece * 8 + l1;
-                            int zLoc = zPiece * 4;
-                            double d14 = 0.25D;
+                            int zLoc = 0 + zPiece * 4;
+                            double d14 = 0.25;
                             double d15 = d10;
                             double d16 = (d11 - d10) * d14;
                             for (int k2 = 0; k2 < 4; k2++) {
                                 double d17 = 1 - (yPiece / 16);
-                                int block = AIR;
-                                if (yPiece * 8 + l1 < oceanHeight) {
-                                    if (d17 < 0.5D && yPiece * 8 + l1 >= oceanHeight - 1) {
-                                        block = ICE;
+                                int block = Block.AIR;
+                                if (yLoc < 64) {
+                                    if (d17 < 0.5 && yLoc >= 64 - 1) {
+                                        block = Block.ICE;
                                     } else {
-                                        block = STILL_WATER;
+                                        block = Block.WATER;
                                     }
                                 }
-                                if (d15 > 0.0D) {
-                                    block = STONE;
+                                if (d15 > 0.0) {
+                                    block = Block.STONE;
                                 }
-                                terrain.setBlock(xLoc, yLoc, zLoc, block);
+                                chunk.setBlockId(xLoc, yLoc, zLoc, block);
                                 zLoc++;
                                 d15 += d16;
                             }
@@ -210,211 +207,118 @@ public class BetaGenerator extends Generator {
             }
         }
 
-        for (int relX = 0; relX < 16; relX++)    {
-            for (int relZ = 0; relZ < 16; relZ++)    {
-                Biome biome = chooseBiome(relX, relZ, terrain.getHighestBlockAt(relX, relZ));
-                replaceBlocksForBiome(relX, relZ, terrain, biome);
-                terrain.setBiomeId(relX, relZ, biome.getId());
-                //TODO: set correct color instead of the bad meme that nukkit uses
+        for (int xx = 0; xx < 16; xx++) {
+            for (int zz = 0; zz < 16; zz++) {
+                int highest = chunk.getHighestBlockAt(xx, zz);
+                chunk.setBiomeId(xx, zz, this.pickBiome(x * 16 + xx, z * 16 + zz, chunk.getBlockId(xx, highest, zz) == Block.WATER ? 1 : highest).biome.getId());
             }
+        }
+
+        for (Populator populator : this.generationPopulators) {
+            populator.populate(this.level, x, z, this.nukkitRandom);
         }
     }
 
-    private double[] initNoiseField(double array[], int xPos, int yPos, int zPos, int xSize, int ySize, int zSize) {
-        if (array == null) {
-            array = new double[xSize * ySize * zSize];
-        }
-        double d0 = 684.412D;
-        double d1 = 684.412D;
-        noise6 = noiseGen6.generateNoiseArray(noise6, xPos, zPos, xSize, zSize, 1.121D, 1.121D, 0.5D);
-        noise7 = noiseGen7.generateNoiseArray(noise7, xPos, zPos, xSize, zSize, 200D, 200D, 0.5D);
-        noise3 = noiseGen3.generateNoiseArray(noise3, xPos, yPos, zPos, xSize, ySize, zSize,
-                d0 / 80D, d1 / 160D, d0 / 80D);
-        noise1 = noiseGen1.generateNoiseArray(noise1, xPos, yPos, zPos, xSize, ySize, zSize,
-                d0, d1, d0);
-        noise2 = noiseGen2.generateNoiseArray(noise2, xPos, yPos, zPos, xSize, ySize, zSize,
-                d0, d1, d0);
+    public void initNoiseField(int posX, int posY, int posZ, int xSize, int ySize, int zSize) {
+        this.noise = new double[xSize * ySize * zSize];
+        double d0 = 684.412;
+        double d1 = 684.412;
 
-        double d = 0.03125D;
-        sandNoise = noiseGen4.generateNoiseArray(sandNoise, xPos * 4, zPos * 4, 0.0D, 16, 16, 1, d, d, 1.0D);
-        gravelNoise = noiseGen4.generateNoiseArray(gravelNoise, xPos * 4, 109.0134D, zPos * 16, 16, 1, 16, d, 1.0D, d);
-        stoneNoise = noiseGen5.generateNoiseArray(stoneNoise, xPos * 4, zPos * 4, 0.0D, 16, 16, 1, d * 2D, d * 2D, d * 2D);
-
-        noiseTemp = noiseGenTemp.generateNoiseArray(noiseTemp, xPos * 4, zPos * 4, 16, 16, 0.025D, 0.025D, 0.25D);
-        noiseRain = noiseGenRain.generateNoiseArray(noiseRain, xPos * 4, zPos * 4, 16, 16, 0.025D, 0.025D, 0.25D);
+        this.noise6 = this.gen6.generateNoiseArray2(this.noise6, posX, posZ, xSize, zSize, 1.121, 1.121, 0.5);
+        this.noise7 = this.gen7.generateNoiseArray2(this.noise7, posX, posZ, xSize, zSize, 200, 200, 0.5);
+        this.noise3 = this.gen3.generateNoiseArray(this.noise3, posX, posY, posZ, xSize, ySize, zSize, d0 / 80, d1 / 160, d0 / 80);
+        this.noise1 = this.gen1.generateNoiseArray(this.noise1, posX, posY, posZ, xSize, ySize, zSize, d0, d1, d0);
+        this.noise2 = this.gen2.generateNoiseArray(this.noise2, posX, posY, posZ, xSize, ySize, zSize, d0, d1, d0);
 
         int k1 = 0;
         int l1 = 0;
+        //double i2 = 16 / xSize;
+
         for (int x = 0; x < xSize; x++) {
+            //double k2 = x * i2 + i2 / 2;
             for (int z = 0; z < zSize; z++) {
+                //double i3 = z * i2 + i2 / 2;
+                //double d2 = 1;
                 double d3 = 1;
-                double d4 = 1.0D - d3;
+                // d2 = temp[k2 * 16 + i3];
+                // d3 = rain[k2 * 16 + i3] * d2;
+                double d4 = 1.0 - d3;
                 d4 *= d4;
                 d4 *= d4;
-                d4 = 1.0D - d4;
-                double d5 = (noise6[l1] + 256D) / 512D;
+                d4 = 1.0 - d4;
+                double d5 = (this.noise6[l1] + 256) / 512;
                 d5 *= d4;
-                if (d5 > 1.0D) {
-                    d5 = 1.0D;
+                if (d5 > 1.0) {
+                    d5 = 1.0;
                 }
-                double d6 = noise7[l1] / 8000D;
-                if (d6 < 0.0D) {
-                    d6 = -d6 * 0.3D;
+                double d6 = this.noise7[l1] / 8000;
+                if (d6 < 0.0) {
+                    d6 = -d6 * 0.3;
                 }
-                d6 = d6 * 3D - 2D;
-                if (d6 < 0.0D) {
-                    d6 /= 2D;
-                    if (d6 < -1D) {
-                        d6 = -1D;
+                d6 = d6 * 3 - 2;
+                if (d6 < 0.0) {
+                    d6 /= 2;
+                    if (d6 < -1) {
+                        d6 = -1;
                     }
-                    d6 /= 1.4D;
-                    d6 /= 2D;
-                    d5 = 0.0D;
+                    d6 /= 1.4;
+                    d6 /= 2;
+                    d5 = 0.0;
                 } else {
-                    if (d6 > 1.0D) {
-                        d6 = 1.0D;
+                    if (d6 > 1.0) {
+                        d6 = 1.0;
                     }
-                    d6 /= 8D;
+                    d6 /= 8;
                 }
-                if (d5 < 0.0D) {
-                    d5 = 0.0D;
+                if (d5 < 0.0) {
+                    d5 = 0.0;
                 }
-                d5 += 0.5D;
-                d6 = (d6 * (double) ySize) / 16D;
-                double d7 = (double) ySize / 2D + d6 * 4D;
+                d5 += 0.5;
+                d6 = (d6 * ySize) / 16;
+                double d7 = ySize / 2 + d6 * 4;
                 l1++;
                 for (int y = 0; y < ySize; y++) {
-                    double d8 = 0.0D;
-                    double d9 = (((double) y - d7) * 12D)
-                            / d5;
-                    if (d9 < 0.0D) {
-                        d9 *= 4D;
+                    double d8 = 0.0;
+                    double d9 = ((y - d7) * 12) / d5;
+                    if (d9 < 0.0) {
+                        d9 *= 4;
                     }
-                    double d10 = noise1[k1] / 512D;
-                    double d11 = noise2[k1] / 512D;
-                    double d12 = (this.noise3[k1] / 10D + 1.0D) / 2D;
-                    if (d12 < 0.0D) {
+                    double d10 = this.noise1[k1] / 512;
+                    double d11 = this.noise2[k1] / 512;
+                    double d12 = (this.noise3[k1] / 10 + 1.0) / 2;
+                    if (d12 < 0.0) {
                         d8 = d10;
-                    } else if (d12 > 1.0D) {
+                    } else if (d12 > 1.0) {
                         d8 = d11;
                     } else {
                         d8 = d10 + (d11 - d10) * d12;
                     }
                     d8 -= d9;
                     if (y > ySize - 4) {
-                        double d13 = (double) ((float) (y - (ySize - 4)) / 3F);
-                        d8 = d8 * (1.0D - d13) + -10D * d13;
+                        double d13 = ((y - (ySize - 4)) / 3);
+                        d8 = d8 * (1.0 - d13) + -10 * d13;
                     }
-                    array[k1] = d8;
+                    this.noise[k1] = d8;
                     k1++;
                 }
             }
         }
-        return array;
     }
 
-    public void replaceBlocksForBiome(int x, int z, FullChunk terrain, Biome biome) {
-        boolean sand = sandNoise[x + z * 16] + rand.nextDouble() * 0.2D > 0.0D;
-        boolean gravel = gravelNoise[x + z * 16] + rand.nextDouble() * 0.2D > 3D;
-        int depth = (int) (stoneNoise[x + z * 16] / 3D + 3D + rand.nextDouble() * 0.25D);
-        byte oceanHeight = 63;
-        int prevDepth = -1;
-        int topBlock = biome.getGroundCover()[0].getId();
-        int fillerBlock = biome.getGroundCover()[1].getId();
-        for (int y = 127; y >= 0; y--) {
-            if (y <= rand.nextInt(5)) {
-                terrain.setBlock(z, y, x, BEDROCK);
-                continue;
-            }
-            int block = terrain.getBlockId(z, y, x);
-            if (block == AIR) {
-                prevDepth = -1;
-                continue;
-            }
-            if (block != STONE) {
-                continue;
-            }
-            if (prevDepth == -1) {
-                if (depth <= 0) {
-                    topBlock = AIR;
-                    fillerBlock = STONE;
-                } else if (y >= oceanHeight - 4 && y <= oceanHeight + 1) {
-                    topBlock = biome.getGroundCover()[0].getId();
-                    fillerBlock = biome.getGroundCover()[1].getId();
-                    if (gravel) {
-                        topBlock = AIR;
-                        fillerBlock = GRAVEL;
-                    }
-                    if (sand) {
-                        topBlock = SAND;
-                        fillerBlock = SAND;
-                    }
-                }
-                if (y < oceanHeight && topBlock == AIR) {
-                    topBlock = STILL_WATER;
-                }
-                prevDepth = depth;
-                if (y >= oceanHeight - 1) {
-                    terrain.setBlock(z, y, x, topBlock);
-                } else {
-                    terrain.setBlock(z, y, x, fillerBlock);
-                }
-                continue;
-            }
-            if (prevDepth <= 0) {
-                continue;
-            }
-            prevDepth--;
-            terrain.setBlock(z, y, x, fillerBlock);
-            if (prevDepth == 0 && fillerBlock == SAND) {
-                prevDepth = rand.nextInt(4);
-                fillerBlock = SANDSTONE;
-            }
+    public BiomeSelectorResult pickBiome(int x, int z, int height) {
+        // return Biome.getBiome(Biome.MOUNTAINS);
+        long hash = x * 2345803 ^ z * 9236449 ^ this.level.getSeed();
+        hash *= hash + 223;
+        int xNoise = (int) (hash >> 20 & 3);
+        int zNoise = (int) (hash >> 22 & 3);
+        if (xNoise == 3) {
+            xNoise = 1;
         }
-    }
-
-    private Biome chooseBiome(int x, int z, int height) {
-        int id;
-        if (height <= 63)   {
-            id = Biome.OCEAN;
-        } else if (height <= 67)    {
-            id = Biome.BEACH;
-        } else {
-            int index = (x << 4) | z;
-            double temp = noiseTemp[index];
-            double rain = noiseRain[index];
-
-            if (temp > 0.8) {
-                if (rain > 0.85){
-                    id = Biome.JUNGLE;
-                } else if (rain > 0.7)  {
-                    id = Biome.SWAMP;
-                } else if (rain > 0.55)  {
-                    id = Biome.SAVANNA;
-                } else {
-                    id = Biome.DESERT;
-                }
-            } else if (temp > 0.6)   {
-                if (rain > 0.5){
-                    if (rain > 0.75){
-                        id = Biome.BIRCH_FOREST;
-                    } else {
-                        id = Biome.FOREST;
-                    }
-                } else {
-                    id = Biome.PLAINS;
-                }
-            } else {
-                if (rain > 0.75){
-                    id = Biome.TAIGA;
-                } else if (rain < 0.5){
-                    id = Biome.MOUNTAINS;
-                } else {
-                    id = Biome.ICE_PLAINS;
-                }
-            }
+        if (zNoise == 3) {
+            zNoise = 1;
         }
 
-        return Biome.getBiome(id);
+        return this.selector.pickBiomeNew(x + xNoise - 1, z + zNoise - 1, height);
     }
+
 }
