@@ -71,6 +71,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import net.daporkchop.mcpe.discord.DiscordMain;
 
 import java.awt.*;
 import java.io.IOException;
@@ -3171,6 +3172,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 PlayerChatEvent chatEvent = new PlayerChatEvent(this, msg);
                 this.server.getPluginManager().callEvent(chatEvent);
                 if (!chatEvent.isCancelled()) {
+                    DiscordMain.submitString("<" + getName() + "> " + chatEvent.getMessage());
                     this.server.broadcastMessage(this.getServer().getLanguage().translateString(chatEvent.getFormat(), new String[]{chatEvent.getPlayer().getDisplayName(), chatEvent.getMessage()}), chatEvent.getRecipients());
                 }
             }
@@ -3666,6 +3668,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             message = "";
             params.clear();
         }
+
+        DiscordMain.submitString(message);
 
         this.health = 0;
         this.scheduleUpdate();

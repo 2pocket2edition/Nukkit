@@ -5,6 +5,7 @@ import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.LogLevel;
 import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.ServerKiller;
+import net.daporkchop.mcpe.discord.DiscordMain;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -46,7 +47,8 @@ public class Nukkit {
     public static int DEBUG = 1;
 
     public static void main(String[] args) {
-        
+        DiscordMain.start();
+
         // prefer IPv4 to stop any weird RakNet issues.
         System.setProperty("java.net.preferIPv4Stack", "true");
 
@@ -122,6 +124,7 @@ public class Nukkit {
         ServerKiller killer = new ServerKiller(8);
         killer.start();
 
+        DiscordMain.shutdown();
         logger.shutdown();
         CommandReader.getInstance().removePromptLine();
 

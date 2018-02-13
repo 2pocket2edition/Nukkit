@@ -33,22 +33,15 @@ hs_err_pid*
 .settings/*
 
 # Generated files
+/run/*
 banned-ips.json
 banned-players.json
-nukkit.yml
 ops.txt
 server.log
-server.properties
 white-list.txt
-worlds
-worlds/*
-plugins
-plugins/*
-players
-players/*
-logs
-logs/*
-resource_packs
-resource_packs/*
+/worlds/*
+/players/*
+/logs/*
 creativeitems.json
 recipes.json
+/discordtoken.txt

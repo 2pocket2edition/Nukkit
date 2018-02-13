@@ -20,6 +20,15 @@
             <id>aikar</id>
             <url>http://ci.emc.gs/nexus/content/groups/aikar/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>jcenter</id>
+            <name>jcenter-bintray</name>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
@@ -123,6 +132,16 @@
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>4.39.2</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.DaMatrix</groupId>
+            <artifactId>PorkLib</artifactId>
+            <version>5491e44ee1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>3.5.0_327</version>
         </dependency>
     </dependencies>
 

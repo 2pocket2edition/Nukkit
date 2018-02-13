@@ -76,6 +76,7 @@ import cn.nukkit.utils.bugreport.ExceptionHandler;
 import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
 import net.daporkchop.mcpe.betaterrain.BetaGenerator;
+import net.daporkchop.mcpe.discord.DiscordMain;
 
 import java.io.*;
 import java.nio.ByteOrder;
