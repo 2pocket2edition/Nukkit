@@ -1027,7 +1027,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             DataPacketSendEvent event = new DataPacketSendEvent(this, packet);
             this.server.getPluginManager().callEvent(event);
             if (event.isCancelled()) {
-                timing.stopTiming();
                 return false;
             }
 
@@ -1058,7 +1057,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
             this.server.getPluginManager().callEvent(ev);
             if (ev.isCancelled()) {
-                timing.stopTiming();
                 return -1;
             }
 
@@ -1066,7 +1064,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             if (needACK && identifier != null) {
                 this.needACK.put(identifier, Boolean.FALSE);
-                timing.stopTiming();
                 return identifier;
             }
         }
@@ -1091,7 +1088,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
             this.server.getPluginManager().callEvent(ev);
             if (ev.isCancelled()) {
-                timing.stopTiming();
                 return -1;
             }
 
@@ -1099,7 +1095,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             if (needACK && identifier != null) {
                 this.needACK.put(identifier, Boolean.FALSE);
-                timing.stopTiming();
                 return identifier;
             }
         }
@@ -2038,12 +2033,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             DataPacketReceiveEvent ev = new DataPacketReceiveEvent(this, packet);
             this.server.getPluginManager().callEvent(ev);
             if (ev.isCancelled()) {
-                timing.stopTiming();
                 return;
             }
 
             if (packet.pid() == ProtocolInfo.BATCH_PACKET) {
-                timing.stopTiming();
                 this.server.getNetwork().processBatch((BatchPacket) packet, this);
                 return;
             }
