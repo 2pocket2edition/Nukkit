@@ -2,6 +2,7 @@ package net.daporkchop.mcpe.betaterrain;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockStone;
+import cn.nukkit.event.level.ChunkPopulateEvent;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.Generator;
@@ -13,6 +14,7 @@ import cn.nukkit.level.generator.populator.PopulatorOre;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import net.daporkchop.mcpe.betaterrain.noise.NoiseGeneratorOctaves3D;
+import net.twoptwoe.mobplugin.MobPlugin;
 
 import java.util.*;
 
@@ -120,6 +122,8 @@ public class BetaGenerator extends Generator {
         FullChunk chunk = this.level.getChunk(chunkX, chunkZ);
         Biome biome = Biome.getBiome(chunk.getBiomeId(7, 7));
         biome.populateChunk(this.level, chunkX, chunkZ, this.nukkitRandom);
+
+        MobPlugin.ChunkPopulateEvent(new ChunkPopulateEvent(chunk));
     }
 
     public void generateChunk(int x, int z) {
