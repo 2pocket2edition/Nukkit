@@ -71,6 +71,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import net.daporkchop.mcpe.deathmsg.DeathMsg;
 import net.daporkchop.mcpe.discord.DiscordMain;
 
 import java.awt.*;
@@ -3547,134 +3548,13 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         if (!this.spawned) {
             return;
         }
-
-        boolean showMessages = this.level.getGameRules().getBoolean(GameRule.SHOW_DEATH_MESSAGE);
-        String message = "death.attack.generic";
-
-        List<String> params = new ArrayList<>();
-        params.add(this.getDisplayName());
-        if (showMessages) {
-
-            EntityDamageEvent cause = this.getLastDamageCause();
-
-            switch (cause == null ? DamageCause.CUSTOM : cause.getCause()) {
-                case ENTITY_ATTACK:
-                    if (cause instanceof EntityDamageByEntityEvent) {
-                        Entity e = ((EntityDamageByEntityEvent) cause).getDamager();
-                        killer = e;
-                        if (e instanceof Player) {
-                            message = "death.attack.player";
-                            params.add(((Player) e).getDisplayName());
-                            break;
-                        } else if (e instanceof EntityLiving) {
-                            message = "death.attack.mob";
-                            params.add(!Objects.equals(e.getNameTag(), "") ? e.getNameTag() : e.getName());
-                            break;
-                        } else {
-                            params.add("Unknown");
-                        }
-                    }
-                    break;
-                case PROJECTILE:
-                    if (cause instanceof EntityDamageByEntityEvent) {
-                        Entity e = ((EntityDamageByEntityEvent) cause).getDamager();
-                        killer = e;
-                        if (e instanceof Player) {
-                            message = "death.attack.arrow";
-                            params.add(((Player) e).getDisplayName());
-                        } else if (e instanceof EntityLiving) {
-                            message = "death.attack.arrow";
-                            params.add(!Objects.equals(e.getNameTag(), "") ? e.getNameTag() : e.getName());
-                            break;
-                        } else {
-                            params.add("Unknown");
-                        }
-                    }
-                    break;
-                case SUICIDE:
-                    message = "death.attack.generic";
-                    break;
-                case VOID:
-                    message = "death.attack.outOfWorld";
-                    break;
-                case FALL:
-                    if (cause != null) {
-                        if (cause.getFinalDamage() > 2) {
-                            message = "death.fell.accident.generic";
-                            break;
-                        }
-                    }
-                    message = "death.attack.fall";
-                    break;
-
-                case SUFFOCATION:
-                    message = "death.attack.inWall";
-                    break;
-
-                case LAVA:
-                    message = "death.attack.lava";
-                    break;
-
-                case FIRE:
-                    message = "death.attack.onFire";
-                    break;
-
-                case FIRE_TICK:
-                    message = "death.attack.inFire";
-                    break;
-
-                case DROWNING:
-                    message = "death.attack.drown";
-                    break;
-
-                case CONTACT:
-                    if (cause instanceof EntityDamageByBlockEvent) {
-                        if (((EntityDamageByBlockEvent) cause).getDamager().getId() == Block.CACTUS) {
-                            message = "death.attack.cactus";
-                        }
-                    }
-                    break;
-
-                case BLOCK_EXPLOSION:
-                case ENTITY_EXPLOSION:
-                    if (cause instanceof EntityDamageByEntityEvent) {
-                        Entity e = ((EntityDamageByEntityEvent) cause).getDamager();
-                        killer = e;
-                        if (e instanceof Player) {
-                            message = "death.attack.explosion.player";
-                            params.add(((Player) e).getDisplayName());
-                        } else if (e instanceof EntityLiving) {
-                            message = "death.attack.explosion.player";
-                            params.add(!Objects.equals(e.getNameTag(), "") ? e.getNameTag() : e.getName());
-                            break;
-                        }
-                    } else {
-                        message = "death.attack.explosion";
-                    }
-                    break;
-
-                case MAGIC:
-                    message = "death.attack.magic";
-                    break;
-
-                case CUSTOM:
-                    break;
-
-                default:
-                    break;
-
-            }
-        } else {
-            message = "";
-            params.clear();
-        }
-
+        String message = DeathMsg.getDeathMessage(this);
         DiscordMain.submitString(message);
 
         this.health = 0;
         this.scheduleUpdate();
 
-        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TranslationContainer(message, params.stream().toArray(String[]::new)), this.getExperienceLevel());
+        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TextContainer(message), this.getExperienceLevel());
 
         ev.setKeepExperience(this.level.gameRules.getBoolean(GameRule.KEEP_INVENTORY));
         ev.setKeepInventory(ev.getKeepExperience());
@@ -3703,10 +3583,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.setExperience(0, 0);
         }
 
-        if (showMessages && !ev.getDeathMessage().toString().isEmpty()) {
+        if (!ev.getDeathMessage().toString().isEmpty()) {
             this.server.broadcast(ev.getDeathMessage(), Server.BROADCAST_CHANNEL_USERS);
         }
-
 
         RespawnPacket pk = new RespawnPacket();
         Position pos = this.getSpawn();

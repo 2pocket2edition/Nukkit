@@ -26,6 +26,7 @@ public class DiscordMain {
     private static Message message;
 
     public static void submitString(String input) {
+        input = TextFormat.clean(input);
         if (input.length() >= 800) {
             return;
         }
@@ -125,6 +126,17 @@ public class DiscordMain {
         }
     }
 
+    public static final void updateMessageNow() {
+        synchronized (list) {
+            String ok = "```\n";
+            for (String s : list) {
+                ok += s + "\n";
+            }
+            ok += "```";
+            message.editMessage(ok).complete();
+        }
+    }
+
     public static final void loadFromInitialMessage() {
         String msg = message.getContentRaw();
         if (!msg.startsWith("```\n")) {
@@ -139,8 +151,8 @@ public class DiscordMain {
     public static final void shutdown() {
         timer.purge();
         timer.cancel();
-        submitString("Server shutting down...");
-        updateMessage();
+        submitString("Server shutting down!");
+        updateMessageNow();
         jda.shutdown();
     }
 
