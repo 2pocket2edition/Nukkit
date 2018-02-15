@@ -33,11 +33,11 @@ public class RandomSpawn {
             int xPos = Utils.rand(-256, 256),
             zPos = Utils.rand(-256, 256),
             yPos = level.getHighestBlockAt(xPos, zPos);
-            int under = level.getBlockIdAt(xPos, yPos - 1, zPos);
+            int under = level.getBlockIdAt(xPos, yPos, zPos);
             if (unsafe_blocks.contains(under))  {
                 continue;
             }
-            pos = new Position(xPos + 0.5f, yPos, zPos + 0.5f, level);
+            pos = new Position(xPos + 0.5f, yPos + 1, zPos + 0.5f, level);
             break;
         }
 
