@@ -6,10 +6,7 @@ import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -91,6 +88,17 @@ public class DiscordMain {
                     .buildBlocking();
             TextChannel channel = jda.getTextChannelById(412992591148220418L);
             message = channel.getMessageById(413020177513447434L).complete();
+            try {
+                MessageHistory history;
+                do {
+                    history = channel.getHistoryAfter(413020177513447434L, 99).complete();
+                    if (!history.getRetrievedHistory().isEmpty()) {
+                        channel.deleteMessages(history.getRetrievedHistory()).complete();
+                    }
+                } while (history.size() == 99);
+            } catch (IllegalStateException e)   {
+                //shrug
+            }
             loadFromInitialMessage();
             submitString("Server started!");
 

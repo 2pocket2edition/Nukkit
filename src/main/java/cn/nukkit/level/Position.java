@@ -56,6 +56,10 @@ public class Position extends Vector3 {
         return this.level != null;
     }
 
+    public boolean isValidSpawn()   {
+        return isValid() && level.getBlockIdAt(this.getFloorX(), this.getFloorY(), this.getFloorZ()) == Block.BED_BLOCK;
+    }
+
     public boolean setStrong() {
         return false;
     }

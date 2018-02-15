@@ -71,6 +71,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.deathmsg.DeathMsg;
 import net.daporkchop.mcpe.discord.DiscordMain;
 
@@ -734,10 +735,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public Position getSpawn() {
-        if (this.spawnPosition != null && this.spawnPosition.getLevel() != null) {
+        if (this.spawnPosition != null && this.spawnPosition.isValidSpawn()) {
             return this.spawnPosition;
         } else {
-            return this.server.getDefaultLevel().getSafeSpawn();
+            return RandomSpawn.getSpawnPos(level);
         }
     }
 
