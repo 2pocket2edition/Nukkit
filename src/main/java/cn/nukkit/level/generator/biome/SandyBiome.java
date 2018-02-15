@@ -12,16 +12,6 @@ import cn.nukkit.level.generator.populator.PopulatorDeadBush;
  */
 public abstract class SandyBiome extends NormalBiome implements CaveBiome {
     public SandyBiome() {
-
-        PopulatorCactus cactus = new PopulatorCactus();
-        cactus.setBaseAmount(2);
-
-        PopulatorDeadBush deadbush = new PopulatorDeadBush();
-        deadbush.setBaseAmount(2);
-
-        this.addPopulator(cactus);
-        this.addPopulator(deadbush);
-
         this.setGroundCover(new Block[]{
                 new BlockSand(),
                 new BlockSand(),
