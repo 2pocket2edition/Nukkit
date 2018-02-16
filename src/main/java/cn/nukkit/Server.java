@@ -75,8 +75,9 @@ import cn.nukkit.utils.*;
 import cn.nukkit.utils.bugreport.ExceptionHandler;
 import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
-import net.daporkchop.mcpe.betaterrain.BetaGenerator;
-import net.daporkchop.mcpe.discord.DiscordMain;
+import net.daporkchop.mcpe.EnumLevel;
+import net.daporkchop.mcpe.terrain.PorkNether;
+import net.daporkchop.mcpe.terrain.beta.BetaGenerator;
 
 import java.io.*;
 import java.nio.ByteOrder;
@@ -435,6 +436,7 @@ public class Server {
         Generator.addGenerator(Normal.class, "default", Generator.TYPE_INFINITE);
         Generator.addGenerator(Nether.class, "nether", Generator.TYPE_NETHER);
         Generator.addGenerator(BetaGenerator.class, "beta", Generator.TYPE_INFINITE);
+        Generator.addGenerator(PorkNether.class, "porknether", Generator.TYPE_NETHER);
         //todo: add old generator and hell generator
 
         for (String name : ((Map<String, Object>) this.getConfig("worlds", new HashMap<>())).keySet()) {
@@ -493,6 +495,8 @@ public class Server {
 
             return;
         }
+
+        EnumLevel.initLevels();
 
         if ((int) this.getConfig("ticks-per.autosave", 6000) > 0) {
             this.autoSaveTicks = (int) this.getConfig("ticks-per.autosave", 6000);

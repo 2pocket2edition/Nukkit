@@ -1,4 +1,4 @@
-package net.daporkchop.mcpe.betaterrain;
+package net.daporkchop.mcpe.terrain.beta;
 
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockStone;
@@ -13,7 +13,7 @@ import cn.nukkit.level.generator.populator.PopulatorGroundCover;
 import cn.nukkit.level.generator.populator.PopulatorOre;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
-import net.daporkchop.mcpe.betaterrain.noise.NoiseGeneratorOctaves3D;
+import net.daporkchop.mcpe.terrain.noise.NoiseGeneratorOctaves3D;
 import net.twoptwoe.mobplugin.MobPlugin;
 
 import java.util.*;
@@ -29,19 +29,13 @@ public class BetaGenerator extends Generator {
     private double[] noise2;
     private double[] noise3;
     private double[] noise;
-    private double[] sandNoise;
-    private double[] gravelNoise;
-    private double[] stoneNoise;
     private double[] noise6;
     private double[] noise7;
     private NoiseGeneratorOctaves3D gen1;
     private NoiseGeneratorOctaves3D gen2;
     private NoiseGeneratorOctaves3D gen3;
-    private NoiseGeneratorOctaves3D gen4;
-    private NoiseGeneratorOctaves3D gen5;
     private NoiseGeneratorOctaves3D gen6;
     private NoiseGeneratorOctaves3D gen7;
-    private NoiseGeneratorOctaves3D genTrees;
 
     public BetaGenerator() {
         this(new HashMap<>());
@@ -94,11 +88,8 @@ public class BetaGenerator extends Generator {
         this.gen1 = new NoiseGeneratorOctaves3D(this.random, 16, false);
         this.gen2 = new NoiseGeneratorOctaves3D(this.random, 16, false);
         this.gen3 = new NoiseGeneratorOctaves3D(this.random, 8, false);
-        this.gen4 = new NoiseGeneratorOctaves3D(this.random, 4, false);
-        this.gen5 = new NoiseGeneratorOctaves3D(this.random, 4, false);
         this.gen6 = new NoiseGeneratorOctaves3D(this.random, 10, false);
         this.gen7 = new NoiseGeneratorOctaves3D(this.random, 16, false);
-        this.genTrees = new NoiseGeneratorOctaves3D(this.random, 8, false);
     }
 
     public String getName()
@@ -215,6 +206,7 @@ public class BetaGenerator extends Generator {
             for (int zz = 0; zz < 16; zz++) {
                 int highest = chunk.getHighestBlockAt(xx, zz);
                 chunk.setBiomeId(xx, zz, this.pickBiome(x * 16 + xx, z * 16 + zz, chunk.getBlockId(xx, highest, zz) == Block.WATER ? 1 : highest).biome.getId());
+                chunk.setBlockId(xx, 0, zz, Block.BEDROCK);
             }
         }
 

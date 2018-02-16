@@ -1,4 +1,4 @@
-package net.daporkchop.mcpe.betaterrain.noise;
+package net.daporkchop.mcpe.terrain.noise;
 
 import java.util.Random;
 

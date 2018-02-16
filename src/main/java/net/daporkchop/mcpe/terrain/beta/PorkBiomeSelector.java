@@ -1,4 +1,4 @@
-package net.daporkchop.mcpe.betaterrain;
+package net.daporkchop.mcpe.terrain.beta;
 
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.level.generator.biome.BiomeSelector;
