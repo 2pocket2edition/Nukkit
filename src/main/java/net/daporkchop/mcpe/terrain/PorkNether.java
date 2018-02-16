@@ -15,18 +15,13 @@ import java.util.Map;
 import java.util.Random;
 
 public class PorkNether extends Generator {
-    private NoiseGeneratorOctaves3D gen1;
-    private NoiseGeneratorOctaves3D gen2;
-    private NoiseGeneratorOctaves3D gen3;
     private NukkitRandom nukkitRandom;
     private Random random;
     private ChunkManager level;
-    private double[] noise1;
-    private double[] noise2;
-    private double[] noise3;
+    private double[][][] noise1 = new double[17][16][128];
+    private double[][][] noise2 = new double[17][16][128];
     private Simplex simplex1;
     private Simplex simplex2;
-    private Simplex simplex3;
 
     public PorkNether() {
         this(new HashMap<>());
@@ -51,10 +46,8 @@ public class PorkNether extends Generator {
         this.level = level;
         this.nukkitRandom = random;
         this.random = new Random(level.getSeed());
-        this.gen1 = new NoiseGeneratorOctaves3D(this.random, 8, false);
-        this.gen2 = new NoiseGeneratorOctaves3D(this.random, 8, false);
-        this.gen3 = new NoiseGeneratorOctaves3D(this.random, 8, false);
-        this.simplex1 = new Simplex(random, 8, 0.5);
+        this.simplex1 = new Simplex(random, 16, 0.5, 1 / 64);
+        this.simplex1 = new Simplex(random, 4, 0.5, 1 / 16);
     }
 
     @Override
@@ -66,11 +59,12 @@ public class PorkNether extends Generator {
                 x, 0, z,
                 16, 256, 16,
                 684.412, 684.412 / 4, 684.412);*/
-        double[][][] noise = getFastNoise3D(simplex1, 16, 256, 16, 4, 1, 4, x, 0, z);
+        getFastNoise3D(simplex1, noise1, 16, 128, 16, 4, 1, 4, x, 0, z);
+        getFastNoise3D(simplex1, noise2, 16, 128, 16, 4, 4, 4, x, 0, z);
         for (int relX = 0; relX < 16; relX++) {
             for (int relZ = 0; relZ < 16; relZ++) {
                 for (int relY = 1; relY < 255; relY++) {
-                    if (noise[relX][relZ][relY] < 0) {
+                    if (noise1[relX][relZ][relY] - (noise2[relX][relZ][relY] / 4) < 0) {
                         chunk.setBlockId(relX, relY, relZ, Block.NETHERRACK);
                     }
                 }
