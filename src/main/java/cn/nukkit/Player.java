@@ -71,6 +71,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import net.daporkchop.mcpe.EnumLevel;
 import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.deathmsg.DeathMsg;
 import net.daporkchop.mcpe.discord.DiscordMain;
@@ -3547,6 +3548,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         if (!this.spawned) {
             return;
         }
+
+        if (this.level != EnumLevel.OVERWORLD.getLevel())   {
+            this.teleportImmediate(new Location(0, -100, 0, EnumLevel.OVERWORLD.getLevel()));
+        }
+
         String message = DeathMsg.getDeathMessage(this);
         DiscordMain.submitString(message);
 

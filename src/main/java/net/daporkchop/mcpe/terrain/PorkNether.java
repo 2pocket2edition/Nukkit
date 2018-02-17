@@ -5,6 +5,7 @@ import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.Generator;
+import cn.nukkit.level.generator.noise.Perlin;
 import cn.nukkit.level.generator.noise.Simplex;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
@@ -19,7 +20,8 @@ public class PorkNether extends Generator {
     private Random random;
     private ChunkManager level;
     private Simplex simplex1;
-    private Simplex simplex2;
+    private NoiseGeneratorOctaves3D noise1;
+    private static final double multiplier = 1 / 64;
 
     public PorkNether() {
         this(new HashMap<>());
@@ -44,8 +46,8 @@ public class PorkNether extends Generator {
         this.level = level;
         this.nukkitRandom = random;
         this.random = new Random(level.getSeed());
-        this.simplex1 = new Simplex(random, 16, 0.5, 1 / 64);
-        this.simplex2 = new Simplex(random, 4, 0.5, 1 / 16);
+        this.simplex1 = new Simplex(random, 16, 0.5, 1 / 128);
+        this.noise1 = new NoiseGeneratorOctaves3D(this.random, 16, false);
     }
 
     @Override
@@ -53,21 +55,16 @@ public class PorkNether extends Generator {
         FullChunk chunk = level.getChunk(chunkX, chunkZ);
         int x = chunkX << 4;
         int z = chunkZ << 4;
-        /*noise1 = gen1.generateNoiseArray(noise1,
-                x, 0, z,
-                16, 256, 16,
-                684.412, 684.412 / 4, 684.412);*/
-        double[][][] noise1 = getFastNoise3D(simplex1, 16, 128, 16, 4, 1, 4, x, 0, z);
-        double[][][] noise2 = getFastNoise3D(simplex2, 16, 128, 16, 4, 4, 4, x, 0, z);
+        //double[][][] noise1 = getFastNoise3D(simplex1, 16, 128, 16, 4, 1, 4, x, 0, z);
         for (int relX = 0; relX < 16; relX++) {
             for (int relZ = 0; relZ < 16; relZ++) {
-                for (int relY = 1; relY < 128; relY++) {
-                    if (noise1[relX][relZ][relY] - (noise2[relX][relZ][relY] / 4) < 0) {
+                for (int relY = 1; relY < 127; relY++) {
+                    if (simplex1.getNoise3D((x + relX) * multiplier, relY * multiplier, (z + relZ) * multiplier) < 0) {
                         chunk.setBlockId(relX, relY, relZ, Block.NETHERRACK);
                     }
                 }
                 chunk.setBlockId(relX, 0, relZ, Block.BEDROCK);
-                chunk.setBlockId(relX, 255, relZ, Block.BEDROCK);
+                chunk.setBlockId(relX, 127, relZ, Block.BEDROCK);
             }
         }
     }

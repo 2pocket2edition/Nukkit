@@ -27,6 +27,16 @@ public class NoiseGeneratorOctaves3D {
         return d2;
     }
 
+    public double generateNoise(double x, double z, double y, double freq) {
+        double d2 = 0.0D;
+        for (int i = 0; i < octaves; i++) {
+            d2 += generatorCollection[i].generateNoise(x * freq, z * freq, y * freq) / freq;
+            freq /= 2D;
+        }
+
+        return d2;
+    }
+
     public double[] generateNoiseArray(double ad[], double x, double y, double z, int xSize, int ySize, int zSize, double gridX, double gridY, double gridZ) {
         if (ad == null) {
             ad = new double[xSize * ySize * zSize];
