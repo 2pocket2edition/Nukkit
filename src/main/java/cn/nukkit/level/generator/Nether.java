@@ -85,6 +85,12 @@ public class Nether extends Generator {
         lava.setRandomAmount(2);
         this.populators.add(lava);
         this.populators.add(new PopulatorGlowStone());
+        PopulatorOre ore = new PopulatorOre();
+        ore.setOreTypes(new OreType[]{
+                new OreType(new BlockOreQuartz(), 20, 16, 1, 126),
+                new OreType(new BlockSoulSand(), 1, 64, 30, 126)
+        });
+        this.populators.add(ore);
     }
 
     @Override
