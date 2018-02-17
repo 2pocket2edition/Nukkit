@@ -431,10 +431,6 @@ public class Server {
         LevelProviderManager.addProvider(this, McRegion.class);
         LevelProviderManager.addProvider(this, LevelDB.class);
 
-        Generator.addGenerator(Flat.class, "flat", Generator.TYPE_FLAT);
-        Generator.addGenerator(Normal.class, "normal", Generator.TYPE_INFINITE);
-        Generator.addGenerator(Normal.class, "default", Generator.TYPE_INFINITE);
-        Generator.addGenerator(Nether.class, "nether", Generator.TYPE_NETHER);
         Generator.addGenerator(BetaGenerator.class, "beta", Generator.TYPE_INFINITE);
         Generator.addGenerator(PorkNether.class, "porknether", Generator.TYPE_NETHER);
         //todo: add old generator and hell generator

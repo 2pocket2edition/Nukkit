@@ -18,8 +18,6 @@ public class PorkNether extends Generator {
     private NukkitRandom nukkitRandom;
     private Random random;
     private ChunkManager level;
-    private double[][][] noise1 = new double[17][16][128];
-    private double[][][] noise2 = new double[17][16][128];
     private Simplex simplex1;
     private Simplex simplex2;
 
@@ -47,7 +45,7 @@ public class PorkNether extends Generator {
         this.nukkitRandom = random;
         this.random = new Random(level.getSeed());
         this.simplex1 = new Simplex(random, 16, 0.5, 1 / 64);
-        this.simplex1 = new Simplex(random, 4, 0.5, 1 / 16);
+        this.simplex2 = new Simplex(random, 4, 0.5, 1 / 16);
     }
 
     @Override
@@ -59,11 +57,11 @@ public class PorkNether extends Generator {
                 x, 0, z,
                 16, 256, 16,
                 684.412, 684.412 / 4, 684.412);*/
-        getFastNoise3D(simplex1, noise1, 16, 128, 16, 4, 1, 4, x, 0, z);
-        getFastNoise3D(simplex1, noise2, 16, 128, 16, 4, 4, 4, x, 0, z);
+        double[][][] noise1 = getFastNoise3D(simplex1, 16, 128, 16, 4, 1, 4, x, 0, z);
+        double[][][] noise2 = getFastNoise3D(simplex2, 16, 128, 16, 4, 4, 4, x, 0, z);
         for (int relX = 0; relX < 16; relX++) {
             for (int relZ = 0; relZ < 16; relZ++) {
-                for (int relY = 1; relY < 255; relY++) {
+                for (int relY = 1; relY < 128; relY++) {
                     if (noise1[relX][relZ][relY] - (noise2[relX][relZ][relY] / 4) < 0) {
                         chunk.setBlockId(relX, relY, relZ, Block.NETHERRACK);
                     }
