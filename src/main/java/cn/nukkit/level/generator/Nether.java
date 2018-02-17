@@ -84,6 +84,7 @@ public class Nether extends Generator {
         lava.setBaseAmount(1);
         lava.setRandomAmount(2);
         this.populators.add(lava);
+        this.populators.add(new PopulatorGlowStone());
     }
 
     @Override
