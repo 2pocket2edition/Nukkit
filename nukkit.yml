@@ -122,4 +122,4 @@ worlds:
  # generator: FLAT:2;7,59x1,3x3,2;1;decoration(treecount=80 grasscount=45)
  nether:
   seed: 12345
-  generator: porknether
+  generator: nether

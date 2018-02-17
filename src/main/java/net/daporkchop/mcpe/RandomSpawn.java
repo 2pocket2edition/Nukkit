@@ -43,4 +43,8 @@ public class RandomSpawn {
 
         return pos;
     }
+
+    public static final boolean isUnafe(int id)  {
+        return unsafe_blocks.contains(id);
+    }
 }
