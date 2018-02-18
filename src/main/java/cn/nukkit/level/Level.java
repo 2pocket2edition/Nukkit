@@ -2090,11 +2090,15 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public Entity getEntity(long entityId) {
-        return this.entities.containsKey(entityId) ? this.entities.get(entityId) : null;
+        synchronized (entities) {
+            return this.entities.containsKey(entityId) ? this.entities.get(entityId) : null;
+        }
     }
 
     public Entity[] getEntities() {
-        return entities.values().stream().toArray(Entity[]::new);
+        synchronized (entities) {
+            return entities.values().stream().toArray(Entity[]::new);
+        }
     }
 
     public Entity[] getCollidingEntities(AxisAlignedBB bb) {
@@ -2558,7 +2562,9 @@ public class Level implements ChunkManager, Metadatable {
             entity.close();
         }
 
-        this.entities.remove(entity.getId());
+        synchronized (entities) {
+            this.entities.remove(entity.getId());
+        }
         this.updateEntities.remove(entity.getId());
     }
 
@@ -2570,7 +2576,9 @@ public class Level implements ChunkManager, Metadatable {
         if (entity instanceof Player) {
             this.players.put(entity.getId(), (Player) entity);
         }
-        this.entities.put(entity.getId(), entity);
+        synchronized (entities) {
+            this.entities.put(entity.getId(), entity);
+        }
     }
 
     public void addBlockEntity(BlockEntity blockEntity) {

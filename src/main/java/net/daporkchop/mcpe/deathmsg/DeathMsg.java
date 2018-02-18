@@ -194,7 +194,11 @@ public class DeathMsg {
     }
 
     public static final String getDeathMessage(Player player)   {
-        return TextFormat.colorize(deathMessages.get(player.getLastDamageCause().getCause())
-                .apply(player.getName(), player.getLastDamageCause()));
+        try {
+            return TextFormat.colorize(deathMessages.get(player.getLastDamageCause().getCause())
+                    .apply(player.getName(), player.getLastDamageCause()));
+        } catch (NullPointerException e)    {
+            return player.getName() + " died";
+        }
     }
 }
