@@ -74,7 +74,7 @@ public class DiscordMain {
                                 }
 
                                 String message = TextFormat.colorize(
-                                        "<&0[&9Discord&0] "
+                                        "<&0[&9Discord&0] &r&f"
                                                 + event.getAuthor().getName().replaceAll("[^\\x20-\\x7e]", "?")
                                                 + "&f> "
                                                 + msg.replaceAll("[^\\x20-\\x7e]", "?"));
