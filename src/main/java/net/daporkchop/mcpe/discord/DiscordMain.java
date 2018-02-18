@@ -75,11 +75,9 @@ public class DiscordMain {
 
                                 String message = TextFormat.colorize(
                                         "<&0[&9Discord&0] "
-                                                + DiscordColors.getClosestTo(event.getMember().getColor()).ingame
                                                 + event.getAuthor().getName().replaceAll("[^\\x20-\\x7e]", "?")
                                                 + "&f> "
-                                                + msg
-                                                    .replaceAll("[^\\x20-\\x7e]", "?"));
+                                                + msg.replaceAll("[^\\x20-\\x7e]", "?"));
                                 Server.getInstance().broadcastMessage(message);
                                 submitString(TextFormat.clean(message));
                             }
