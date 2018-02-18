@@ -6,5 +6,6 @@ do
     sleep 3
     mvn clean package
     mv target/*.jar .
+    git pull
     mvn clean compile exec:exec -Dexec.executable="java" -Dexec.args="-classpath %classpath -Xmx6G -Xms6G cn.nukkit.Nukkit"
 done
