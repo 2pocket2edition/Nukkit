@@ -4,6 +4,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockStone;
 import cn.nukkit.event.level.ChunkPopulateEvent;
 import cn.nukkit.level.ChunkManager;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
@@ -13,6 +14,7 @@ import cn.nukkit.level.generator.populator.PopulatorGroundCover;
 import cn.nukkit.level.generator.populator.PopulatorOre;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
+import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.terrain.noise.NoiseGeneratorOctaves3D;
 import net.twoptwoe.mobplugin.MobPlugin;
 
@@ -98,10 +100,8 @@ public class BetaGenerator extends Generator {
         return "porkworld";
     }
 
-    public Vector3 getSpawn()
-
-    {
-        return new Vector3(0.5, 128, 0.5);
+    public Vector3 getSpawn() {
+        return RandomSpawn.getSpawnPos((Level) level);
     }
 
     public void populateChunk(int chunkX, int chunkZ) {
