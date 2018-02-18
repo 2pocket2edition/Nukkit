@@ -3173,8 +3173,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 PlayerChatEvent chatEvent = new PlayerChatEvent(this, msg);
                 this.server.getPluginManager().callEvent(chatEvent);
                 if (!chatEvent.isCancelled()) {
-                    DiscordMain.submitString("<" + getName() + "> " + (chatEvent.getMessage().startsWith(">") ? "\u00A7a" : "") + chatEvent.getMessage());
-                    this.server.broadcastMessage(this.getServer().getLanguage().translateString(chatEvent.getFormat(), new String[]{chatEvent.getPlayer().getDisplayName(), chatEvent.getMessage()}), chatEvent.getRecipients());
+                    DiscordMain.submitString("<" + getName() + "> " + chatEvent.getMessage());
+                    this.server.broadcastMessage("<" + getName() + "> " + (chatEvent.getMessage().startsWith(">") ? "\u00A7a" : "") + chatEvent.getMessage());
                 }
             }
         }
