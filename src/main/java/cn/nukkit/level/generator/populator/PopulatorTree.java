@@ -6,6 +6,7 @@ import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.generator.object.tree.ObjectTree;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.NukkitRandom;
+import net.twoptwoe.mobplugin.utils.Utils;
 
 /**
  * author: MagicDroidX
@@ -39,8 +40,8 @@ public class PopulatorTree extends Populator {
         this.level = level;
         int amount = random.nextBoundedInt(this.randomAmount + 1) + this.baseAmount;
         for (int i = 0; i < amount; ++i) {
-            int x = NukkitMath.randomRange(random, chunkX << 4, (chunkX << 4) + 15);
-            int z = NukkitMath.randomRange(random, chunkZ << 4, (chunkZ << 4) + 15);
+            int x = Utils.rand(chunkX << 4, (chunkX << 4) + 15);
+            int z = Utils.rand(chunkZ << 4, (chunkZ << 4) + 15);
             int y = this.getHighestWorkableBlock(x, z);
             if (y == -1) {
                 continue;

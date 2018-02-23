@@ -5,6 +5,7 @@ import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.generator.object.ore.OreType;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.NukkitRandom;
+import net.twoptwoe.mobplugin.utils.Utils;
 
 /**
  * author: MagicDroidX
@@ -24,14 +25,10 @@ public class PopulatorOre extends Populator {
 
     @Override
     public void populate(ChunkManager level, int chunkX, int chunkZ, NukkitRandom random) {
-        int sx = chunkX << 4;
-        int ex = sx + 15;
-        int sz = chunkZ << 4;
-        int ez = sz + 15;
         for (OreType type : this.oreTypes) {
             for (int i = 0; i < type.clusterCount; i++) {
-                int x = NukkitMath.randomRange(random, sx, ex);
-                int z = NukkitMath.randomRange(random, sz, ez);
+                int x = (chunkX << 4) | Utils.rand(0, 15);
+                int z = (chunkZ << 4) | Utils.rand(0, 15);
                 int y = NukkitMath.randomRange(random, type.minHeight, type.maxHeight);
                 if (level.getBlockIdAt(x, y, z) != replaceId) {
                     continue;
