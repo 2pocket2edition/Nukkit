@@ -23,6 +23,6 @@ public class UtilsPE {
             public void onRun(int currentTick) {
                 s.dispatchCommand(new ConsoleCommandSender(), "gc");
             }
-        }, 300, 300);
+        }, 3600, 3600);
     }
 }

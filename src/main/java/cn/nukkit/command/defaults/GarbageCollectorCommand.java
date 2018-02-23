@@ -45,11 +45,11 @@ public class GarbageCollectorCommand extends VanillaCommand {
 
         long freedMemory = Runtime.getRuntime().freeMemory() - memory;
 
-        sender.getServer().broadcastMessage(TextFormat.GREEN + "---- " + TextFormat.WHITE + "Garbage collection result" + TextFormat.GREEN + " ----"
-                + TextFormat.GOLD + "Chunks: " + TextFormat.RED + chunksCollected
-                + TextFormat.GOLD + "Entities: " + TextFormat.RED + entitiesCollected
-                + TextFormat.GOLD + "Tile Entities: " + TextFormat.RED + tilesCollected
-                + TextFormat.GOLD + "Memory freed: " + TextFormat.RED + NukkitMath.round((freedMemory / 1024d / 1024d), 2) + " MB");
+        sender.getServer().broadcastMessage(TextFormat.GREEN + "---- " + TextFormat.WHITE + "Garbage collection result" + TextFormat.GREEN + " ----");
+        sender.getServer().broadcastMessage(TextFormat.GOLD + "Chunks: " + TextFormat.RED + chunksCollected);
+        sender.getServer().broadcastMessage(TextFormat.GOLD + "Entities: " + TextFormat.RED + entitiesCollected);
+        sender.getServer().broadcastMessage(TextFormat.GOLD + "Tile Entities: " + TextFormat.RED + tilesCollected);
+        sender.getServer().broadcastMessage(TextFormat.GOLD + "Memory freed: " + TextFormat.RED + NukkitMath.round((freedMemory / 1024d / 1024d), 2) + " MB");
         return true;
     }
 }
