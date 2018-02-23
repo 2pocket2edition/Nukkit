@@ -76,6 +76,7 @@ import cn.nukkit.utils.bugreport.ExceptionHandler;
 import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
 import net.daporkchop.mcpe.EnumLevel;
+import net.daporkchop.mcpe.UtilsPE;
 import net.daporkchop.mcpe.terrain.PorkNether;
 import net.daporkchop.mcpe.terrain.beta.BetaGenerator;
 
@@ -424,6 +425,7 @@ public class Server {
         this.network.registerInterface(new RakNetInterface(this));
 
         this.pluginManager.loadPlugins(this.pluginPath);
+        UtilsPE.init(this);
 
         this.enablePlugins(PluginLoadOrder.STARTUP);
 

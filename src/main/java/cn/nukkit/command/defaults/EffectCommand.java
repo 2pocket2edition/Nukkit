@@ -107,7 +107,7 @@ public class EffectCommand extends Command {
         } else {
             effect.setDuration(duration).setAmplifier(amplification);
             player.addEffect(effect);
-            Command.broadcastCommandMessage(sender, new TranslationContainer("%commands.effect.success", new String[]{effect.getName(), String.valueOf(effect.getId()), String.valueOf(effect.getAmplifier()), player.getDisplayName(), String.valueOf(effect.getDuration() / 20)}));
+            sender.sendMessage(new TranslationContainer("%commands.effect.success", new String[]{effect.getName(), String.valueOf(effect.getId()), String.valueOf(effect.getAmplifier()), player.getDisplayName(), String.valueOf(effect.getDuration() / 20)}));
         }
         return true;
     }

@@ -77,7 +77,7 @@ public class GiveCommand extends VanillaCommand {
 
             return true;
         }
-        Command.broadcastCommandMessage(sender, new TranslationContainer(
+        sender.sendMessage(new TranslationContainer(
                 "%commands.give.success",
                 new String[]{
                         item.getName() + " (" + item.getId() + ":" + item.getDamage() + ")",
