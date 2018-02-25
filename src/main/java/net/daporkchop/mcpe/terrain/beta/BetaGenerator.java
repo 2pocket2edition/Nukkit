@@ -1,7 +1,6 @@
 package net.daporkchop.mcpe.terrain.beta;
 
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockStone;
+import cn.nukkit.block.*;
 import cn.nukkit.event.level.ChunkPopulateEvent;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
@@ -9,9 +8,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.biome.Biome;
 import cn.nukkit.level.generator.object.ore.OreType;
-import cn.nukkit.level.generator.populator.Populator;
-import cn.nukkit.level.generator.populator.PopulatorGroundCover;
-import cn.nukkit.level.generator.populator.PopulatorOre;
+import cn.nukkit.level.generator.populator.*;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import net.daporkchop.mcpe.RandomSpawn;
@@ -70,21 +67,28 @@ public class BetaGenerator extends Generator {
         this.level = level;
         this.selector = new PorkBiomeSelector(new NukkitRandom(level.getSeed()), Biome.getBiome(Biome.OCEAN));
         this.generationPopulators.add(new PopulatorGroundCover());
+
         PopulatorOre ores = new PopulatorOre();
         ores.setOreTypes(new OreType[]{
-                new OreType(Block.get(Block.COAL_ORE), 20, 16, 0, 128),
-                new OreType(Block.get(Block.IRON_ORE), 20, 8, 0, 64),
-                new OreType(Block.get(Block.REDSTONE_ORE), 1, 7, 0, 16),
-                new OreType(Block.get(Block.LAPIS_ORE), 2, 6, 0, 32),
-                new OreType(Block.get(Block.GOLD_ORE), 4, 8, 0, 32),
-                new OreType(Block.get(Block.DIAMOND_ORE), 2, 7, 0, 16),
-                new OreType(Block.get(Block.DIRT), 20, 32, 0, 128),
-                new OreType(Block.get(Block.GRAVEL), 10, 16, 0, 128),
-                new OreType(Block.get(Block.STONE, BlockStone.DIORITE), 6, 32, 0, 128),
-                new OreType(Block.get(Block.STONE, BlockStone.ANDESITE), 6, 32, 0, 128),
-                new OreType(Block.get(Block.STONE, BlockStone.GRANITE), 6, 32, 0, 128),
+                new OreType(new BlockOreCoal(), 20, 17, 0, 128),
+                new OreType(new BlockOreIron(), 20, 9, 0, 64),
+                new OreType(new BlockOreRedstone(), 8, 8, 0, 16),
+                new OreType(new BlockOreLapis(), 1, 7, 0, 16),
+                new OreType(new BlockOreGold(), 2, 9, 0, 32),
+                new OreType(new BlockOreDiamond(), 1, 8, 0, 16),
+                new OreType(new BlockDirt(), 10, 33, 0, 128),
+                new OreType(new BlockGravel(), 8, 33, 0, 128),
+                new OreType(new BlockStone(BlockStone.GRANITE), 10, 33, 0, 80),
+                new OreType(new BlockStone(BlockStone.DIORITE), 10, 33, 0, 80),
+                new OreType(new BlockStone(BlockStone.ANDESITE), 10, 33, 0, 80)
         });
         this.populators.add(ores);
+
+        PopulatorCaves caves = new PopulatorCaves();
+        this.populators.add(caves);
+
+        PopulatorRavines ravines = new PopulatorRavines();
+        this.populators.add(ravines);
 
         this.random.setSeed(level.getSeed());
         this.gen1 = new NoiseGeneratorOctaves3D(this.random, 16, false);
