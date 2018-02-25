@@ -168,6 +168,88 @@ public class ItemFlintSteel extends ItemTool {
                     }
 
                     return true;
+                } else if (sizeZ >= 2 && sizeZ <= MAX_PORTAL_SIZE) {
+                    //start scan from 1 block above base
+                    //find pillar or end of portal to start scan
+                    int scanX = targX;
+                    int scanY = targY + 1;
+                    int scanZ = targZ;
+                    for (int i = 0; i < sizePosZ + 1; i++) {
+                        //this must be air
+                        if (level.getBlockIdAt(scanX, scanY, scanZ + i) != AIR) {
+                            break PORTAL;
+                        }
+                        if (level.getBlockIdAt(scanX, scanY, scanZ + i + 1) == OBSIDIAN) {
+                            scanZ += i;
+                            break;
+                        }
+                    }
+                    //make sure that the above loop finished
+                    if (level.getBlockIdAt(scanX, scanY, scanZ + 1) != OBSIDIAN) {
+                        break PORTAL;
+                    }
+
+                    int innerWidth = 0;
+                    LOOP: for (int i = 0; i < MAX_PORTAL_SIZE - 2; i++) {
+                        int id = level.getBlockIdAt(scanX, scanY, scanZ - i);
+                        switch (id) {
+                            case AIR:
+                                innerWidth++;
+                                break;
+                            case OBSIDIAN:
+                                break LOOP;
+                            default:
+                                break PORTAL;
+                        }
+                    }
+                    int innerHeight = 0;
+                    LOOP: for (int i = 0; i < MAX_PORTAL_SIZE - 2; i++) {
+                        int id = level.getBlockIdAt(scanX, scanY + i, scanZ);
+                        switch (id) {
+                            case AIR:
+                                innerHeight++;
+                                break;
+                            case OBSIDIAN:
+                                break LOOP;
+                            default:
+                                break PORTAL;
+                        }
+                    }
+                    if (!(innerWidth <= MAX_PORTAL_SIZE - 2
+                            && innerWidth >= 2
+                            && innerHeight <= MAX_PORTAL_SIZE - 2
+                            && innerHeight >= 3))   {
+                        break PORTAL;
+                    }
+
+                    for (int height = 0; height < innerHeight + 1; height++)    {
+                        if (height == innerHeight) {
+                            for (int width = 0; width < innerWidth; width++) {
+                                if (level.getBlockIdAt(scanX, scanY + height, scanZ - width) != OBSIDIAN) {
+                                    break PORTAL;
+                                }
+                            }
+                        } else {
+                            if (level.getBlockIdAt(scanX, scanY + height, scanZ + 1) != OBSIDIAN
+                                    || level.getBlockIdAt(scanX, scanY + height, scanZ - innerWidth) != OBSIDIAN) {
+                                break PORTAL;
+                            }
+
+                            for (int width = 0; width < innerWidth; width++) {
+                                if (level.getBlockIdAt(scanX, scanY + height, scanZ - width) != AIR) {
+                                    break PORTAL;
+                                }
+                            }
+                        }
+                    }
+
+                    for (int height = 0; height < innerHeight; height++)    {
+                        for (int width = 0; width < innerWidth; width++)    {
+                            level.setBlock(new Vector3(scanX, scanY + height, scanZ - width), new BlockNetherPortal());
+                        }
+                    }
+
+                    return true;
                 }
             }
             BlockFire fire = new BlockFire();
