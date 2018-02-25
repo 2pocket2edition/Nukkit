@@ -19,7 +19,7 @@ public class ItemFlintSteel extends ItemTool {
      * 23x23 in vanilla
      */
     private static final int MAX_PORTAL_SIZE = 23;
-
+    
     public ItemFlintSteel() {
         this(0, 1);
     }
