@@ -3161,6 +3161,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             message = TextFormat.clean(message);
         }
 
+        if (lastMessage + 1000 > System.currentTimeMillis())    {
+            return false;
+        } else {
+            lastMessage = System.currentTimeMillis();
+        }
+
         for (String msg : message.split("\n")) {
             if (!msg.trim().isEmpty() && msg.length() <= 255 && this.messageCounter-- > 0) {
                 PlayerChatEvent chatEvent = new PlayerChatEvent(this, msg);
@@ -3174,6 +3180,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
         return true;
     }
+
+    public long lastMessage = System.currentTimeMillis();
 
     public boolean kick() {
         return this.kick("");
