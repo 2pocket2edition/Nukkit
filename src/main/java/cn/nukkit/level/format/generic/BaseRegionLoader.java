@@ -1,8 +1,12 @@
 package cn.nukkit.level.format.generic;
 
+import cn.nukkit.Server;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
 import cn.nukkit.nbt.stream.BufferedRandomAccessFile;
+import cn.nukkit.utils.Logger;
+
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -49,7 +53,17 @@ abstract public class BaseRegionLoader {
             if (!exists) {
                 this.createBlank();
             } else {
-                this.loadLocationTable();
+                try {
+                    this.loadLocationTable();
+                } catch (EOFException e) {
+                    Server.getInstance().getLogger().emergency("EOF while reading region headers! Resetting region.");
+                    Server.getInstance().broadcastMessage("\u00A7c\u00A7l[CRITICAL] EOF while reading region headers! Resetting region.");
+                    this.randomAccessFile.close();
+                    file.delete();
+                    file.createNewFile();
+                    this.randomAccessFile = new BufferedRandomAccessFile(filePath, "rw", 1024);
+                    this.createBlank();
+                }
             }
 
             this.lastUsed = System.currentTimeMillis();
