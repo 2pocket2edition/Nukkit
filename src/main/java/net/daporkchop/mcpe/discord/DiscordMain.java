@@ -23,6 +23,10 @@ public class DiscordMain {
     private static Message message;
 
     public static void submitString(String input) {
+        if (message == null)    {
+            return;
+        }
+
         input = TextFormat.clean(input);
         if (input.length() >= 800) {
             return;
@@ -85,27 +89,29 @@ public class DiscordMain {
                     })
                     .buildBlocking();
             TextChannel channel = jda.getTextChannelById(412992591148220418L);
-            message = channel.getMessageById(413020177513447434L).complete();
-            try {
-                MessageHistory history;
-                do {
-                    history = channel.getHistoryAfter(413020177513447434L, 99).complete();
-                    if (!history.getRetrievedHistory().isEmpty()) {
-                        channel.deleteMessages(history.getRetrievedHistory()).complete();
-                    }
-                } while (history.size() == 99);
-            } catch (IllegalStateException e)   {
-                //shrug
-            }
-            loadFromInitialMessage();
-            submitString("Server started!");
-
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    updateMessage();
+            if (channel != null) {
+                message = channel.getMessageById(413020177513447434L).complete();
+                try {
+                    MessageHistory history;
+                    do {
+                        history = channel.getHistoryAfter(413020177513447434L, 99).complete();
+                        if (!history.getRetrievedHistory().isEmpty()) {
+                            channel.deleteMessages(history.getRetrievedHistory()).complete();
+                        }
+                    } while (history.size() == 99);
+                } catch (IllegalStateException e) {
+                    //shrug
                 }
-            }, 2000, 2000);
+                loadFromInitialMessage();
+                submitString("Server started!");
+
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        updateMessage();
+                    }
+                }, 2000, 2000);
+            }
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -122,6 +128,9 @@ public class DiscordMain {
     }
 
     public static final void updateMessage() {
+        if (message == null)    {
+            return;
+        }
         synchronized (list) {
             String ok = "```\n";
             for (String s : list) {
@@ -133,6 +142,9 @@ public class DiscordMain {
     }
 
     public static final void updateMessageNow() {
+        if (message == null)    {
+            return;
+        }
         synchronized (list) {
             String ok = "```\n";
             for (String s : list) {
