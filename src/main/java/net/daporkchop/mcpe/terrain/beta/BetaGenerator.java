@@ -80,7 +80,8 @@ public class BetaGenerator extends Generator {
                 new OreType(new BlockGravel(), 8, 33, 0, 128),
                 new OreType(new BlockStone(BlockStone.GRANITE), 10, 33, 0, 80),
                 new OreType(new BlockStone(BlockStone.DIORITE), 10, 33, 0, 80),
-                new OreType(new BlockStone(BlockStone.ANDESITE), 10, 33, 0, 80)
+                new OreType(new BlockStone(BlockStone.ANDESITE), 10, 33, 0, 80),
+                new OreType(new BlockLavaStill(), 1, 33, 0, 12)
         });
         this.populators.add(ores);
 
