@@ -402,12 +402,20 @@ public class BinaryStream {
         this.putLFloat(z);
     }
 
-    public void putGameRules(GameRules gameRules) {
+    public void putGameRules(GameRules gameRules, boolean showCoords) {
         Map<GameRule, GameRules.Value> rules = gameRules.getGameRules();
         this.putUnsignedVarInt(rules.size());
         rules.forEach((gameRule, value) -> {
             putString(gameRule.getName().toLowerCase());
-            value.write(this);
+            jef:
+            {
+                if (gameRule == GameRule.SHOW_COORDINATES) {
+                    this.putUnsignedVarInt(1); //boolean
+                    this.putBoolean(showCoords);
+                    break jef;
+                }
+                value.write(this);
+            }
         });
     }
 

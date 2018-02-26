@@ -3,15 +3,14 @@ package cn.nukkit.command.defaults;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.level.Position;
+import cn.nukkit.network.protocol.GameRulesChangedPacket;
 import cn.nukkit.utils.TextFormat;
 
-public class XYZCommand extends VanillaCommand {
+public class CoordsCommand extends VanillaCommand {
 
-    public XYZCommand(String name) {
-        super(name, "Sends your coordinates", "/xyz", new String[]{});
+    public CoordsCommand(String name) {
+        super(name, "Show your coordinates", "/coords", new String[]{"togglecoords"});
         this.setPermission("nukkit.command.help");
         this.commandParameters.clear();
         this.commandParameters.put("default", new CommandParameter[]{
@@ -21,8 +20,11 @@ public class XYZCommand extends VanillaCommand {
     @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         if (sender instanceof Player) {
-            Position position = (Position) sender;
-            sender.sendMessage(TextFormat.colorize("&bx:" + position.x + " y:" + position.y + " z:" + position.z));
+            Player player = (Player) sender;
+            GameRulesChangedPacket packet = new GameRulesChangedPacket();
+            packet.showCoords = player.showCoords = !player.showCoords;
+            packet.gameRules = player.level.gameRules;
+            player.dataPacket(packet);
         }
         return true;
     }

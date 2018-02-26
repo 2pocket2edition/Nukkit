@@ -84,7 +84,7 @@ public class StartGamePacket extends DataPacket {
         this.putBoolean(this.broadcastToXboxLive);
         this.putBoolean(this.commandsEnabled);
         this.putBoolean(this.isTexturePacksRequired);
-        this.putGameRules(gameRules);
+        this.putGameRules(gameRules, true); //enabled by default
         this.putBoolean(this.bonusChest);
         this.putBoolean(this.trustPlayers);
         this.putVarInt(this.permissionLevel);

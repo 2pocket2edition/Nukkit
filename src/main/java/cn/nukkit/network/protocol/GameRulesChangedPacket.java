@@ -1,5 +1,6 @@
 package cn.nukkit.network.protocol;
 
+import cn.nukkit.level.GameRule;
 import cn.nukkit.level.GameRules;
 
 /**
@@ -15,6 +16,7 @@ public class GameRulesChangedPacket extends DataPacket {
     }
 
     public GameRules gameRules;
+    public Boolean showCoords = null;
 
     @Override
     public void decode() {
@@ -23,6 +25,6 @@ public class GameRulesChangedPacket extends DataPacket {
     @Override
     public void encode() {
         this.reset();
-        putGameRules(gameRules);
+        putGameRules(gameRules, showCoords == null ? gameRules.getBoolean(GameRule.SHOW_COORDINATES) : showCoords);
     }
 }
