@@ -59,7 +59,7 @@ abstract public class BaseRegionLoader {
                     this.randomAccessFile.close();
                     file.delete();
                     file.createNewFile();
-                    this.randomAccessFile = new BufferedRandomAccessFile(filePath, "rw", 1024);
+                    this.randomAccessFile = new RandomAccessFile(filePath, "rw");
                     this.createBlank();
                 }
             }
