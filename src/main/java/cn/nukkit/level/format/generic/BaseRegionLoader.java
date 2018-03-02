@@ -3,10 +3,8 @@ package cn.nukkit.level.format.generic;
 import cn.nukkit.Server;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.nbt.stream.BufferedRandomAccessFile;
-import cn.nukkit.utils.Logger;
-
 import java.io.EOFException;
+import cn.nukkit.utils.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -49,7 +47,7 @@ abstract public class BaseRegionLoader {
             }
             // TODO: buffering is a temporary solution to chunk reading/writing being poorly optimized
             //  - need to fix the code where it reads single bytes at a time from disk
-            this.randomAccessFile = new BufferedRandomAccessFile(filePath, "rw", 1024);
+            this.randomAccessFile = new RandomAccessFile(filePath, "rw");
             if (!exists) {
                 this.createBlank();
             } else {
