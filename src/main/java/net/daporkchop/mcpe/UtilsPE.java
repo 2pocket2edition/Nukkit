@@ -23,6 +23,12 @@ public class UtilsPE {
             public void onRun(int currentTick) {
                 s.dispatchCommand(new ConsoleCommandSender(), "gc");
             }
-        }, 3600, 3600);
+        }, 6000, 6000);
+        s.getScheduler().scheduleRepeatingTask(new Task() {
+            @Override
+            public void onRun(int currentTick) {
+                Server.getInstance().getNetwork().setName(MultiMOTD.getMOTD());
+            }
+        }, 250);
     }
 }

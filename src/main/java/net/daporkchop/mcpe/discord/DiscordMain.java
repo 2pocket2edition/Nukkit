@@ -85,17 +85,20 @@ public class DiscordMain {
                                 Server.getInstance().broadcastMessage(message);
                                 submitString(TextFormat.clean(message));
                             } else if (event.getMessage().getContentRaw().startsWith("!players")) {
+                                if (event.getChannel().getIdLong() == 412888996444635139L)  {
+                                    return;
+                                }
                                 EmbedBuilder builder = new EmbedBuilder();
                                 builder.setTitle("Online players:", "http://2p2e.net");
                                 builder.setColor(Color.BLACK);
                                 builder.setTimestamp(LocalDateTime.now(ZoneId.of("UTC")));
 
                                 if (Server.getInstance().getOnlinePlayers().size() == 0)    {
-                                    builder.addField("", "", false);
+                                    builder.addField("0/" + Server.getInstance().getMaxPlayers(), "", false);
                                 } else {
                                     StringBuilder builder1 = new StringBuilder();
                                     Server.getInstance().getOnlinePlayers().values().forEach(player -> builder1.append(player.getName() + ", "));
-                                    builder.addField("", builder1.toString().substring(0, builder1.length() - 2), false);
+                                    builder.addField(Server.getInstance().getOnlinePlayers().size() + "/" + Server.getInstance().getMaxPlayers(), builder1.toString().substring(0, builder1.length() - 2), false);
                                 }
                                 event.getChannel().sendMessage(builder.build()).queue();
                             }

@@ -45,3 +45,5 @@ white-list.txt
 creativeitems.json
 recipes.json
 /discordtoken.txt
+
+/plugins/PocketVote/config.yml
