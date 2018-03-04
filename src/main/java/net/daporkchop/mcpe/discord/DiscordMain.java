@@ -19,6 +19,7 @@ public class DiscordMain {
     private static final List<String> list = new ArrayList<>();
     private static JDA jda;
     private static Timer timer = new Timer();
+    private static boolean dirty = false;
 
     private static Message message;
 
@@ -49,6 +50,7 @@ public class DiscordMain {
                 }
                 list.add(input);
             }
+            dirty = true;
         }
     }
 
@@ -145,7 +147,7 @@ public class DiscordMain {
     }
 
     public static final void updateMessage() {
-        if (message == null) {
+        if (!dirty || message == null) {
             return;
         }
         synchronized (list) {
@@ -155,11 +157,12 @@ public class DiscordMain {
             }
             ok += "```";
             message.editMessage(ok).queue();
+            dirty = false;
         }
     }
 
     public static final void updateMessageNow() {
-        if (message == null) {
+        if (!dirty || message == null) {
             return;
         }
         synchronized (list) {
@@ -169,6 +172,7 @@ public class DiscordMain {
             }
             ok += "```";
             message.editMessage(ok).complete();
+            dirty = false;
         }
     }
 
