@@ -2,14 +2,14 @@ package net.daporkchop.mcpe.discord;
 
 import cn.nukkit.Server;
 import cn.nukkit.utils.TextFormat;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.*;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -84,6 +84,16 @@ public class DiscordMain {
                                                 + msg.replaceAll("[^\\x20-\\x7e]", "?"));
                                 Server.getInstance().broadcastMessage(message);
                                 submitString(TextFormat.clean(message));
+                            } else if (event.getMessage().getContentRaw().startsWith("!players")) {
+                                EmbedBuilder builder = new EmbedBuilder();
+                                builder.setTitle("Online players:", "http://2p2e.net");
+                                builder.setColor(Color.BLACK);
+                                builder.setTimestamp(LocalDateTime.now(ZoneId.of("UTC")));
+
+                                StringBuilder builder1 = new StringBuilder();
+                                Server.getInstance().getOnlinePlayers().values().forEach(player -> builder1.append(player.getName() + " "));
+                                builder.addField("", builder1.toString(), false);
+                                event.getChannel().sendMessage(builder.build()).queue();
                             }
                         }
                     })
