@@ -24,7 +24,7 @@ public class StopCommand extends VanillaCommand {
 
         Command.broadcastCommandMessage(sender, new TranslationContainer("commands.stop.start"));
 
-        sender.getServer().shutdown();
+        sender.getServer().forceShutdown();
 
         return true;
     }

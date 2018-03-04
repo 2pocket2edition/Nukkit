@@ -90,9 +90,13 @@ public class DiscordMain {
                                 builder.setColor(Color.BLACK);
                                 builder.setTimestamp(LocalDateTime.now(ZoneId.of("UTC")));
 
-                                StringBuilder builder1 = new StringBuilder();
-                                Server.getInstance().getOnlinePlayers().values().forEach(player -> builder1.append(player.getName() + " "));
-                                builder.addField("", builder1.toString(), false);
+                                if (Server.getInstance().getOnlinePlayers().size() == 0)    {
+                                    builder.addField("", "", false);
+                                } else {
+                                    StringBuilder builder1 = new StringBuilder();
+                                    Server.getInstance().getOnlinePlayers().values().forEach(player -> builder1.append(player.getName() + ", "));
+                                    builder.addField("", builder1.toString().substring(0, builder1.length() - 2), false);
+                                }
                                 event.getChannel().sendMessage(builder.build()).queue();
                             }
                         }

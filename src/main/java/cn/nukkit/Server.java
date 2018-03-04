@@ -744,10 +744,6 @@ public class Server {
         if (this.watchdog != null) {
             this.watchdog.kill();
         }
-        if (this.isRunning) {
-            ServerKiller killer = new ServerKiller(90);
-            killer.start();
-        }
         this.isRunning = false;
     }
 
@@ -772,35 +768,37 @@ public class Server {
                 this.rcon.close();
             }
 
-            this.getLogger().debug("Disabling all plugins");
+            this.getLogger().info("Disabling all plugins");
             this.pluginManager.disablePlugins();
 
             for (Player player : new ArrayList<>(this.players.values())) {
                 player.close(player.getLeaveMessage(), (String) this.getConfig("settings.shutdown-message", "Server closed"));
             }
 
-            this.getLogger().debug("Unloading all levels");
+            this.getLogger().info("Unloading all levels");
             for (Level level : this.levelArray) {
                 this.unloadLevel(level, true);
             }
+            ServerKiller killer = new ServerKiller(90);
+            killer.start();
 
-            this.getLogger().debug("Removing event handlers");
+            this.getLogger().info("Removing event handlers");
             HandlerList.unregisterAll();
 
-            this.getLogger().debug("Stopping all tasks");
+            this.getLogger().info("Stopping all tasks");
             this.scheduler.cancelAllTasks();
             this.scheduler.mainThreadHeartbeat(Integer.MAX_VALUE);
 
-            this.getLogger().debug("Closing console");
+            this.getLogger().info("Closing console");
             this.console.interrupt();
 
-            this.getLogger().debug("Stopping network interfaces");
+            this.getLogger().info("Stopping network interfaces");
             for (SourceInterface interfaz : this.network.getInterfaces()) {
                 interfaz.shutdown();
                 this.network.unregisterInterface(interfaz);
             }
 
-            this.getLogger().debug("Disabling timings");
+            this.getLogger().info("Disabling timings");
             Timings.stopServer();
             //todo other things
         } catch (Exception e) {
