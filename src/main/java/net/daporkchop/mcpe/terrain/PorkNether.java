@@ -5,7 +5,6 @@ import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.generator.Generator;
-import cn.nukkit.level.generator.noise.Perlin;
 import cn.nukkit.level.generator.noise.Simplex;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
@@ -16,12 +15,12 @@ import java.util.Map;
 import java.util.Random;
 
 public class PorkNether extends Generator {
+    private static final double multiplier = 1 / 64;
     private NukkitRandom nukkitRandom;
     private Random random;
     private ChunkManager level;
     private Simplex simplex1;
     private NoiseGeneratorOctaves3D noise1;
-    private static final double multiplier = 1 / 64;
 
     public PorkNether() {
         this(new HashMap<>());

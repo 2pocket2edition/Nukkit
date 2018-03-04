@@ -23,7 +23,7 @@ public class DiscordMain {
     private static Message message;
 
     public static void submitString(String input) {
-        if (message == null)    {
+        if (message == null) {
             return;
         }
 
@@ -128,7 +128,7 @@ public class DiscordMain {
     }
 
     public static final void updateMessage() {
-        if (message == null)    {
+        if (message == null) {
             return;
         }
         synchronized (list) {
@@ -142,7 +142,7 @@ public class DiscordMain {
     }
 
     public static final void updateMessageNow() {
-        if (message == null)    {
+        if (message == null) {
             return;
         }
         synchronized (list) {

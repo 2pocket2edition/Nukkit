@@ -12,16 +12,12 @@ public enum EnumLevel {
 
     Level level;
 
-    public Level getLevel() {
-        return level;
-    }
-
     public static void initLevels() {
         OVERWORLD.level = Server.getInstance().getDefaultLevel();
         NETHER.level = Server.getInstance().getLevelByName("nether");
     }
 
-    public static Level getOtherNetherPair(Level current)   {
+    public static Level getOtherNetherPair(Level current) {
         if (current == OVERWORLD.level) {
             return NETHER.level;
         } else if (current == NETHER.level) {
@@ -31,13 +27,17 @@ public enum EnumLevel {
         }
     }
 
-    public static Position moveToNether(Position current)   {
-        if (current.level == OVERWORLD.level)   {
+    public static Position moveToNether(Position current) {
+        if (current.level == OVERWORLD.level) {
             return new Position(UtilsPE.mRound(current.getFloorX() >> 3, 128), UtilsPE.mRound(current.getFloorY(), 32), UtilsPE.mRound(current.getFloorZ() >> 3, 128), NETHER.level);
-        } else if (current.level == NETHER.level)   {
+        } else if (current.level == NETHER.level) {
             return new Position(UtilsPE.mRound(current.getFloorX() << 3, 1024), UtilsPE.mRound(current.getFloorY(), 32), UtilsPE.mRound(current.getFloorZ() << 3, 1024), OVERWORLD.level);
         } else {
             throw new IllegalArgumentException("Neither overworld nor nether given!");
         }
+    }
+
+    public Level getLevel() {
+        return level;
     }
 }

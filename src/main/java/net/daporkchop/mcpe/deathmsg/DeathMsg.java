@@ -33,9 +33,9 @@ public class DeathMsg {
                         String attacker = ((EntityDamageByEntityEvent) event).getDamager().getName();
                         if (((EntityDamageByEntityEvent) event).getDamager() instanceof Player) {
                             Item item = ((Player) ((EntityDamageByEntityEvent) event).getDamager()).getInventory().getItemInHand();
-                            if (!item.getCustomName().isEmpty())    {
+                            if (!item.getCustomName().isEmpty()) {
                                 String i = item.getCustomName();
-                                switch (UtilsPE.random(3))  {
+                                switch (UtilsPE.random(3)) {
                                     case 0:
                                         return "&b" + name + " &4was killed by &b" + attacker + " &4using &b" + i;
                                     case 1:
@@ -100,7 +100,7 @@ public class DeathMsg {
                 });
         deathMessages.put(EntityDamageEvent.DamageCause.FIRE,
                 (name, event) -> {
-                    switch (UtilsPE.random(2))  {
+                    switch (UtilsPE.random(2)) {
                         case 0:
                             return "&b" + name + " &4was burnt to a crisp";
                         case 1:
@@ -112,7 +112,7 @@ public class DeathMsg {
                 deathMessages.get(EntityDamageEvent.DamageCause.FIRE));
         deathMessages.put(EntityDamageEvent.DamageCause.LAVA,
                 (name, event) -> {
-                    switch (UtilsPE.random(2))  {
+                    switch (UtilsPE.random(2)) {
                         case 0:
                             return "&b" + name + " &4took a swim in lava";
                         case 1:
@@ -122,7 +122,7 @@ public class DeathMsg {
                 });
         deathMessages.put(EntityDamageEvent.DamageCause.BLOCK_EXPLOSION,
                 (name, event) -> {
-                    switch (UtilsPE.random(3))  {
+                    switch (UtilsPE.random(3)) {
                         case 0:
                             return "&b" + name + " &4was blasted to pieces";
                         case 1:
@@ -136,7 +136,7 @@ public class DeathMsg {
                 (name, event) -> {
                     if (event instanceof EntityDamageByEntityEvent) {
                         String killer = ((EntityDamageByEntityEvent) event).getDamager().getName();
-                        switch (UtilsPE.random(3))  {
+                        switch (UtilsPE.random(3)) {
                             case 0:
                                 return "&b" + name + " &4was blown up by &b" + killer;
                             case 1:
@@ -149,7 +149,7 @@ public class DeathMsg {
                 });
         deathMessages.put(EntityDamageEvent.DamageCause.VOID,
                 (name, event) -> {
-                    switch (UtilsPE.random(2))  {
+                    switch (UtilsPE.random(2)) {
                         case 0:
                             return "&b" + name + " &4fell through the world";
                         case 1:
@@ -159,7 +159,7 @@ public class DeathMsg {
                 });
         deathMessages.put(EntityDamageEvent.DamageCause.SUICIDE,
                 (name, event) -> {
-                    switch (UtilsPE.random(4))  {
+                    switch (UtilsPE.random(4)) {
                         case 0:
                             return "&b" + name + " &4took the pill";
                         case 1:
@@ -173,7 +173,7 @@ public class DeathMsg {
                 });
         deathMessages.put(EntityDamageEvent.DamageCause.MAGIC,
                 (name, event) -> {
-                    switch (UtilsPE.random(2))  {
+                    switch (UtilsPE.random(2)) {
                         case 0:
                             return "&b" + name + " &4was killed by magic";
                         case 1:
@@ -183,7 +183,7 @@ public class DeathMsg {
                 });
         deathMessages.put(EntityDamageEvent.DamageCause.LIGHTNING,
                 (name, event) -> {
-                    switch (UtilsPE.random(2))  {
+                    switch (UtilsPE.random(2)) {
                         case 0:
                             return "&b" + name + " &4was fatally struck by lighting";
                         case 1:
@@ -193,11 +193,11 @@ public class DeathMsg {
                 });
     }
 
-    public static final String getDeathMessage(Player player)   {
+    public static final String getDeathMessage(Player player) {
         try {
             return TextFormat.colorize(deathMessages.get(player.getLastDamageCause().getCause())
                     .apply(player.getName(), player.getLastDamageCause()));
-        } catch (NullPointerException e)    {
+        } catch (NullPointerException e) {
             return player.getName() + " died";
         }
     }

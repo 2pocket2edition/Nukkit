@@ -12,7 +12,7 @@ public class RandomSpawn {
     private static TIntSet unsafe_blocks = new TSynchronizedIntSet(new TIntHashSet());
 
     static {
-        unsafe_blocks.addAll(new int[] {
+        unsafe_blocks.addAll(new int[]{
                 Block.AIR,
                 Block.WATER,
                 Block.STILL_WATER,
@@ -27,14 +27,16 @@ public class RandomSpawn {
     }
 
     public static Position getSpawnPos(Level level) {
-        Position pos = new Position(0, 128, 0, level);
+        return getSpawnPos(level, new Position(0, 128, 0, level), 256, 512);
+    }
 
-        for (int tries = 0; tries < 512; tries++)   {
-            int xPos = Utils.rand(-256, 256),
-            zPos = Utils.rand(-256, 256),
-            yPos = level.getHighestBlockAt(xPos, zPos);
+    public static Position getSpawnPos(Level level, Position pos, int radius, int maxTries) {
+        for (int tries = 0; tries < maxTries; tries++) {
+            int xPos = Utils.rand(-radius, radius + 1) + pos.getFloorX(),
+                    zPos = Utils.rand(-radius, radius + 1) + pos.getFloorZ(),
+                    yPos = level.getHighestBlockAt(xPos, zPos);
             int under = level.getBlockIdAt(xPos, yPos, zPos);
-            if (unsafe_blocks.contains(under))  {
+            if (unsafe_blocks.contains(under)) {
                 continue;
             }
             pos = new Position(xPos + 0.5f, yPos + 1, zPos + 0.5f, level);
@@ -44,7 +46,7 @@ public class RandomSpawn {
         return pos;
     }
 
-    public static final boolean isUnafe(int id)  {
+    public static final boolean isUnafe(int id) {
         return unsafe_blocks.contains(id);
     }
 }

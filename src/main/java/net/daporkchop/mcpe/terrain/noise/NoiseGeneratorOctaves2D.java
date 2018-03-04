@@ -10,7 +10,7 @@ public class NoiseGeneratorOctaves2D {
     public NoiseGeneratorOctaves2D(Random rand, int i) {
         octaves = i;
         noiseGenerators = new NoiseGenerator2D[i];
-        for(int j = 0; j < i; j++) {
+        for (int j = 0; j < i; j++) {
             noiseGenerators[j] = new NoiseGenerator2D(rand);
         }
 
@@ -25,17 +25,17 @@ public class NoiseGeneratorOctaves2D {
                                        double gridX, double gridZ, double fq, double persistance) {
         gridX /= 1.5D;
         gridZ /= 1.5D;
-        if(array == null || array.length < xSize * zSize) {
+        if (array == null || array.length < xSize * zSize) {
             array = new double[xSize * zSize];
         } else {
-            for(int k = 0; k < array.length; k++) {
+            for (int k = 0; k < array.length; k++) {
                 array[k] = 0.0D;
             }
 
         }
         double amplitude = 1.0D;
         double frequency = 1.0D;
-        for(int l = 0; l < octaves; l++) {
+        for (int l = 0; l < octaves; l++) {
             noiseGenerators[l].generateNoiseArray(array, xPos, zPos, xSize, zSize, gridX * frequency, gridZ * frequency, 0.55D / amplitude);
             frequency *= fq;
             amplitude *= persistance;

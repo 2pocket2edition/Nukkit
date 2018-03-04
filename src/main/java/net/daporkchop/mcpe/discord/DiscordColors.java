@@ -25,7 +25,7 @@ public enum DiscordColors {
     public final Color color;
     public final TextFormat ingame;
 
-    DiscordColors(int color, TextFormat ingame)  {
+    DiscordColors(int color, TextFormat ingame) {
         this.color = new Color(color);
         this.ingame = ingame;
     }
@@ -34,7 +34,7 @@ public enum DiscordColors {
         double distance = Double.MAX_VALUE;
         DiscordColors toReturn = null;
 
-        for (DiscordColors test : values())   {
+        for (DiscordColors test : values()) {
             double newDistance = getDistance(color, test.color);
             if (newDistance < distance) {
                 toReturn = test;
@@ -44,7 +44,7 @@ public enum DiscordColors {
         return toReturn;
     }
 
-    public static final double getDistance(Color a, Color b)  {
+    public static final double getDistance(Color a, Color b) {
         return Math.pow(a.getRed() - b.getRed(), 2)
                 + Math.pow(a.getGreen() - b.getGreen(), 2)
                 + Math.pow(a.getBlue() - b.getBlue(), 2);
