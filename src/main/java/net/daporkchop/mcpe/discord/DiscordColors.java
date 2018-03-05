@@ -31,6 +31,10 @@ public enum DiscordColors {
     }
 
     public static final DiscordColors getClosestTo(Color color) {
+        if (color == null)  {
+            return WHITE;
+        }
+
         double distance = Double.MAX_VALUE;
         DiscordColors toReturn = null;
 
