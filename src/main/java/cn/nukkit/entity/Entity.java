@@ -32,7 +32,7 @@ import cn.nukkit.utils.MainLogger;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
 import co.aikar.timings.TimingsHistory;
-import net.daporkchop.mcpe.EnumLevel;
+import cn.nukkit.level.EnumLevel;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -1136,24 +1136,27 @@ public abstract class Entity extends Location implements Metadatable {
             getServer().getPluginManager().callEvent(ev);
 
             Position newPos = EnumLevel.moveToNether(this);
-            for (int x = -1; x < 2; x++)    {
-                for (int z = -1; z < 2; z++)    {
-                    int chunkX = (newPos.getFloorX() >> 4) + x,
-                            chunkZ = (newPos.getFloorZ() >> 4) + z;
-                    FullChunk chunk = newPos.level.getChunk(chunkX, chunkZ, false);
-                    if (chunk == null || !(chunk.isGenerated() || chunk.isPopulated()))   {
-                        newPos.level.generateChunk(chunkX, chunkZ, true);
+            if (newPos != null) {
+                for (int x = -1; x < 2; x++) {
+                    for (int z = -1; z < 2; z++) {
+                        int chunkX = (newPos.getFloorX() >> 4) + x,
+                                chunkZ = (newPos.getFloorZ() >> 4) + z;
+                        FullChunk chunk = newPos.level.getChunk(chunkX, chunkZ, false);
+                        if (chunk == null || !(chunk.isGenerated() || chunk.isPopulated())) {
+                            newPos.level.generateChunk(chunkX, chunkZ, true);
+                        }
                     }
                 }
+                this.teleport(newPos.add(1.5, 1, 0.5));
+                server.getScheduler().scheduleDelayedTask(new Task() {
+                    @Override
+                    public void onRun(int currentTick) {
+                        //dirty hack to make sure chunks are loaded and generated before spawning player
+                        teleport(newPos.add(1.5, 1, 0.5));
+                        BlockNetherPortal.spawnPortal(newPos);
+                    }
+                }, 20);
             }
-            this.teleport(newPos.add(1.5, 1, 0.5));
-            server.getScheduler().scheduleDelayedTask(new Task() {
-                @Override
-                public void onRun(int currentTick) {
-                    teleport(newPos.add(1.5, 1, 0.5));
-                    BlockNetherPortal.spawnPortal(newPos);
-                }
-            }, 20);
         }
 
         this.age += tickDiff;

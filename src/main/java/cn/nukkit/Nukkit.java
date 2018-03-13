@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class Nukkit {
 
     public final static String VERSION = "1.0dev";
-    public final static String API_VERSION = "1.0.5";
+    public final static String API_VERSION = "1.0.6";
     public final static String CODENAME = "Porkman";
     @Deprecated
     public final static String MINECRAFT_VERSION = ProtocolInfo.MINECRAFT_VERSION;
