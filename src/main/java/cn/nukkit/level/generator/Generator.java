@@ -6,7 +6,6 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
-import net.daporkchop.mcpe.terrain.beta.BetaGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,14 +52,14 @@ public abstract class Generator implements BlockID {
         if (Generator.nameList.containsKey(name)) {
             return Generator.nameList.get(name);
         }
-        return BetaGenerator.class;
+        return Normal.class;
     }
 
     public static Class<? extends Generator> getGenerator(int type) {
         if (Generator.typeList.containsKey(type)) {
             return Generator.typeList.get(type);
         }
-        return BetaGenerator.class;
+        return Normal.class;
     }
 
     public static String getGeneratorName(Class<? extends Generator> c) {

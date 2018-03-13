@@ -77,10 +77,7 @@ import cn.nukkit.utils.*;
 import cn.nukkit.utils.bugreport.ExceptionHandler;
 import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
-import net.daporkchop.mcpe.EnumLevel;
 import net.daporkchop.mcpe.UtilsPE;
-import net.daporkchop.mcpe.terrain.PorkNether;
-import net.daporkchop.mcpe.terrain.beta.BetaGenerator;
 
 import java.io.*;
 import java.nio.ByteOrder;
@@ -439,8 +436,6 @@ public class Server {
         Generator.addGenerator(Normal.class, "normal", Generator.TYPE_INFINITE);
         Generator.addGenerator(Normal.class, "default", Generator.TYPE_INFINITE);
         Generator.addGenerator(Nether.class, "nether", Generator.TYPE_NETHER);
-        Generator.addGenerator(BetaGenerator.class, "beta", Generator.TYPE_INFINITE);
-        Generator.addGenerator(PorkNether.class, "porknether", Generator.TYPE_NETHER);
         //todo: add old generator and hell generator
 
         for (String name : ((Map<String, Object>) this.getConfig("worlds", new HashMap<>())).keySet()) {

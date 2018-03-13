@@ -74,7 +74,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import net.daporkchop.mcpe.EnumLevel;
 import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.deathmsg.DeathMsg;
 import net.daporkchop.mcpe.discord.DiscordMain;

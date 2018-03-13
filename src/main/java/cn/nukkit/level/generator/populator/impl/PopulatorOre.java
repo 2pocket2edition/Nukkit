@@ -26,7 +26,7 @@ public class PopulatorOre extends Populator {
     }
 
     @Override
-    public void populate(ChunkManager level, int chunkX, int chunkZ, NukkitRandom random) {
+    public void populate(ChunkManager level, int chunkX, int chunkZ, NukkitRandom random, FullChunk chunk) {
         for (OreType type : this.oreTypes) {
             for (int i = 0; i < type.clusterCount; i++) {
                 int x = (chunkX << 4) | Utils.rand(0, 15);
