@@ -1,7 +1,10 @@
 package net.daporkchop.mcpe;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.level.Level;
 import cn.nukkit.scheduler.Task;
 
 import java.util.Random;
@@ -30,5 +33,20 @@ public class UtilsPE {
                 Server.getInstance().getNetwork().setName(MultiMOTD.getMOTD());
             }
         }, 250);
+        s.getScheduler().scheduleDelayedRepeatingTask(new Task() {
+            @Override
+            public void onRun(int currentTick) {
+                Server.getInstance().getOnlinePlayers().forEach((uuid, player) -> {
+                    if (player.level.getDimension() == Level.DIMENSION_NETHER && player.getY() > 127.5d)    {
+                        EntityDamageEvent ev = new EntityDamageEvent(player, EntityDamageEvent.DamageCause.VOID, Integer.MAX_VALUE);
+                        player.getServer().getPluginManager().callEvent(ev);
+                        if (!ev.isCancelled()) {
+                            player.setLastDamageCause(ev);
+                            player.setHealth(0);
+                        }
+                    }
+                });
+            }
+        }, 40, 40);
     }
 }
