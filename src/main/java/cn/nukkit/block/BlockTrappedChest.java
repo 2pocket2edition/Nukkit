@@ -86,7 +86,7 @@ public class BlockTrappedChest extends BlockChest {
 
     @Override
     public int getWeakPower(BlockFace face) {
-        int playerCount = 0;
+        /*int playerCount = 0;
 
         BlockEntity blockEntity = this.level.getBlockEntity(this);
 
@@ -94,12 +94,14 @@ public class BlockTrappedChest extends BlockChest {
             playerCount = ((BlockEntityChest) blockEntity).getInventory().getViewers().size();
         }
 
-        return playerCount < 0 ? 0 : playerCount > 15 ? 15 : playerCount;
+        return playerCount < 0 ? 0 : playerCount > 15 ? 15 : playerCount;*/
+        return 0;
     }
 
     @Override
     public int getStrongPower(BlockFace side) {
-        return side == BlockFace.UP ? this.getWeakPower(side) : 0;
+        return 0;
+        //return side == BlockFace.UP ? this.getWeakPower(side) : 0;
     }
 
     @Override

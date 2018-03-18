@@ -47,7 +47,7 @@ public abstract class BlockButton extends BlockFlowable {
         return true;
     }
 
-    @Override
+    /*@Override
     public boolean onActivate(Item item, Player player) {
         if (this.isActivated()) {
             return false;
@@ -63,9 +63,9 @@ public abstract class BlockButton extends BlockFlowable {
         level.updateAroundRedstone(pos, null);
         level.updateAroundRedstone(pos.getSide(getFacing().getOpposite()), null);
         return true;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public int onUpdate(int type) {
         if (type == Level.BLOCK_UPDATE_NORMAL) {
             if (this.getSide(getFacing().getOpposite()).isTransparent()) {
@@ -89,13 +89,13 @@ public abstract class BlockButton extends BlockFlowable {
         }
 
         return 0;
-    }
+    }*/
 
     public boolean isActivated() {
         return ((this.getDamage() & 0x08) == 0x08);
     }
 
-    @Override
+    /*@Override
     public boolean isPowerSource() {
         return true;
     }
@@ -106,7 +106,7 @@ public abstract class BlockButton extends BlockFlowable {
 
     public int getStrongPower(BlockFace side) {
         return !isActivated() ? 0 : (getFacing() == side ? 15 : 0);
-    }
+    }*/
 
     public BlockFace getFacing() {
         int side = isActivated() ? getDamage() ^ 0x08 : getDamage();

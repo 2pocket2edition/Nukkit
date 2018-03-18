@@ -52,12 +52,12 @@ public class BlockRedstoneLamp extends BlockSolid {
 
     @Override
     public int onUpdate(int type) {
-        if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE) {
+        /*if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE) {
             if (this.level.isBlockPowered(this)) {
                 this.level.setBlock(this, new BlockRedstoneLampLit(), false, false);
                 return 1;
             }
-        }
+        }*/
 
         return 0;
     }

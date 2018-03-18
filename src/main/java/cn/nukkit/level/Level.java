@@ -1156,13 +1156,13 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void updateAroundRedstone(Vector3 pos, BlockFace face) {
-        for (BlockFace side : BlockFace.values()) {
-            /*if(face != null && side == face) {
+        /*for (BlockFace side : BlockFace.values()) {
+            if(face != null && side == face) {
                 continue;
-            }*/
+            }
 
             this.getBlock(pos.getSide(side)).onUpdate(BLOCK_UPDATE_REDSTONE);
-        }
+        }*/
     }
 
     public void updateComparatorOutputLevel(Vector3 v) {

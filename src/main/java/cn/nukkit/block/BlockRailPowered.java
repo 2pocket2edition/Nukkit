@@ -39,7 +39,7 @@ public class BlockRailPowered extends BlockRail {
         //          Network below 86Kb/s. This will became unresponsive to clients 
         //          When updating the block state. Espicially on the world with many rails. 
         //          Trust me, I tested this on my server.
-        if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE || type == Level.BLOCK_UPDATE_SCHEDULED) {
+        /*if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE || type == Level.BLOCK_UPDATE_SCHEDULED) {
             super.onUpdate(type);
             boolean wasPowered = isActive();
             boolean isPowered = level.isBlockPowered(this)
@@ -55,7 +55,7 @@ public class BlockRailPowered extends BlockRail {
                 }
             }
             return type;
-        }
+        }*/
         return 0;
     }
 
@@ -69,7 +69,7 @@ public class BlockRailPowered extends BlockRail {
      */
     protected boolean checkSurrounding(Vector3 pos, boolean relative, int power) {
         // The powered rail can power up to 8 blocks only
-        if (power >= 8) {
+        /*if (power >= 8) {
             return false;
         }
         // The position of the floor numbers
@@ -153,7 +153,8 @@ public class BlockRailPowered extends BlockRail {
         }
         // Next check the if rail is on power state
         return canPowered(new Vector3(dx, dy, dz), base, power, relative)
-                || onStraight && canPowered(new Vector3(dx, dy - 1, dz), base, power, relative);
+                || onStraight && canPowered(new Vector3(dx, dy - 1, dz), base, power, relative);*/
+        return false;
     }
 
     protected boolean canPowered(Vector3 pos, Rail.Orientation state, int power, boolean relative) {

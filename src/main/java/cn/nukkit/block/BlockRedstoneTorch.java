@@ -51,9 +51,9 @@ public class BlockRedstoneTorch extends BlockTorch {
             this.setDamage(0);
             this.getLevel().setBlock(block, this, true, true);
 
-            for (BlockFace side : BlockFace.values()) {
+            /*for (BlockFace side : BlockFace.values()) {
                 this.level.updateAroundRedstone(pos.getSide(side), null);
-            }
+            }*/
             return true;
         }
         return false;

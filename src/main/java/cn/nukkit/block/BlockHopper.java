@@ -121,7 +121,7 @@ public class BlockHopper extends BlockTransparentMeta {
 
     @Override
     public int onUpdate(int type) {
-        if (type == Level.BLOCK_UPDATE_NORMAL) {
+        /*if (type == Level.BLOCK_UPDATE_NORMAL) {
             boolean powered = this.level.isBlockPowered(this);
 
             if (powered == this.isEnabled()) {
@@ -130,7 +130,7 @@ public class BlockHopper extends BlockTransparentMeta {
             }
 
             return type;
-        }
+        }*/
 
         return 0;
     }

@@ -89,7 +89,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
 
     @Override
     public int onUpdate(int type) {
-        if (type != 6 && type != 1) {
+        /*if (type != 6 && type != 1) {
             return 0;
         } else {
             BlockEntity blockEntity = this.level.getBlockEntity(this);
@@ -106,11 +106,12 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
             }
 
             return type;
-        }
+        }*/
+        return 0;
     }
 
     private void checkState() {
-        BlockFace facing = getFacing();
+        /*BlockFace facing = getFacing();
         boolean isPowered = this.isPowered();
 
         if (isPowered && !isExtended()) {
@@ -140,7 +141,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
             }
 
             this.level.addSound(this, Sound.TILE_PISTON_IN);
-        }
+        }*/
     }
 
     public BlockFace getFacing() {
@@ -148,7 +149,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
     }
 
     private boolean isPowered() {
-        BlockFace face = getFacing();
+        /*BlockFace face = getFacing();
 
         for (BlockFace side : BlockFace.values()) {
             if (side != face && this.level.isSidePowered(this.getLocation().getSide(side), side)) {
@@ -168,11 +169,12 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
             }
 
             return false;
-        }
+        }*/
+        return false;
     }
 
     private boolean doMove(boolean extending) {
-        Vector3 pos = this.getLocation();
+        /*Vector3 pos = this.getLocation();
         BlockFace direction = getFacing();
 
         if (!extending) {
@@ -218,11 +220,12 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
             }
 
             return true;
-        }
+        }*/
+        return false;
     }
 
     public static boolean canPush(Block block, BlockFace face, boolean destroyBlocks) {
-        if (!block.canBePushed()) {
+        /*if (!block.canBePushed()) {
             return false;
         } else if (block.getY() >= 0 && (face != BlockFace.DOWN || block.getY() != 0)) {
             if (block.getY() <= 255 && (face != BlockFace.UP || block.getY() != 255)) {
@@ -241,7 +244,8 @@ public abstract class BlockPistonBase extends BlockSolidMeta {
             }
         } else {
             return false;
-        }
+        }*/
+        return false;
     }
 
     public class BlocksCalculator {

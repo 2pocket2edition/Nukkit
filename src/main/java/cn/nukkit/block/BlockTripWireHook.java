@@ -88,7 +88,7 @@ public class BlockTripWireHook extends BlockFlowable {
     }
 
     public void calculateState(boolean onBreak, boolean updateAround, int pos, Block block) {
-        BlockFace facing = getFacing();
+        /*BlockFace facing = getFacing();
         Vector3 v = this.getLocation();
         boolean attached = isAttached();
         boolean powered = isPowered();
@@ -172,7 +172,7 @@ public class BlockTripWireHook extends BlockFlowable {
                     this.level.setBlock(vc, block, true, false);
                 }
             }
-        }
+        }*/
     }
 
     private void addSound(Vector3 pos, boolean canConnect, boolean nextPowered, boolean attached, boolean powered) {
@@ -216,7 +216,7 @@ public class BlockTripWireHook extends BlockFlowable {
 
     @Override
     public boolean isPowerSource() {
-        return true;
+        return false;
     }
 
     @Override
