@@ -4,9 +4,9 @@ import cn.nukkit.block.*;
 import cn.nukkit.event.level.ChunkPopulateEvent;
 import cn.nukkit.level.ChunkManager;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.biome.EnumBiome;
-import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.biome.Biome;
+import cn.nukkit.level.biome.EnumBiome;
+import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.generator.noise.nukkit.f.SimplexF;
 import cn.nukkit.level.generator.object.ore.OreType;
 import cn.nukkit.level.generator.populator.impl.PopulatorGlowStone;
@@ -16,8 +16,8 @@ import cn.nukkit.level.generator.populator.impl.PopulatorOre;
 import cn.nukkit.level.generator.populator.type.Populator;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
-import net.twoptwoe.mobplugin.MobPlugin;
 
+import net.twoptwoe.mobplugin.MobPlugin;
 import java.util.*;
 
 public class Nether extends Generator {
@@ -115,10 +115,12 @@ public class Nether extends Generator {
     }
 
     @Override
-    public void generateChunk(int chunkX, int chunkZ, FullChunk chunk) {
+    public void generateChunk(int chunkX, int chunkZ) {
         int baseX = chunkX << 4;
         int baseZ = chunkZ << 4;
         this.nukkitRandom.setSeed(chunkX * localSeed1 ^ chunkZ * localSeed2 ^ this.level.getSeed());
+
+        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
 
         for (int x = 0; x < 16; ++x) {
             for (int z = 0; z < 16; ++z) {
@@ -143,7 +145,8 @@ public class Nether extends Generator {
     }
 
     @Override
-    public void populateChunk(int chunkX, int chunkZ, FullChunk chunk) {
+    public void populateChunk(int chunkX, int chunkZ) {
+        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
         this.nukkitRandom.setSeed(0xdeadbeef ^ (chunkX << 8) ^ chunkZ ^ this.level.getSeed());
         for (Populator populator : this.populators) {
             populator.populate(this.level, chunkX, chunkZ, this.nukkitRandom, chunk);
