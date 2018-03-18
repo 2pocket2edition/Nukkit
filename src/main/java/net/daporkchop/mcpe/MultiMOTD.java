@@ -14,12 +14,14 @@ import java.util.Scanner;
  */
 public class MultiMOTD {
     private static List<String> motds;
+    private static final String newLine = System.getProperty("line.separator");
 
     static {
         try {
             File file = new File(".", "motds.txt");
             if (file.exists()) {
                 motds = Files.readAllLines(file.getAbsoluteFile().toPath(), Charset.forName("UTF-8"));
+                motds.removeIf(String::isEmpty);
             } else {
                 file.createNewFile();
                 motds = new ArrayList<>();
@@ -32,7 +34,7 @@ public class MultiMOTD {
 
     public static String getMOTD() {
         synchronized (motds) {
-            return motds.size() == 0 ? "jeff" : motds.get(Utils.rand(0, motds.size()));
+            return motds.size() == 0 ? "\u00A7cjeff" : "\u00A7c" + motds.get(Utils.rand(0, motds.size()));
         }
     }
 
@@ -41,7 +43,7 @@ public class MultiMOTD {
             motds.add(motd);
             try {
                 Writer output = new BufferedWriter(new FileWriter(new File(".", "motds.txt"), true));
-                output.append(motd);
+                output.append(motd + newLine);
                 output.close();
             } catch (IOException e) {
                 e.printStackTrace();
