@@ -48,5 +48,12 @@ public class UtilsPE {
                 });
             }
         }, 40, 40);
+        s.getScheduler().scheduleDelayedTask(new Task() {
+            @Override
+            public void onRun(int currentTick) {
+                s.getOnlinePlayers().values().forEach(p -> p.kick("Server restarting..."));
+                s.dispatchCommand(new ConsoleCommandSender(), "stop");
+            }
+        }, 432000);
     }
 }
