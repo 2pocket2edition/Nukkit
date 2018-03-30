@@ -103,7 +103,6 @@ public class BlockBed extends BlockTransparentMeta {
             player.sendMessage(new TranslationContainer("tile.bed.occupied"));
         }
 
-
         return true;
     }
 

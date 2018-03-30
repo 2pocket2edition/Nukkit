@@ -1095,30 +1095,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return false;
         }
 
-        for (Entity p : this.level.getNearbyEntities(this.boundingBox.grow(2, 1, 2), this)) {
-            if (p instanceof Player) {
-                if (((Player) p).sleeping != null && pos.distance(((Player) p).sleeping) <= 0.1) {
-                    return false;
-                }
-            }
-        }
-
-        PlayerBedEnterEvent ev;
-        this.server.getPluginManager().callEvent(ev = new PlayerBedEnterEvent(this, this.level.getBlock(pos)));
-        if (ev.isCancelled()) {
-            return false;
-        }
-
-        this.sleeping = pos.clone();
-        this.teleport(new Location(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, this.yaw, this.pitch, this.level), null);
-
-        this.setDataProperty(new IntPositionEntityData(DATA_PLAYER_BED_POSITION, (int) pos.x, (int) pos.y, (int) pos.z));
-        this.setDataFlag(DATA_PLAYER_FLAGS, DATA_PLAYER_FLAG_SLEEP, true);
-
         this.setSpawn(pos);
-
-        this.level.sleepTicks = 60;
-
+        this.sendMessage("Updated spawn point!");
         return true;
     }
 
