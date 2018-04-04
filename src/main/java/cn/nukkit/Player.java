@@ -3509,24 +3509,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return;
         }
 
-        if (this.level != EnumLevel.OVERWORLD.getLevel())   {
-            this.teleportImmediate(new Location(0, -100, 0, EnumLevel.OVERWORLD.getLevel()));
-        }
-
-        String message = DeathMsg.getDeathMessage(this);
-        DiscordMain.submitString(message);
-
-        this.health = 0;
-        this.scheduleUpdate();
-
-        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TextContainer(message), this.getExperienceLevel());
-
-        ev.setKeepExperience(this.level.gameRules.getBoolean(GameRule.KEEP_INVENTORY));
-        ev.setKeepInventory(ev.getKeepExperience());
-        this.server.getPluginManager().callEvent(ev);
-
-        if (!ev.getKeepInventory() && this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
-            for (Item item : ev.getDrops()) {
+        if (this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
+            for (Item item : this.getDrops()) {
                 this.level.dropItem(this, item, null, true, 40);
             }
 
@@ -3535,9 +3519,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             }
         }
 
-        if (!ev.getKeepExperience() && this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
+        if (this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
             if (this.isSurvival() || this.isAdventure()) {
-                int exp = ev.getExperience() * 7;
+                int exp = this.getExperienceLevel() * 7;
                 if (exp > 100) exp = 100;
                 int add = 1;
                 for (int ii = 1; ii < exp; ii += add) {
@@ -3548,9 +3532,17 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.setExperience(0, 0);
         }
 
-        if (!ev.getDeathMessage().toString().isEmpty()) {
-            this.server.broadcast(ev.getDeathMessage(), Server.BROADCAST_CHANNEL_USERS);
+        if (this.level != EnumLevel.OVERWORLD.getLevel())   {
+            this.teleportImmediate(new Location(0, -100, 0, EnumLevel.OVERWORLD.getLevel()));
         }
+
+        String message = DeathMsg.getDeathMessage(this);
+        DiscordMain.submitString(message);
+
+        this.health = 0;
+        this.scheduleUpdate();
+
+        this.server.broadcast(new TextContainer(message), Server.BROADCAST_CHANNEL_USERS);
 
         RespawnPacket pk = new RespawnPacket();
         Position pos = this.getSpawn();
