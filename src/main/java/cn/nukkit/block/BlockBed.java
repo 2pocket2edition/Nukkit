@@ -64,15 +64,6 @@ public class BlockBed extends BlockTransparentMeta {
 
     @Override
     public boolean onActivate(Item item, Player player) {
-        int time = this.getLevel().getTime() % Level.TIME_FULL;
-
-        boolean isNight = (time >= Level.TIME_NIGHT && time < Level.TIME_SUNRISE);
-
-        if (player != null && !isNight) {
-            player.sendMessage(new TranslationContainer("tile.bed.noSleep"));
-            return true;
-        }
-
         Block blockNorth = this.north();
         Block blockSouth = this.south();
         Block blockEast = this.east();
