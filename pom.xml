@@ -29,6 +29,10 @@
             <name>jcenter-bintray</name>
             <url>http://jcenter.bintray.com</url>
         </repository>
+        <repository>
+            <id>daporkchop</id>
+            <url>http://maven.daporkchop.net/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
