@@ -2,8 +2,16 @@ package net.daporkchop.mcpe.discord;
 
 import cn.nukkit.Server;
 import cn.nukkit.utils.TextFormat;
-import net.dv8tion.jda.core.*;
-import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.OnlineStatus;
+import net.dv8tion.jda.core.entities.Game;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageHistory;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -28,7 +36,7 @@ public class DiscordMain {
             return;
         }
 
-        input = TextFormat.clean(input);
+        input = TextFormat.clean(input.replaceAll("`", ""));
         if (input.length() >= 800) {
             return;
         }
