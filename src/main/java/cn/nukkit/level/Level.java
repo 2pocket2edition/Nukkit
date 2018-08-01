@@ -1347,9 +1347,14 @@ public class Level implements ChunkManager, Metadatable {
 
         List<AxisAlignedBB> collides = new ArrayList<>();
 
+        LOOP:
         for (int z = minZ; z <= maxZ; ++z) {
             for (int x = minX; x <= maxX; ++x) {
                 for (int y = minY; y <= maxY; ++y) {
+                    if (collides.size() >= 100)  {
+                        this.server.getLogger().debug("Spent too long ticking: " + minX + ' ' + minY + ' ' + minZ + ' ' + maxX + ' ' + maxY + ' ' + maxZ);
+                        break LOOP;
+                    }
                     Block block = this.getBlock(this.temporalVector.setComponents(x, y, z));
                     if (!block.canPassThrough() && block.collidesWithBB(bb)) {
                         collides.add(block.getBoundingBox());
@@ -1358,13 +1363,13 @@ public class Level implements ChunkManager, Metadatable {
             }
         }
 
-        if (entities) {
+        if (entities && collides.size() < 100) {
             for (Entity ent : this.getCollidingEntities(bb.grow(0.25f, 0.25f, 0.25f), entity)) {
                 collides.add(ent.boundingBox.clone());
             }
         }
 
-        return collides.toArray(new AxisAlignedBB[0]);
+        return collides.toArray(new AxisAlignedBB[collides.size()]);
     }
 
     public boolean hasCollision(Entity entity, AxisAlignedBB bb, boolean entities) {
@@ -1443,7 +1448,7 @@ public class Level implements ChunkManager, Metadatable {
         return this.getChunk(x >> 4, z >> 4, false).getFullBlock(x & 0x0f, y & 0xff, z & 0x0f);
     }
 
-    public synchronized Block getBlock(Vector3 pos) {
+    public Block getBlock(Vector3 pos) {
         return this.getBlock(pos.getFloorX(), pos.getFloorY(), pos.getFloorZ());
     }
 
