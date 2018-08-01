@@ -51,10 +51,18 @@ public class UtilsPE {
         s.getScheduler().scheduleDelayedTask(new Task() {
             @Override
             public void onRun(int currentTick) {
-                s.getOnlinePlayers().values().forEach(p -> p.kick("Server restarting..."));
-                s.dispatchCommand(new ConsoleCommandSender(), "stop");
+                stopNow();
             }
         }, 432000);
+    }
+
+    /**
+     * Stops the server now, disconnecting all players and whatnot
+     */
+    public static void stopNow()   {
+        Server s = Server.getInstance();
+        s.getOnlinePlayers().values().forEach(p -> p.kick("Server restarting..."));
+        s.dispatchCommand(new ConsoleCommandSender(), "stop");
     }
 
     /**

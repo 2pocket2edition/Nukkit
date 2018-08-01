@@ -2,6 +2,7 @@ package net.daporkchop.mcpe.discord;
 
 import cn.nukkit.Server;
 import cn.nukkit.utils.TextFormat;
+import net.daporkchop.mcpe.UtilsPE;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
@@ -77,6 +78,8 @@ public class DiscordMain {
                     .setStatus(OnlineStatus.ONLINE)
                     .setGame(Game.of(Game.GameType.STREAMING, "starting", "https://www.twitch.tv/daporkchop_"))
                     .addEventListener(new ListenerAdapter() {
+
+
                         @Override
                         public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
                             if (event.getChannel().getIdLong() == 412992591148220418L) {
@@ -84,6 +87,11 @@ public class DiscordMain {
 
                                 String msg = event.getMessage().getContentRaw();
                                 if (msg.length() > 255) {
+                                    return;
+                                }
+
+                                if (event.getMember().isOwner() && msg.startsWith("!reboot"))   {
+                                    UtilsPE.stopNow();
                                     return;
                                 }
 
