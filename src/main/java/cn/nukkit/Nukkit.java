@@ -43,11 +43,15 @@ public class Nukkit {
     public final static String PLUGIN_PATH = DATA_PATH + "plugins";
     public static final long START_TIME = System.currentTimeMillis();
     public static boolean ANSI = true;
+    public static boolean TITLE = false;
     public static boolean shortTitle = false;
     public static int DEBUG = 1;
 
     public static void main(String[] args) {
         DiscordMain.start();
+
+        // Force IPv4 since Nukkit is not compatible with IPv6
+        System.setProperty("java.net.preferIPv4Stack" , "true");
 
         //Shorter title for windows 8/2012
         String osName = System.getProperty("os.name").toLowerCase();
@@ -72,7 +76,9 @@ public class Nukkit {
                 case "disable-ansi":
                     ANSI = false;
                     break;
-
+                case "enable-title":
+                    TITLE = true;
+                    break;
                 case "--verbosity":
                 case "-v":
                     skip = true;

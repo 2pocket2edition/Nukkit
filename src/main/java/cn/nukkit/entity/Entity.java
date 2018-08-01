@@ -133,7 +133,7 @@ public abstract class Entity extends Location implements Metadatable {
     public static final int DATA_LIMITED_LIFE = 77;
     public static final int DATA_ARMOR_STAND_POSE_INDEX = 78; // int
     public static final int DATA_ENDER_CRYSTAL_TIME_OFFSET = 79; // int
-    // 80 (byte) nametag
+    public static final int DATA_ALWAYS_SHOW_NAMETAG = 80; // byte
     public static final int DATA_COLOR_2 = 81; // byte
     // 82 unknown
     public static final int DATA_SCORE_TAG = 83; //String
@@ -483,7 +483,7 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public void setNameTagAlwaysVisible(boolean value) {
-        this.setDataFlag(DATA_FLAGS, DATA_FLAG_ALWAYS_SHOW_NAMETAG, value);
+        this.setDataProperty(new ByteEntityData(DATA_ALWAYS_SHOW_NAMETAG, value ? 1 : 0));
     }
 
     public boolean isSneaking() {
@@ -1394,7 +1394,8 @@ public abstract class Entity extends Location implements Metadatable {
             fallDistance = (float) (this.highestPosition - this.y);
 
             if (fallDistance > 0) {
-                if (this instanceof EntityLiving && !this.isInsideOfWater()) {
+                // check if we fell into at least 1 block of water
+                if (this instanceof EntityLiving && !(this.getLevelBlock() instanceof BlockWater)) {
                     this.fall(fallDistance);
                 }
                 this.resetFallDistance();

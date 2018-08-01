@@ -15,7 +15,6 @@ import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -58,8 +57,6 @@ public class BugReportGenerator extends Thread {
         long totalDiskSpace = 0;
         int diskNum = 0;
         for (Path root : FileSystems.getDefault().getRootDirectories()) {
-
-            System.out.print(root + ": ");
             try {
                 FileStore store = Files.getFileStore(root);
                 model.append("Disk ").append(diskNum++).append(":(avail=").append(getCount(store.getUsableSpace(), true))
@@ -74,13 +71,18 @@ public class BugReportGenerator extends Thread {
         StringWriter stringWriter = new StringWriter();
         throwable.printStackTrace(new PrintWriter(stringWriter));
 
+        StackTraceElement[] stackTrace = throwable.getStackTrace();
+        boolean pluginError = false;
+        if (stackTrace.length > 0) {
+            pluginError = !throwable.getStackTrace()[0].getClassName().startsWith("cn.nukkit");
+        }
+
 
         File mdReport = new File(reports, date + "_" + throwable.getClass().getSimpleName() + ".md");
         mdReport.createNewFile();
         String content = Utils.readFile(this.getClass().getClassLoader().getResourceAsStream("report_template.md"));
 
         Properties properties = getGitRepositoryState();
-        System.out.println(properties.getProperty("git.commit.id.abbrev"));
         String abbrev = properties.getProperty("git.commit.id.abbrev");
 
         String cpuType = System.getenv("PROCESSOR_IDENTIFIER");
@@ -94,7 +96,7 @@ public class BugReportGenerator extends Thread {
         content = content.replace("${CPU_TYPE}", cpuType == null ? "UNKNOWN" : cpuType);
         content = content.replace("${AVAILABLE_CORE}", String.valueOf(osMXBean.getAvailableProcessors()));
         content = content.replace("${STACKTRACE}", stringWriter.toString());
-        content = content.replace("${PLUGIN_ERROR}", String.valueOf(!throwable.getStackTrace()[0].getClassName().startsWith("cn.nukkit")).toUpperCase());
+        content = content.replace("${PLUGIN_ERROR}", Boolean.toString(pluginError).toUpperCase());
         content = content.replace("${STORAGE_TYPE}", model.toString());
 
         Utils.writeFile(mdReport, content);

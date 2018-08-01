@@ -1792,7 +1792,16 @@ public class Level implements ChunkManager, Metadatable {
 
             breakTime -= 0.15;
 
-            BlockBreakEvent ev = new BlockBreakEvent(player, target, item, player.isCreative(),
+            Item[] eventDrops;
+            if (!player.isSurvival()) {
+                eventDrops = new Item[0];
+            } else if (item.getEnchantment(Enchantment.ID_SILK_TOUCH) != null && target.canSilkTouch()) {
+                eventDrops = new Item[]{target.toItem()};
+            } else {
+                eventDrops = target.getDrops(item);
+            }
+
+            BlockBreakEvent ev = new BlockBreakEvent(player, target, item, eventDrops, player.isCreative(),
                     (player.lastBreak + breakTime * 1000) > System.currentTimeMillis());
 
             double distance;
@@ -1820,6 +1829,8 @@ public class Level implements ChunkManager, Metadatable {
             drops = ev.getDrops();
         } else if (!target.isBreakable(item)) {
             return null;
+        } else if(item.getEnchantment(Enchantment.ID_SILK_TOUCH) != null) {
+            drops = new Item[] {target.toItem()};
         } else {
             drops = target.getDrops(item);
         }
@@ -2115,7 +2126,7 @@ public class Level implements ChunkManager, Metadatable {
 
             for (int x = minX; x <= maxX; ++x) {
                 for (int z = minZ; z <= maxZ; ++z) {
-                    for (Entity ent : this.getChunkEntities(x, z).values()) {
+                    for (Entity ent : this.getChunkEntities(x, z, false).values()) {
                         if ((entity == null || (ent != entity && entity.canCollideWith(ent)))
                                 && ent.boundingBox.intersectsWith(bb)) {
                             nearby.add(ent);
@@ -2203,8 +2214,12 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public Map<Long, Entity> getChunkEntities(int X, int Z) {
-        FullChunk chunk;
-        return (chunk = this.getChunk(X, Z)) != null ? chunk.getEntities() : Collections.emptyMap();
+        return getChunkEntities(X, Z, true);
+    }
+
+    public Map<Long, Entity> getChunkEntities(int X, int Z, boolean loadChunks) {
+        FullChunk chunk = loadChunks ? this.getChunk(X, Z) : this.getChunkIfLoaded(X, Z);
+        return chunk != null ? chunk.getEntities() : Collections.emptyMap();
     }
 
     public Map<Long, BlockEntity> getChunkBlockEntities(int X, int Z) {
@@ -2300,6 +2315,11 @@ public class Level implements ChunkManager, Metadatable {
             chunk = this.forceLoadChunk(index, chunkX, chunkZ, create);
         }
         return chunk;
+    }
+
+    public BaseFullChunk getChunkIfLoaded(int chunkX, int chunkZ) {
+        long index = Level.chunkHash(chunkX, chunkZ);
+        return this.provider.getLoadedChunk(index);
     }
 
     public void generateChunkCallback(int x, int z, BaseFullChunk chunk) {
@@ -3097,7 +3117,7 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public void addEntityMovement(int chunkX, int chunkZ, long entityId, double x, double y, double z, double yaw, double pitch, double headYaw) {
-        MoveEntityPacket pk = new MoveEntityPacket();
+        MoveEntityAbsolutePacket pk = new MoveEntityAbsolutePacket();
         pk.eid = entityId;
         pk.x = (float) x;
         pk.y = (float) y;

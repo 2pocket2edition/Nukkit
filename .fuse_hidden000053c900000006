@@ -1,0 +1,10 @@
+[submodule "src/main/resources/lang"]
+	path = src/main/resources/lang
+<<<<<<< HEAD
+	url = https://github.com/Nukkit/Languages.git
+[submodule "src/main/java/net/twoptwoe/mobplugin"]
+	path = src/main/java/net/twoptwoe/mobplugin
+	url = https://github.com/2pocket2edition/mob-plugin.git
+=======
+	url = https://github.com/NukkitX/Languages.git
+>>>>>>> upstream/master

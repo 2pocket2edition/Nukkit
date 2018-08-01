@@ -168,26 +168,15 @@ public class ShapedRecipe implements CraftingRecipe {
 
     @Override
     public boolean matchItems(Item[][] input, Item[][] output) {
-        if (!matchInputMap(cloneItemArray(input))) {
-            //Item[][] result = input;
-            /*for(int i = 0; i < input.length; i++) {
-                Item[] origin = input[i];
-                Item[] dest = new Item[origin.length];
+        if (!matchInputMap(Utils.clone2dArray(input))) {
 
-                System.arraycopy(origin, 0, dest, 0, dest.length);
-                result[i] = dest;
-            }*/
+            Item[][] reverse = Utils.clone2dArray(input);
 
-            for (int i = 0; i < input.length; i++) {
-                Item[] old = input[i];
-                Item[] newArray = new Item[old.length];
-                System.arraycopy(old, 0, newArray, 0, newArray.length);
-                Utils.reverseArray(newArray);
-
-                input[i] = newArray;
+            for (int y = 0; y < reverse.length; y++) {
+                reverse[y] = Utils.reverseArray(reverse[y], false);
             }
 
-            if (!matchInputMap(input)) {
+            if (!matchInputMap(reverse)) {
                 return false;
             }
         }
@@ -247,17 +236,12 @@ public class ShapedRecipe implements CraftingRecipe {
         return true;
     }
 
-    private Item[][] cloneItemArray(Item[][] map) {
-        Item[][] newMap = new Item[map.length][];
-        for (int i = 0; i < newMap.length; i++) {
-            Item[] old = map[i];
-            Item[] n = new Item[old.length];
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ");
 
-            System.arraycopy(old, 0, n, 0, n.length);
-            newMap[i] = n;
-        }
-
-        return newMap;
+        ingredients.forEach((character, item) -> joiner.add(item.getName() + ":" + item.getDamage()));
+        return joiner.toString();
     }
 
     @Override
