@@ -40,7 +40,7 @@ public class TellCommand extends VanillaCommand {
 
         Player player = sender.getServer().getPlayer(name);
         if (player == null) {
-            sender.sendMessage(new TranslationContainer("commands.generic.player.notFound"));
+            sender.sendMessage(TextFormat.colorize("&cThat player is not online"));
             return true;
         }
 
@@ -57,10 +57,9 @@ public class TellCommand extends VanillaCommand {
             msg = msg.substring(0, msg.length() - 1);
         }
 
-        String displayName = (sender instanceof Player ? ((Player) sender).getDisplayName() : sender.getName());
-
-        sender.sendMessage("[" + sender.getName() + " -> " + player.getDisplayName() + "] " + msg);
-        player.sendMessage("[" + displayName + " -> " + player.getName() + "] " + msg);
+        sender.sendMessage("&5[&dme &5-> &d" + player.getName() + "&5] &d" + msg);
+        player.sendMessage("&5[&d" + sender.getName() + " &5-> &dme&5] &d" + msg);
+        player.lastDM = sender.getName();
 
         return true;
     }

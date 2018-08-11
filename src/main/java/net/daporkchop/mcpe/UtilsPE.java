@@ -7,7 +7,9 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.scheduler.Task;
 
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UtilsPE {
     private static final Random random = new Random(System.currentTimeMillis());

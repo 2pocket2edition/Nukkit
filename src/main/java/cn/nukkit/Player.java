@@ -93,6 +93,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Player extends EntityHuman implements CommandSender, InventoryHolder, ChunkLoader, IPlayer {
 
+    public String lastDM = "°";
     public boolean showCoords = true;
 
     public static final int SURVIVAL = 0;
