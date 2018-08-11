@@ -55,7 +55,7 @@ abstract public class BaseRegionLoader {
                     this.loadLocationTable();
                 } catch (EOFException e) {
                     Server.getInstance().getLogger().emergency("EOF while reading region headers! Resetting region at " + regionX + "," + regionZ);
-                    Server.getInstance().broadcastMessage("\u00A7c\u00A7l[CRITICAL] EOF while reading region headers! Resetting region at " + regionX + "," + regionZ);
+                    //Server.getInstance().broadcastMessage("\u00A7c\u00A7l[CRITICAL] EOF while reading region headers! Resetting region at " + regionX + "," + regionZ);
                     this.randomAccessFile.close();
                     file.delete();
                     file.createNewFile();
