@@ -19,7 +19,7 @@ public class ReplyCommand extends VanillaCommand {
 
     @Override
     public boolean execute(CommandSender senderC, String commandLabel, String[] args) {
-        if (args.length < 2) {
+        if (args.length < 1) {
             senderC.sendMessage(new TranslationContainer("commands.generic.usage", this.usageMessage));
 
             return false;

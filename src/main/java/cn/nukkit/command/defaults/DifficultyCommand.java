@@ -1,6 +1,8 @@
 package cn.nukkit.command.defaults;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParameter;
@@ -32,6 +34,20 @@ public class DifficultyCommand extends VanillaCommand {
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         if (!this.testPermission(sender)) {
             return true;
+        } else {
+            if (sender.isPlayer())  {
+                Player player = (Player) sender;
+                //debug: test tnt optimization
+                //note to self: remove this before commit to github
+                for (int x = -5; x < 5; x++)    {
+                    for (int y = -5; y < 5; y++)    {
+                        for (int z = -5; z < 5; z++)    {
+                            player.level.setBlockFullIdAt(player.getFloorX() + x, player.getFloorY() + y, player.getFloorZ() + z, Block.TNT << 4);
+                        }
+                    }
+                }
+                return true;
+            }
         }
 
         if (args.length != 1) {
