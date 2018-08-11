@@ -958,6 +958,10 @@ public abstract class Entity extends Location implements Metadatable {
         return this.health > 0;
     }
 
+    public boolean isClosed() {
+        return closed;
+    }
+
     public void setHealth(float health) {
         if (this.health == health) {
             return;
@@ -1810,7 +1814,10 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     /**
-     * used for bat only
+     * Whether the entity can active pressure plates.
+     * Used for {@link cn.nukkit.entity.passive.EntityBat}s only.
+     *
+     * @return triggers pressure plate
      */
     public boolean doesTriggerPressurePlate() {
         return true;
@@ -1986,8 +1993,8 @@ public abstract class Entity extends Location implements Metadatable {
 
     public void close() {
         if (!this.closed) {
-            this.server.getPluginManager().callEvent(new EntityDespawnEvent(this));
             this.closed = true;
+            this.server.getPluginManager().callEvent(new EntityDespawnEvent(this));
             this.despawnFromAll();
             if (this.chunk != null) {
                 this.chunk.removeEntity(this);

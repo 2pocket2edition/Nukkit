@@ -254,7 +254,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
             list[PURPUR_BLOCK] = BlockPurpur.class; //201
 
             list[PURPUR_STAIRS] = BlockStairsPurpur.class; //203
-
+            
+            list[UNDYED_SHULKER_BOX] = BlockUndyedShulkerBox.class; //205
             list[END_BRICKS] = BlockBricksEndStone.class; //206
 
             list[END_ROD] = BlockEndRod.class; //208
@@ -511,7 +512,7 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
     /**
      * The full id is a combination of the id and data.
-     * @return
+     * @return full id
      */
     public int getFullId() {
         return (getId() << 4);
@@ -636,6 +637,8 @@ public abstract class Block extends Position implements Metadatable, Cloneable, 
 
     /**
      * @deprecated This function is lack of Player class and is not accurate enough, use #getBreakTime(Item, Player)
+     * @param item item used
+     * @return break time
      */
     @Deprecated
     public double getBreakTime(Item item) {
