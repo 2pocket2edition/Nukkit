@@ -4458,7 +4458,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.dataPacket(pk);
 
                 this.inventory.addItem(item.clone());
-                entity.kill();
+                entity.close();
                 return true;
             } else if (entity instanceof EntityItem) {
                 if (((EntityItem) entity).getPickupDelay() <= 0) {
@@ -4500,7 +4500,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                         this.dataPacket(pk);
 
                         this.inventory.addItem(item.clone());
-                        entity.kill();
+                        entity.close();
                         return true;
                     }
                 }
