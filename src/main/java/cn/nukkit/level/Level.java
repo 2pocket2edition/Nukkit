@@ -696,6 +696,10 @@ public class Level implements ChunkManager, Metadatable {
 
         updateBlockLight(lightQueue);
         this.checkTime();
+        
+        if(stopTime) {
+            this.sendTime();
+        }
 
         // Tick Weather
         if (gameRules.getBoolean(GameRule.DO_WEATHER_CYCLE)) {
@@ -1988,7 +1992,7 @@ public class Level implements ChunkManager, Metadatable {
             PlayerInteractEvent ev = new PlayerInteractEvent(player, item, target, face,
                     target.getId() == 0 ? Action.RIGHT_CLICK_AIR : Action.RIGHT_CLICK_BLOCK);
 
-            if (player.getGamemode() > 2) {
+            if (player.getGamemode() > 1) {
                 ev.setCancelled();
             }
 

@@ -78,12 +78,10 @@ import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.deathmsg.DeathMsg;
 import net.daporkchop.mcpe.discord.DiscordMain;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.*;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -2427,10 +2425,24 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                             }
                             break;
                         case PlayerActionPacket.ACTION_START_SWIMMING:
-                            this.setSwimming(true);
+                            PlayerToggleSwimEvent ptse = new PlayerToggleSwimEvent(this, true);
+                            this.server.getPluginManager().callEvent(ptse);
+
+                            if (ptse.isCancelled()) {
+                                this.sendData(this);
+                            } else {
+                                this.setSwimming(true);
+                            }
                             break;
                         case PlayerActionPacket.ACTION_STOP_SWIMMING:
-                            this.setSwimming(false);
+                            ptse = new PlayerToggleSwimEvent(this, false);
+                            this.server.getPluginManager().callEvent(ptse);
+
+                            if (ptse.isCancelled()) {
+                                this.sendData(this);
+                            } else {
+                                this.setSwimming(false);
+                            }
                             break;
                     }
 
@@ -4065,7 +4077,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
      * @return DummyBossBar object
      * @see DummyBossBar#setText(String) Set BossBar text
      * @see DummyBossBar#setLength(float) Set BossBar length
-     * @see DummyBossBar#setColor(Color) Set BossBar color
+     * @see DummyBossBar#setColor(BlockColor) Set BossBar color
      */
     public DummyBossBar getDummyBossBar(long bossBarId) {
         return this.dummyBossBars.getOrDefault(bossBarId, null);
