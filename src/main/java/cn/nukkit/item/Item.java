@@ -201,19 +201,19 @@ public class Item implements Cloneable, BlockID, ItemID {
             list[ROTTEN_FLESH] = ItemRottenFlesh.class; //367
             list[ENDER_PEARL] = ItemEnderPearl.class; //368
             list[BLAZE_ROD] = ItemBlazeRod.class; //369
-            //TODO: list[GHAST_TEAR] = ItemGhastTear.class; //370
+            list[GHAST_TEAR] = ItemGhastTear.class; //370
             list[GOLD_NUGGET] = ItemNuggetGold.class; //371
             list[NETHER_WART] = ItemNetherWart.class; //372
             list[POTION] = ItemPotion.class; //373
             list[GLASS_BOTTLE] = ItemGlassBottle.class; //374
             list[SPIDER_EYE] = ItemSpiderEye.class; //375
-            //TODO: list[FERMENTED_SPIDER_EYE] = ItemSpiderEyeFermented.class; //376
-            //TODO: list[BLAZE_POWDER] = ItemBlazePowder.class; //377
-            //TODO: list[MAGMA_CREAM] = ItemMagmaCream.class; //378
+            list[FERMENTED_SPIDER_EYE] = ItemSpiderEyeFermented.class; //376
+            list[BLAZE_POWDER] = ItemBlazePowder.class; //377
+            list[MAGMA_CREAM] = ItemMagmaCream.class; //378
             list[BREWING_STAND] = ItemBrewingStand.class; //379
             list[CAULDRON] = ItemCauldron.class; //380
             list[ENDER_EYE] = ItemEnderEye.class; //381
-            //TODO: list[GLISTERING_MELON] = ItemMelonGlistering.class; //382
+            list[GLISTERING_MELON] = ItemMelonGlistering.class; //382
             list[SPAWN_EGG] = ItemSpawnEgg.class; //383
             list[EXPERIENCE_BOTTLE] = ItemExpBottle.class; //384
             list[FIRE_CHARGE] = ItemFireCharge.class; //385
@@ -223,6 +223,7 @@ public class Item implements Cloneable, BlockID, ItemID {
             list[ITEM_FRAME] = ItemItemFrame.class; //389
             list[FLOWER_POT] = ItemFlowerPot.class; //390
             list[CARROT] = ItemCarrot.class; //391
+            list[POTATO] = ItemPotato.class; //392
             list[BAKED_POTATO] = ItemPotatoBaked.class; //393
             list[POISONOUS_POTATO] = ItemPotatoPoisonous.class; //394
             //TODO: list[EMPTY_MAP] = ItemEmptyMap.class; //395
@@ -262,7 +263,7 @@ public class Item implements Cloneable, BlockID, ItemID {
             list[JUNGLE_DOOR] = ItemDoorJungle.class; //429
             list[ACACIA_DOOR] = ItemDoorAcacia.class; //430
             list[DARK_OAK_DOOR] = ItemDoorDarkOak.class; //431
-            //TODO: list[CHORUS_FRUIT] = ItemChorusFruit.class; //432
+            list[CHORUS_FRUIT] = ItemChorusFruit.class; //432
             //TODO: list[POPPED_CHORUS_FRUIT] = ItemChorusFruitPopped.class; //433
 
             //TODO: list[DRAGON_BREATH] = ItemDragonBreath.class; //437
@@ -273,6 +274,8 @@ public class Item implements Cloneable, BlockID, ItemID {
             list[ELYTRA] = ItemElytra.class; //444
 
             //TODO: list[SHULKER_SHELL] = ItemShulkerShell.class; //445
+            
+            list[TRIDENT] = ItemTrident.class; //455
 
             list[BEETROOT] = ItemBeetroot.class; //457
             list[BEETROOT_SEEDS] = ItemSeedsBeetroot.class; //458
@@ -283,6 +286,9 @@ public class Item implements Cloneable, BlockID, ItemID {
             list[COOKED_SALMON] = ItemSalmonCooked.class; //463
 
             list[GOLDEN_APPLE_ENCHANTED] = ItemAppleGoldEnchanted.class; //466
+            
+            list[TURTLE_SHELL] = ItemTurtleShell.class; //469
+
             list[RECORD_11] = ItemRecord11.class;
             list[RECORD_CAT] = ItemRecordCat.class;
             list[RECORD_13] = ItemRecord13.class;

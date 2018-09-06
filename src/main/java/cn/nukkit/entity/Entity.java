@@ -838,6 +838,8 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public void spawnTo(Player player) {
+        player.dataPacket(createAddEntityPacket());
+
         if (!this.hasSpawned.containsKey(player.getLoaderId()) && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
             this.hasSpawned.put(player.getLoaderId(), player);
         }
@@ -851,6 +853,24 @@ public abstract class Entity extends Location implements Metadatable {
 
             player.dataPacket(pkk);
         }
+    }
+
+    protected DataPacket createAddEntityPacket() {
+        AddEntityPacket addEntity = new AddEntityPacket();
+        addEntity.type = this.getNetworkId();
+        addEntity.entityUniqueId = this.getId();
+        addEntity.entityRuntimeId = this.getId();
+        addEntity.yaw = (float) this.yaw;
+        addEntity.headYaw = (float) this.yaw;
+        addEntity.pitch = (float) this.pitch;
+        addEntity.x = (float) this.x;
+        addEntity.y = (float) this.y;
+        addEntity.z = (float) this.z;
+        addEntity.speedX = (float) this.motionX;
+        addEntity.speedY = (float) this.motionY;
+        addEntity.speedZ = (float) this.motionZ;
+        addEntity.metadata = this.dataProperties;
+        return addEntity;
     }
 
     public Map<Integer, Player> getViewers() {
@@ -1172,27 +1192,29 @@ public abstract class Entity extends Location implements Metadatable {
             EntityPortalEnterEvent ev = new EntityPortalEnterEvent(this, PortalType.NETHER);
             getServer().getPluginManager().callEvent(ev);
 
-            Position newPos = EnumLevel.moveToNether(this);
-            if (newPos != null) {
-                for (int x = -1; x < 2; x++) {
-                    for (int z = -1; z < 2; z++) {
-                        int chunkX = (newPos.getFloorX() >> 4) + x,
-                                chunkZ = (newPos.getFloorZ() >> 4) + z;
-                        FullChunk chunk = newPos.level.getChunk(chunkX, chunkZ, false);
-                        if (chunk == null || !(chunk.isGenerated() || chunk.isPopulated())) {
-                            newPos.level.generateChunk(chunkX, chunkZ, true);
+            if (!ev.isCancelled()) {
+                Position newPos = EnumLevel.moveToNether(this);
+                if (newPos != null) {
+                    for (int x = -1; x < 2; x++) {
+                        for (int z = -1; z < 2; z++) {
+                            int chunkX = (newPos.getFloorX() >> 4) + x, chunkZ = (newPos.getFloorZ() >> 4) + z;
+                            FullChunk chunk = newPos.level.getChunk(chunkX, chunkZ, false);
+                            if (chunk == null || !(chunk.isGenerated() || chunk.isPopulated())) {
+                                newPos.level.generateChunk(chunkX, chunkZ, true);
+                            }
                         }
                     }
+                    this.teleport(newPos.add(1.5, 1, 0.5));
+                    server.getScheduler().scheduleDelayedTask(new Task() {
+                        @Override
+                        public void onRun(int currentTick) {
+                            // dirty hack to make sure chunks are loaded and generated before spawning
+                            // player
+                            teleport(newPos.add(1.5, 1, 0.5));
+                            BlockNetherPortal.spawnPortal(newPos);
+                        }
+                    }, 20);
                 }
-                this.teleport(newPos.add(1.5, 1, 0.5));
-                server.getScheduler().scheduleDelayedTask(new Task() {
-                    @Override
-                    public void onRun(int currentTick) {
-                        //dirty hack to make sure chunks are loaded and generated before spawning player
-                        teleport(newPos.add(1.5, 1, 0.5));
-                        BlockNetherPortal.spawnPortal(newPos);
-                    }
-                }, 20);
             }
         }
 
