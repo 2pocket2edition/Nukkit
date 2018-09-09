@@ -27,8 +27,8 @@ import java.util.TimerTask;
 public class DiscordMain {
     private static final List<String> list = new ArrayList<>();
     private static JDA jda;
-    private static Timer timer = new Timer();
-    private static boolean dirty = false;
+    private static final Timer timer = new Timer();
+    private static boolean dirty;
 
     private static Message message;
 
@@ -126,11 +126,11 @@ public class DiscordMain {
                     .buildBlocking();
             TextChannel channel = jda.getTextChannelById(412992591148220418L);
             if (channel != null) {
-                message = channel.getMessageById(413020177513447434L).complete();
+                message = channel.getMessageById(488246220863569940L).complete();
                 try {
                     MessageHistory history;
                     do {
-                        history = channel.getHistoryAfter(413020177513447434L, 99).complete();
+                        history = channel.getHistoryAfter(488246220863569940L, 99).complete();
                         if (!history.getRetrievedHistory().isEmpty()) {
                             channel.deleteMessages(history.getRetrievedHistory()).complete();
                         }
