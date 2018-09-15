@@ -44,6 +44,7 @@ public class EntityEndCrystal extends Entity {
             return false;
         }
 
+        this.close();
 		Position pos = this.getPosition();
 		Explosion explode = new Explosion(pos, 6, this);
 
@@ -52,7 +53,6 @@ public class EntityEndCrystal extends Entity {
             explode.explodeB();
         }
 
-        close();
         return true;
 	}
 
