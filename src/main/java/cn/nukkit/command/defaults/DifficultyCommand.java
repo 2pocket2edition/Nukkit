@@ -39,9 +39,9 @@ public class DifficultyCommand extends VanillaCommand {
                 Player player = (Player) sender;
                 //debug: test tnt optimization
                 //note to self: remove this before commit to github
-                for (int x = -5; x < 5; x++)    {
-                    for (int y = -5; y < 5; y++)    {
-                        for (int z = -5; z < 5; z++)    {
+                for (int x = -3; x < 3; x++)    {
+                    for (int y = -5; y < 0; y++)    {
+                        for (int z = -3; z < 3; z++)    {
                             player.level.setBlockFullIdAt(player.getFloorX() + x, player.getFloorY() + y, player.getFloorZ() + z, Block.TNT << 4);
                         }
                     }
