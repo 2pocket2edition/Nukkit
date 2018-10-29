@@ -55,7 +55,7 @@ public class BlockHopper extends BlockTransparentMeta {
 
         this.setDamage(facing.getIndex());
 
-        boolean powered = this.level.isBlockPowered(this);
+        boolean powered = this.level.isBlockPowered(this.getLocation());
 
         if (powered == this.isEnabled()) {
             this.setEnabled(!powered);
@@ -121,8 +121,8 @@ public class BlockHopper extends BlockTransparentMeta {
 
     @Override
     public int onUpdate(int type) {
-        /*if (type == Level.BLOCK_UPDATE_NORMAL) {
-            boolean powered = this.level.isBlockPowered(this);
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
+            boolean powered = this.level.isBlockPowered(this.getLocation());
 
             if (powered == this.isEnabled()) {
                 this.setEnabled(!powered);
@@ -130,7 +130,7 @@ public class BlockHopper extends BlockTransparentMeta {
             }
 
             return type;
-        }*/
+        }
 
         return 0;
     }

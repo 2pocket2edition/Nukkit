@@ -44,9 +44,10 @@ public class EntityEndCrystal extends Entity {
             return false;
         }
 
-        this.close();
-		Position pos = this.getPosition();
-		Explosion explode = new Explosion(pos, 6, this);
+        Position pos = this.getPosition();
+        Explosion explode = new Explosion(pos, 6, this);
+
+        close();
 
         if (this.level.getGameRules().getBoolean(GameRule.TNT_EXPLODES)) {
             explode.explodeA();
