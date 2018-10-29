@@ -47,3 +47,7 @@ recipes.json
 /discordtoken.txt
 
 /plugins/PocketVote/config.yml
+
+#Nukkit data dir
+data
+data/*

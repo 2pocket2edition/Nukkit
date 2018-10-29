@@ -43,7 +43,7 @@ public class BlockRedstoneLamp extends BlockSolid {
 
     @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
-        if (this.level.isBlockPowered(this)) {
+        if (this.level.isBlockPowered(this.getLocation())) {
             this.level.setBlock(this, new BlockRedstoneLampLit(), false, true);
         } else {
             this.level.setBlock(this, this, false, true);
@@ -53,6 +53,19 @@ public class BlockRedstoneLamp extends BlockSolid {
 
     @Override
     public int onUpdate(int type) {
+        if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE) {
+            // Redstone event
+            RedstoneUpdateEvent ev = new RedstoneUpdateEvent(this);
+            getLevel().getServer().getPluginManager().callEvent(ev);
+            if (ev.isCancelled()) {
+                return 0;
+            }
+            if (this.level.isBlockPowered(this.getLocation())) {
+                this.level.setBlock(this, new BlockRedstoneLampLit(), false, false);
+                return 1;
+            }
+        }
+
         return 0;
     }
 
