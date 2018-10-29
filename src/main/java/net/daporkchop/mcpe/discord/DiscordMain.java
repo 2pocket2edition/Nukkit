@@ -33,7 +33,7 @@ public class DiscordMain {
     private static Message message;
 
     public static void submitString(String input) {
-        if (message == null) {
+        if (message == null || jda == null) {
             return;
         }
 
@@ -73,8 +73,12 @@ public class DiscordMain {
 
     public static final void start() {
         try {
+            String token = DiscordUtils.getToken().trim();
+            if (token.isEmpty())     {
+                return;
+            }
             jda = new JDABuilder(AccountType.BOT)
-                    .setToken(DiscordUtils.getToken())
+                    .setToken(token)
                     .setStatus(OnlineStatus.ONLINE)
                     .setGame(Game.of(Game.GameType.STREAMING, "starting", "https://www.twitch.tv/daporkchop_"))
                     .addEventListener(new ListenerAdapter() {
@@ -164,7 +168,7 @@ public class DiscordMain {
     }
 
     public static final void updateMessage() {
-        if (!dirty || message == null) {
+        if (!dirty || message == null || jda == null) {
             return;
         }
         synchronized (list) {
@@ -179,7 +183,7 @@ public class DiscordMain {
     }
 
     public static final void updateMessageNow() {
-        if (!dirty || message == null) {
+        if (!dirty || message == null || jda == null) {
             return;
         }
         synchronized (list) {
@@ -205,6 +209,9 @@ public class DiscordMain {
     }
 
     public static final void shutdown() {
+        if (jda == null)    {
+            return;
+        }
         timer.purge();
         timer.cancel();
         submitString("Server shutting down!");
