@@ -1724,9 +1724,7 @@ public class Server {
         }
 
         if (provider == null) {
-            if ((provider = LevelProviderManager.getProviderByName((String) this.getConfig("level-settings.default-format", "anvil"))) == null) {
-                provider = LevelProviderManager.getProviderByName("anvil");
-            }
+            provider = LevelProviderManager.getProviderByName(this.getConfig().get("level-settings.default-format", "anvil"));
         }
 
         String path;
