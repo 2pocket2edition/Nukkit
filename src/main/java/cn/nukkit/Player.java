@@ -48,7 +48,6 @@ import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.level.*;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
-import cn.nukkit.level.particle.CriticalParticle;
 import cn.nukkit.level.particle.PunchBlockParticle;
 import cn.nukkit.math.*;
 import cn.nukkit.metadata.MetadataValue;
@@ -88,6 +87,7 @@ import java.nio.ByteOrder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
  * @author MagicDroidX &amp; Box
@@ -2099,6 +2099,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                                 } else if (playerInstance.shouldLogin) {
                                     playerInstance.completeLoginSequence();
                                 }
+
+                                for (Consumer<Server> action : e.getScheduledActions()) {
+                                    action.accept(server);
+                                }
                             }
                         }
                     };
@@ -2339,10 +2343,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                             respawnPacket.z = (float) respawnPos.z;
                             this.dataPacket(respawnPacket);
 
-                            this.setSprinting(false, true);
+                            this.setSprinting(false);
                             this.setSneaking(false);
 
-                            this.extinguish();
                             this.setDataProperty(new ShortEntityData(Player.DATA_AIR, 400), false);
                             this.deadTicks = 0;
                             this.noDamageTicks = 60;
@@ -2587,8 +2590,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                                 break;
                             }
 
-                            /*this.dataPacket(packet); //bug?
-                            Server.broadcastPacket(this.getViewers().values(), packet);*/
+                            this.dataPacket(packet);
+                            Server.broadcastPacket(this.getViewers().values(), packet);
                             break;
                     }
                     break;
@@ -3600,6 +3603,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.teleport(new Location(pos.x, pos.y, pos.z, pos.level), null);
         }
 
+        this.extinguish();
+
         this.dataPacket(pk);
     }
 
@@ -3710,8 +3715,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     @Override
     public void setMovementSpeed(float speed) {
+        setMovementSpeed(speed, true);
+    }
+
+    public void setMovementSpeed(float speed, boolean send) {
         super.setMovementSpeed(speed);
-        if (this.spawned) {
+        if (this.spawned && send) {
             Attribute attribute = Attribute.getAttribute(Attribute.MOVEMENT_SPEED).setValue(speed);
             this.setAttribute(attribute);
         }
@@ -3751,18 +3760,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             if (damager instanceof Player) {
                 ((Player) damager).getFoodData().updateFoodExpLevel(0.3);
             }
-            //Critical hit
-            boolean add = false;
-            if (!damager.onGround) {
-                NukkitRandom random = new NukkitRandom();
-                for (int i = 0; i < 5; i++) {
-                    CriticalParticle par = new CriticalParticle(new Vector3(this.x + random.nextRange(-15, 15) / 10, this.y + random.nextRange(0, 20) / 10, this.z + random.nextRange(-15, 15) / 10));
-                    this.getLevel().addParticle(par);
-                }
-
-                add = true;
-            }
-            if (add) source.setDamage((float) (source.getDamage() * 1.5));
         }
 
         if (super.attack(source)) { //!source.isCancelled()
@@ -4407,16 +4404,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         return this.locale.get();
     }
 
-    public void setSprinting(boolean value, boolean setDefault) {
-        super.setSprinting(value);
-        if (setDefault) {
-            this.movementSpeed = DEFAULT_SPEED;
-        } else {
-            float sprintSpeedChange = DEFAULT_SPEED * 0.3f;
-            if (!value) sprintSpeedChange *= -1;
-            this.movementSpeed += sprintSpeedChange;
+    @Override
+    public void setSprinting(boolean value) {
+        if (isSprinting() != value) {
+            super.setSprinting(value);
+            this.setMovementSpeed(value ? getMovementSpeed() * 1.3f : getMovementSpeed() / 1.3f);
         }
-        this.setMovementSpeed(this.movementSpeed);
     }
 
     public void transfer(InetSocketAddress address) {
@@ -4462,7 +4455,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 entity.close();
                 return true;
             } else if (entity instanceof EntityThrownTrident && ((EntityThrownTrident) entity).hadCollision) {
-                ItemTrident item = new ItemTrident();
+                Item item = ((EntityThrownTrident) entity).getItem();
                 if (this.isSurvival() && !this.inventory.canAddItem(item)) {
                     return false;
                 }

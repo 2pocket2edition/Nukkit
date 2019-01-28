@@ -6,6 +6,8 @@ import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 
+import java.util.StringJoiner;
+
 /**
  * Created on 2015/12/08 by Pub4Game.
  * Package cn.nukkit.command.defaults in project Nukkit .
