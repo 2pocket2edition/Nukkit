@@ -5,7 +5,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockAir;
 import cn.nukkit.inventory.BeaconInventory;
 import cn.nukkit.inventory.Inventory;
-import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -17,13 +16,10 @@ import java.util.Map;
 /**
  * author: Rover656
  */
-public class BlockEntityBeacon extends BlockEntitySpawnable implements InventoryHolder {
-
-    protected final BeaconInventory inventory;
+public class BlockEntityBeacon extends BlockEntitySpawnable {
 
     public BlockEntityBeacon(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.inventory = new BeaconInventory(this);
     }
 
     @Override
@@ -98,8 +94,8 @@ public class BlockEntityBeacon extends BlockEntitySpawnable implements Inventory
         Map<Long, Player> players = this.level.getPlayers();
 
         //Calculate vars for beacon power
-        Integer range = 10 + getPowerLevel() * 10;
-        Integer duration = 9 + getPowerLevel() * 2;
+        int range = 10 + getPowerLevel() * 10;
+        int duration = 9 + getPowerLevel() * 2;
 
         for(Map.Entry<Long, Player> entry : players.entrySet()) {
             Player p = entry.getValue();
@@ -237,11 +233,6 @@ public class BlockEntityBeacon extends BlockEntitySpawnable implements Inventory
             setDirty();
             this.spawnToAll();
         }
-    }
-
-    @Override
-    public Inventory getInventory() {
-        return this.inventory;
     }
 
     @Override

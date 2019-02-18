@@ -5,6 +5,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.LevelProvider;
 import java.io.EOFException;
 import cn.nukkit.utils.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -109,7 +110,7 @@ abstract public class BaseRegionLoader {
     public abstract int getZ();
 
     public Integer[] getLocationIndexes() {
-        return this.locationTable.keySet().stream().toArray(Integer[]::new);
+        return this.locationTable.keySet().toArray(new Integer[0]);
     }
 
 }
