@@ -135,7 +135,9 @@ public class DiscordMain {
                     MessageHistory history;
                     do {
                         history = channel.getHistoryAfter(488246220863569940L, 99).complete();
-                        if (!history.getRetrievedHistory().isEmpty()) {
+                        if (history.size() == 1) {
+                            channel.deleteMessageById(history.getRetrievedHistory().get(0).getIdLong()).complete();
+                        } else if (!history.isEmpty())    {
                             channel.deleteMessages(history.getRetrievedHistory()).complete();
                         }
                     } while (history.size() == 99);
