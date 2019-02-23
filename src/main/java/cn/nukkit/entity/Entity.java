@@ -17,6 +17,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.generator.Generator;
 import cn.nukkit.math.*;
 import cn.nukkit.metadata.MetadataValue;
 import cn.nukkit.metadata.Metadatable;
@@ -1291,6 +1292,10 @@ public abstract class Entity extends Location implements Metadatable {
     public boolean onUpdate(int currentTick) {
         if (this.closed) {
             return false;
+        }
+
+        if (this.level.getDimension() == Level.DIMENSION_NETHER && this.y >= 127.0d) {
+            this.attack(5.0f);
         }
 
         if (!this.isAlive()) {

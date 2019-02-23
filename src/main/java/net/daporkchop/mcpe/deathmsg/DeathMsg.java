@@ -126,9 +126,9 @@ public class DeathMsg {
                         case 0:
                             return "&b" + name + " &4was blasted to pieces";
                         case 1:
-                            return "&b" + name + "&4exploded too hard";
+                            return "&b" + name + " &4exploded too hard";
                         case 2:
-                            return "&b" + name + "&4blew up and away";
+                            return "&b" + name + " &4blew up and away";
                     }
                     return "";
                 });
