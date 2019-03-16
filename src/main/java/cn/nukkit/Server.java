@@ -76,6 +76,7 @@ import cn.nukkit.utils.bugreport.ExceptionHandler;
 import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
 import lombok.extern.log4j.Log4j2;
+import net.daporkchop.mcpe.UtilsPE;
 
 import java.io.*;
 import java.nio.ByteOrder;
@@ -440,7 +441,9 @@ public class Server {
 
         this.network.registerInterface(new RakNetInterface(this));
 
+
         this.pluginManager.loadPlugins(this.pluginPath);
+        UtilsPE.init(this);
 
         this.enablePlugins(PluginLoadOrder.STARTUP);
 
