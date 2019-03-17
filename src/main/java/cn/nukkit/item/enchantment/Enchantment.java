@@ -106,7 +106,13 @@ public abstract class Enchantment implements Cloneable {
     }
 
     public static Enchantment get(int id) {
-        return id >= 0 && id < enchantments.length ? enchantments[id] : new UnknownEnchantment(id);
+        if (id >= 0 && id < enchantments.length)    {
+            Enchantment enchantment = enchantments[id];
+            if (enchantment != null)    {
+                return enchantment;
+            }
+        }
+        return new UnknownEnchantment(id);
     }
 
     public static Enchantment getEnchantment(int id) {
