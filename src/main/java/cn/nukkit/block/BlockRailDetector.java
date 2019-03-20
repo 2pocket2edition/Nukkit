@@ -66,7 +66,7 @@ public class BlockRailDetector extends BlockRail {
     }
 
     protected void updateState() {
-        /*boolean wasPowered = isActive();
+        boolean wasPowered = isActive();
         boolean isPowered = false;
 
         for (Entity entity : level.getNearbyEntities(new SimpleAxisAlignedBB(
@@ -93,7 +93,7 @@ public class BlockRailDetector extends BlockRail {
             level.scheduleUpdate(this, this.down(), 0);
         }
 
-        level.updateComparatorOutputLevel(this);*/
+        level.updateComparatorOutputLevel(this);
     }
 
     @Override

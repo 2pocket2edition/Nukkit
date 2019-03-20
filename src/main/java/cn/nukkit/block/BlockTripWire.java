@@ -88,7 +88,7 @@ public class BlockTripWire extends BlockFlowable {
 
     @Override
     public void onEntityCollide(Entity entity) {
-        /*if (!entity.doesTriggerPressurePlate()) {
+        if (!entity.doesTriggerPressurePlate()) {
             return;
         }
 
@@ -100,11 +100,11 @@ public class BlockTripWire extends BlockFlowable {
             this.updateHook(false);
 
             this.level.scheduleUpdate(this, 10);
-        }*/
+        }
     }
 
     public void updateHook(boolean scheduleUpdate) {
-        /*for (BlockFace side : new BlockFace[]{BlockFace.SOUTH, BlockFace.WEST}) {
+        for (BlockFace side : new BlockFace[]{BlockFace.SOUTH, BlockFace.WEST}) {
             for (int i = 1; i < 42; ++i) {
                 Block block = this.getSide(side, i);
 
@@ -117,7 +117,7 @@ public class BlockTripWire extends BlockFlowable {
 
                     /*if(scheduleUpdate) {
                         this.level.scheduleUpdate(hook, 10);
-                    }*//*
+                    }*/
                     break;
                 }
 
@@ -125,12 +125,11 @@ public class BlockTripWire extends BlockFlowable {
                     break;
                 }
             }
-        }*/
+        }
     }
 
     @Override
     public int onUpdate(int type) {
-        /*
         if (type == Level.BLOCK_UPDATE_SCHEDULED) {
             if (!isPowered()) {
                 return type;
@@ -153,7 +152,7 @@ public class BlockTripWire extends BlockFlowable {
                 this.updateHook(false);
             }
             return type;
-        }*/
+        }
 
         return 0;
     }

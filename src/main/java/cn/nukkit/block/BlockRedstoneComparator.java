@@ -50,15 +50,14 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
 
     @Override
     protected int getRedstoneSignal() {
-        return 0;
-        //BlockEntity blockEntity = this.level.getBlockEntity(this);
+        BlockEntity blockEntity = this.level.getBlockEntity(this);
 
-        //return blockEntity instanceof BlockEntityComparator ? ((BlockEntityComparator) blockEntity).getOutputSignal() : 0;
+        return blockEntity instanceof BlockEntityComparator ? ((BlockEntityComparator) blockEntity).getOutputSignal() : 0;
     }
 
     @Override
     public void updateState() {
-        /*if (!this.level.isBlockTickPending(this, this)) {
+        if (!this.level.isBlockTickPending(this, this)) {
             int output = this.calculateOutput();
             BlockEntity blockEntity = this.level.getBlockEntity(this);
             int power = blockEntity instanceof BlockEntityComparator ? ((BlockEntityComparator) blockEntity).getOutputSignal() : 0;
@@ -68,16 +67,16 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
                     this.level.scheduleUpdate(this, this, 2, -1);
                 } else {
                     this.level.scheduleUpdate(this, this, 2, 0);
-                }*//*
+                }*/
 
                 //System.out.println("schedule update 0");
                 this.level.scheduleUpdate(this, this, 2);
             }
-        }*/
+        }
     }
 
     protected int calculateInputStrength() {
-        /*int power = super.calculateInputStrength();
+        int power = super.calculateInputStrength();
         BlockFace face = getFacing();
         Block block = this.getSide(face);
 
@@ -91,12 +90,11 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
             }
         }
 
-        return power;*/
-        return 0;
+        return power;
     }
 
     protected boolean shouldBePowered() {
-        /*int input = this.calculateInputStrength();
+        int input = this.calculateInputStrength();
 
         if (input >= 15) {
             return true;
@@ -105,18 +103,16 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
         } else {
             int sidePower = this.getPowerOnSides();
             return sidePower == 0 || input >= sidePower;
-        }*/
-        return false;
+        }
     }
 
     private int calculateOutput() {
-        return 0;
-        //return getMode() == Mode.SUBTRACT ? Math.max(this.calculateInputStrength() - this.getPowerOnSides(), 0) : this.calculateInputStrength();
+        return getMode() == Mode.SUBTRACT ? Math.max(this.calculateInputStrength() - this.getPowerOnSides(), 0) : this.calculateInputStrength();
     }
 
     @Override
     public boolean onActivate(Item item, Player player) {
-        /*if (getMode() == Mode.SUBTRACT) {
+        if (getMode() == Mode.SUBTRACT) {
             this.setDamage(this.getDamage() - 4);
         } else {
             this.setDamage(this.getDamage() + 4);
@@ -126,7 +122,7 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
         this.level.setBlock(this, this, true, false);
         //bug?
 
-        this.onChange();*/
+        this.onChange();
         return true;
     }
 
@@ -141,7 +137,7 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
     }
 
     private void onChange() {
-        /*int output = this.calculateOutput();
+        int output = this.calculateOutput();
         BlockEntity blockEntity = this.level.getBlockEntity(this);
         int currentOutput = 0;
 
@@ -162,7 +158,7 @@ public abstract class BlockRedstoneComparator extends BlockRedstoneDiode {
             }
 
             this.level.updateAroundRedstone(this, null);
-        }*/
+        }
     }
 
     @Override

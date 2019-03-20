@@ -63,7 +63,7 @@ public class BlockLever extends BlockFlowable implements Faceable {
 
     @Override
     public boolean onActivate(Item item, Player player) {
-        /*this.level.getServer().getPluginManager().callEvent(new BlockRedstoneEvent(this, isPowerOn() ? 15 : 0, isPowerOn() ? 0 : 15));
+        this.level.getServer().getPluginManager().callEvent(new BlockRedstoneEvent(this, isPowerOn() ? 15 : 0, isPowerOn() ? 0 : 15));
         this.setDamage(this.getDamage() ^ 0x08);
 
         this.getLevel().setBlock(this, this, false, true);
@@ -72,7 +72,7 @@ public class BlockLever extends BlockFlowable implements Faceable {
         LeverOrientation orientation = LeverOrientation.byMetadata(this.isPowerOn() ? this.getDamage() ^ 0x08 : this.getDamage());
         BlockFace face = orientation.getFacing();
         //this.level.updateAroundRedstone(this, null);
-        this.level.updateAroundRedstone(this.getLocation().getSide(face.getOpposite()), isPowerOn() ? face : null);*/
+        this.level.updateAroundRedstone(this.getLocation().getSide(face.getOpposite()), isPowerOn() ? face : null);
         return true;
     }
 
@@ -102,22 +102,20 @@ public class BlockLever extends BlockFlowable implements Faceable {
     public boolean onBreak(Item item) {
         this.getLevel().setBlock(this, new BlockAir(), true, true);
 
-        /*if (isPowerOn()) {
+        if (isPowerOn()) {
             BlockFace face = LeverOrientation.byMetadata(this.isPowerOn() ? this.getDamage() ^ 0x08 : this.getDamage()).getFacing();
             this.level.updateAround(this.getLocation().getSide(face.getOpposite()));
-        }*/
+        }
         return true;
     }
 
     @Override
     public int getWeakPower(BlockFace side) {
-        return 0;
-        //return isPowerOn() ? 15 : 0;
+        return isPowerOn() ? 15 : 0;
     }
 
     public int getStrongPower(BlockFace side) {
-        return 0;
-        //return !isPowerOn() ? 0 : LeverOrientation.byMetadata(this.isPowerOn() ? this.getDamage() ^ 0x08 : this.getDamage()).getFacing() == side ? 15 : 0;
+        return !isPowerOn() ? 0 : LeverOrientation.byMetadata(this.isPowerOn() ? this.getDamage() ^ 0x08 : this.getDamage()).getFacing() == side ? 15 : 0;
     }
 
     @Override

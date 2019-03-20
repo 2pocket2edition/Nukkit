@@ -31,7 +31,7 @@ public class BlockRailActivator extends BlockRail {
 
     @Override
     public int onUpdate(int type) {
-        /*if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE || type == Level.BLOCK_UPDATE_SCHEDULED) {
+        if (type == Level.BLOCK_UPDATE_NORMAL || type == Level.BLOCK_UPDATE_REDSTONE || type == Level.BLOCK_UPDATE_SCHEDULED) {
             super.onUpdate(type);
             boolean wasPowered = isActive();
             boolean isPowered = level.isBlockPowered(this.getLocation())
@@ -51,7 +51,7 @@ public class BlockRailActivator extends BlockRail {
                 }
             }
             return type;
-        }*/
+        }
         return 0;
     }
 
@@ -64,7 +64,7 @@ public class BlockRailActivator extends BlockRail {
      * @return Boolean of the surrounding area. Where the powered rail on!
      */
     protected boolean checkSurrounding(Vector3 pos, boolean relative, int power) {
-        /*if (power >= 8) {
+        if (power >= 8) {
             return false;
         }
         int dx = pos.getFloorX();
@@ -143,12 +143,11 @@ public class BlockRailActivator extends BlockRail {
         }
 
         return canPowered(new Vector3(dx, dy, dz), base, power, relative)
-                || onStraight && canPowered(new Vector3(dx, dy - 1, dz), base, power, relative);*/
-        return false;
+                || onStraight && canPowered(new Vector3(dx, dy - 1, dz), base, power, relative);
     }
 
     protected boolean canPowered(Vector3 pos, Rail.Orientation state, int power, boolean relative) {
-        /*Block block = level.getBlock(pos);
+        Block block = level.getBlock(pos);
 
         if (!(block instanceof BlockRailActivator)) {
             return false;
@@ -164,8 +163,7 @@ public class BlockRailActivator extends BlockRail {
                 || base != Rail.Orientation.STRAIGHT_EAST_WEST
                 && base != Rail.Orientation.ASCENDING_EAST
                 && base != Rail.Orientation.ASCENDING_WEST)
-                && (level.isBlockPowered(pos) || checkSurrounding(pos, relative, power + 1));*/
-        return false;
+                && (level.isBlockPowered(pos) || checkSurrounding(pos, relative, power + 1));
     }
 
     @Override

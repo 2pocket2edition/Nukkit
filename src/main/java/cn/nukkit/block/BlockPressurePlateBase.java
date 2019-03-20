@@ -83,7 +83,7 @@ public abstract class BlockPressurePlateBase extends BlockFlowable {
 
     @Override
     public int onUpdate(int type) {
-        /*if (type == Level.BLOCK_UPDATE_NORMAL) {
+        if (type == Level.BLOCK_UPDATE_NORMAL) {
             if (this.down().isTransparent()) {
                 this.level.useBreakOn(this);
             }
@@ -93,7 +93,7 @@ public abstract class BlockPressurePlateBase extends BlockFlowable {
             if (power > 0) {
                 this.updateState(power);
             }
-        }*/
+        }
 
         return 0;
     }
@@ -115,7 +115,7 @@ public abstract class BlockPressurePlateBase extends BlockFlowable {
 
     @Override
     public void onEntityCollide(Entity entity) {
-        /*int power = getRedstonePower();
+        int power = getRedstonePower();
 
         if (power == 0) {
             Event ev;
@@ -131,11 +131,11 @@ public abstract class BlockPressurePlateBase extends BlockFlowable {
             if (!ev.isCancelled()) {
                 updateState(power);
             }
-        }*/
+        }
     }
 
     protected void updateState(int oldStrength) {
-        /*int strength = this.computeRedstoneStrength();
+        int strength = this.computeRedstoneStrength();
         boolean wasPowered = oldStrength > 0;
         boolean isPowered = strength > 0;
 
@@ -157,22 +157,22 @@ public abstract class BlockPressurePlateBase extends BlockFlowable {
 
         if (isPowered) {
             this.level.scheduleUpdate(this, 20);
-        }*/
+        }
     }
 
     @Override
     public boolean onBreak(Item item) {
         this.level.setBlock(this, new BlockAir(), true, true);
 
-        /*if (this.getRedstonePower() > 0) {
+        if (this.getRedstonePower() > 0) {
             this.level.updateAroundRedstone(this, null);
             this.level.updateAroundRedstone(this.getLocation().down(), null);
-        }*/
+        }
 
         return true;
     }
 
-    /*@Override
+    @Override
     public int getWeakPower(BlockFace side) {
         return getRedstonePower();
     }
@@ -188,7 +188,7 @@ public abstract class BlockPressurePlateBase extends BlockFlowable {
 
     public void setRedstonePower(int power) {
         this.setDamage(power);
-    }*/
+    }
 
     protected void playOnSound() {
         this.level.addSound(this, Sound.RANDOM_CLICK, 0.6f, onPitch);
