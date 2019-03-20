@@ -99,7 +99,8 @@ public class UtilsPE {
      */
     public static void stopNow() {
         Server s = Server.getInstance();
-        s.getOnlinePlayers().values().forEach(p -> p.kick("Server restarting..."));
+        s.dispatchCommand(new ConsoleCommandSender(), "save-all");
+        s.getOnlinePlayers().values().forEach(p -> p.kick("§9§lServer restarting...", false));
         s.dispatchCommand(new ConsoleCommandSender(), "stop");
     }
 

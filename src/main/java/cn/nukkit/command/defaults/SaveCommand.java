@@ -24,17 +24,14 @@ public class SaveCommand extends VanillaCommand {
             return true;
         }
 
-        Command.broadcastCommandMessage(sender, new TranslationContainer("commands.save.start"));
-
+        sender.getServer().broadcastMessage("§9Saving the world...");
         for (Player player : sender.getServer().getOnlinePlayers().values()) {
             player.save();
         }
-
         for (Level level : sender.getServer().getLevels().values()) {
             level.save(true);
         }
-
-        Command.broadcastCommandMessage(sender, new TranslationContainer("commands.save.success"));
+        sender.getServer().broadcastMessage("§9World saved.");
         return true;
     }
 }

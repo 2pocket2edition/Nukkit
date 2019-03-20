@@ -3454,7 +3454,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             PlayerQuitEvent ev = null;
             if (this.getName() != null && this.getName().length() > 0) {
                 this.server.getPluginManager().callEvent(ev = new PlayerQuitEvent(this, message, true, reason));
-                if (this.loggedIn && ev.getAutoSave()) {
+                if (this.loggedIn) {
                     this.save();
                 }
                 if (this.fishing != null) {

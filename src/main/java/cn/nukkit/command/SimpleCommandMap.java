@@ -72,6 +72,7 @@ public class SimpleCommandMap implements CommandMap {
         this.register("nukkit", new VoteCommand("vote"));
         this.register("nukkit", new MOTDCommand("submit"));
         this.register("nukkit", new ReplyCommand("reply"));
+        this.register("nukkit", new RebootCommand("reboot"));
 
 //        if ((boolean) this.server.getConfig("debug.commands", false)) {
         this.register("nukkit", new StatusCommand("status"));
