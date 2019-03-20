@@ -1772,7 +1772,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public boolean canInteract(Vector3 pos, double maxDistance) {
-        return this.canInteract(pos, maxDistance, 0.5);
+        return this.canInteract(pos, maxDistance, 0.6);
     }
 
     public boolean canInteract(Vector3 pos, double maxDistance, double maxDiff) {
@@ -4197,6 +4197,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             return -1;
         }
+    }
+
+    public Optional<Inventory> getTopWindow() {
+        return Optional.ofNullable(this.windowIndex.get(windowCnt));
     }
 
     public void removeWindow(Inventory inventory) {
