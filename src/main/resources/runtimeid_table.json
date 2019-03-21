@@ -1185,6 +1185,46 @@
     "data": 7
   },
   {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 8
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 9
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 10
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 11
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 12
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 13
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 14
+  },
+  {
+    "name": "minecraft:piston",
+    "id": 33,
+    "data": 15
+  },
+  {
     "name": "minecraft:pistonArmCollision",
     "id": 34,
     "data": 0
@@ -1223,6 +1263,46 @@
     "name": "minecraft:pistonArmCollision",
     "id": 34,
     "data": 7
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 8
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 9
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 10
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 11
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 12
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 13
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 14
+  },
+  {
+    "name": "minecraft:pistonArmCollision",
+    "id": 34,
+    "data": 15
   },
   {
     "name": "minecraft:wool",

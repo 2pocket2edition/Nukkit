@@ -47,9 +47,9 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             double y = player.y + player.getEyeHeight();
 
             if (y - this.y > 2) {
-                this.setDamage(BlockFace.UP.getIndex());
+                this.setDamage(BlockFace.DOWN.getIndex()); //these needed to be swapped for some reason
             } else if (this.y - y > 0) {
-                this.setDamage(BlockFace.DOWN.getIndex());
+                this.setDamage(BlockFace.UP.getIndex());
             } else {
                 this.setDamage(player.getHorizontalFacing().getIndex());
             }
@@ -58,16 +58,16 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         }
         this.level.setBlock(block, this, true, false);
 
-        CompoundTag nbt = new CompoundTag("")
+        /*CompoundTag nbt = new CompoundTag("")
                 .putString("id", BlockEntity.PISTON_ARM)
                 .putInt("x", (int) this.x)
                 .putInt("y", (int) this.y)
                 .putInt("z", (int) this.z)
                 .putBoolean("Sticky", this.sticky);
 
-        BlockEntityPistonArm be = new BlockEntityPistonArm(this.level.getChunk((int) this.x >> 4, (int) this.z >> 4), nbt);
+        BlockEntityPistonArm be = new BlockEntityPistonArm(this.level.getChunk((int) this.x >> 4, (int) this.z >> 4), nbt);*/
 
-        //this.checkState();
+        this.checkState();
         return true;
     }
 
@@ -94,18 +94,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         if (type != 6 && type != 1) {
             return 0;
         } else {
-            BlockEntity blockEntity = this.level.getBlockEntity(this);
-            if (blockEntity instanceof BlockEntityPistonArm) {
-                BlockEntityPistonArm arm = (BlockEntityPistonArm) blockEntity;
-                boolean powered = this.isPowered();
-                if (arm.powered != powered) {
-                    this.level.getServer().getPluginManager().callEvent(new BlockPistonChangeEvent(this, powered ? 0 : 15, powered ? 15 : 0));
-                    arm.powered = !arm.powered;
-                    if (arm.chunk != null) {
-                        arm.chunk.setChanged();
-                    }
-                }
-            }
+            this.checkState();
 
             return type;
         }
@@ -116,8 +105,9 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         boolean isPowered = this.isPowered();
 
         if (isPowered && !isExtended()) {
-            if ((new BlocksCalculator(this.level, this, facing, true)).canMove()) {
-                if (!this.doMove(true)) {
+            BlocksCalculator calculator = new BlocksCalculator(this, facing, true);
+            if (calculator.canMove()) {
+                if (!this.doMove(true, calculator)) {
                     return;
                 }
 
@@ -128,14 +118,14 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             //this.level.setBlock() TODO: set piston extension?
 
             if (this.sticky) {
-                Vector3 pos = this.add(facing.getXOffset() * 2, facing.getYOffset() * 2, facing.getZOffset() * 2);
+                Vector3 pos = this.add(facing.getXOffset() << 1, facing.getYOffset() << 1, facing.getZOffset() << 1);
                 Block block = this.level.getBlock(pos);
 
                 if (block.getId() == AIR) {
                     this.level.setBlock(this.getLocation().getSide(facing), new BlockAir(), true, true);
                 }
                 if (canPush(block, facing.getOpposite(), false) && (!(block instanceof BlockFlowable) || block.getId() == PISTON || block.getId() == STICKY_PISTON)) {
-                    this.doMove(false);
+                    this.doMove(false, null);
                 }
             } else {
                 this.level.setBlock(getLocation().getSide(facing), new BlockAir(), true, false);
@@ -173,23 +163,36 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         }
     }
 
-    private boolean doMove(boolean extending) {
+    private boolean doMove(boolean extending, BlocksCalculator calculator) {
+        BlockEntity blockEntity = this.level.getBlockEntity(this);
+        if (blockEntity instanceof BlockEntityPistonArm) {
+            BlockEntityPistonArm arm = (BlockEntityPistonArm) blockEntity;
+            if (arm.powered != extending) {
+                this.level.getServer().getPluginManager().callEvent(new BlockPistonChangeEvent(this, extending ? 0 : 15, extending ? 15 : 0));
+                arm.powered = !arm.powered;
+                if (arm.chunk != null) {
+                    arm.chunk.setChanged();
+                }
+            }
+        }
+
         Vector3 pos = this.getLocation();
         BlockFace direction = getFacing();
 
         if (!extending) {
             this.level.setBlock(pos.getSide(direction), new BlockAir(), true, false);
         }
+        if (calculator == null) {
+            calculator = new BlocksCalculator(this, direction, extending);
+        }
 
-        BlocksCalculator calculator = new BlocksCalculator(this.level, this, direction, extending);
-
-        if (!calculator.canMove()) {
-            return false;
-        } else {
+        if (calculator.canMove()) {
             List<Block> blocks = calculator.getBlocksToMove();
-
+            if (!extending && blocks.isEmpty()) {
+                this.level.setBlock(pos.getSide(direction), new BlockAir(), false, true);
+                return true;
+            }
             List<Block> newBlocks = new ArrayList<>(blocks);
-
             List<Block> destroyBlocks = calculator.getBlocksToDestroy();
             BlockFace side = extending ? direction : direction.getOpposite();
 
@@ -200,22 +203,28 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
 
             for (int i = blocks.size() - 1; i >= 0; --i) {
                 Block block = blocks.get(i);
-                this.level.setBlock(block, new BlockAir());
+                this.level.setBlock(block, new BlockAir(), true, false);
                 Vector3 newPos = block.getLocation().getSide(side);
 
                 //TODO: change this to block entity
-                this.level.setBlock(newPos, newBlocks.get(i));
+                this.level.setBlock(newPos, newBlocks.get(i), true, false);
             }
 
-            Vector3 pistonHead = pos.getSide(direction);
+            if (extending){
+                this.setDamage(this.getDamage() | 0x8);
+            } else {
+                this.setDamage(this.getDamage() & 0x7);
+            }
 
             if (extending) {
                 //extension block entity
-
-                this.level.setBlock(pistonHead, new BlockPistonHead(this.getDamage()));
+                Vector3 pistonHead = pos.getSide(direction);
+                this.level.setBlockFullIdAt(pistonHead.getFloorX(), pistonHead.getFloorY(), pistonHead.getFloorZ(), (Block.PISTON_HEAD << 4) | (this.getDamage() & 0x7));
+                //this.level.setBlock(pistonHead, new BlockPistonHead(this.getDamage()));
             }
-
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -223,7 +232,6 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         if (block.canBePushed() && block.getY() >= 0 && (face != BlockFace.DOWN || block.getY() != 0) &&
                 block.getY() <= 255 && (face != BlockFace.UP || block.getY() != 255)) {
             if (!(block instanceof BlockPistonBase)) {
-
                 if (block instanceof BlockFlowable) {
                     return destroyBlocks;
                 }
@@ -234,8 +242,6 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
     }
 
     public class BlocksCalculator {
-
-        private final Level level;
         private final Vector3 pistonPos;
         private final Block blockToMove;
         private final BlockFace moveDirection;
@@ -243,8 +249,9 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         private final List<Block> toMove = new ArrayList<>();
         private final List<Block> toDestroy = new ArrayList<>();
 
-        public BlocksCalculator(Level level, Block pos, BlockFace facing, boolean extending) {
-            this.level = level;
+        protected Boolean canMove;
+
+        public BlocksCalculator(Block pos, BlockFace facing, boolean extending) {
             this.pistonPos = pos.getLocation();
 
             if (extending) {
@@ -257,6 +264,10 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         }
 
         public boolean canMove() {
+            return this.canMove == null ? this.canMove = this.eval() : this.canMove;
+        }
+
+        private boolean eval() {
             this.toMove.clear();
             this.toDestroy.clear();
             Block block = this.blockToMove;
@@ -271,9 +282,11 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             } else if (!this.addBlockLine(this.blockToMove)) {
                 return false;
             } else {
-                for (Block b : this.toMove) {
-                    if (b.getId() == SLIME_BLOCK && !this.addBranchingBlocks(b)) {
-                        return false;
+                if (false) {
+                    for (Block b : this.toMove) {
+                        if (b.getId() == SLIME_BLOCK && !this.addBranchingBlocks(b)) {
+                            return false;
+                        }
                     }
                 }
 
@@ -298,7 +311,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                 if (count + this.toMove.size() > 12) {
                     return false;
                 } else {
-                    while (block.getId() == SLIME_BLOCK) {
+                    while (false && block.getId() == SLIME_BLOCK) {
                         block = origin.getSide(this.moveDirection.getOpposite(), count);
 
                         if (block.getId() == AIR || !canPush(block, this.moveDirection, false) || block.equals(this.pistonPos)) {
@@ -331,7 +344,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
                             for (int l = 0; l <= index + blockCount; ++l) {
                                 Block b = this.toMove.get(l);
 
-                                if (b.getId() == SLIME_BLOCK && !this.addBranchingBlocks(b)) {
+                                if (false && b.getId() == SLIME_BLOCK && !this.addBranchingBlocks(b)) {
                                     return false;
                                 }
                             }
