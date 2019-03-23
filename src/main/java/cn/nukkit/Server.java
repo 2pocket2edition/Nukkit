@@ -468,7 +468,6 @@ public class Server {
 
         this.network.registerInterface(new RakNetInterface(this));
 
-
         this.pluginManager.loadPlugins(this.pluginPath);
         UtilsPE.init(this);
 
@@ -1648,6 +1647,7 @@ public class Server {
                     this.onCancel();
                 }
 
+                //doing it like this ensures that the playerdata will be saved in a server shutdown
                 @Override
                 public void onCancel() {
                     if (!this.hasRun)    {
