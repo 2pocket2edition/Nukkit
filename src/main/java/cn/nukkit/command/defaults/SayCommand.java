@@ -6,6 +6,7 @@ import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.utils.TextFormat;
+import net.daporkchop.mcpe.discord.DiscordMain;
 
 /**
  * Created on 2015/11/12 by xtypr.
@@ -50,10 +51,10 @@ public class SayCommand extends VanillaCommand {
             msg = msg.substring(0, msg.length() - 1);
         }
 
-
         sender.getServer().broadcastMessage(new TranslationContainer(
                 TextFormat.LIGHT_PURPLE + "%chat.type.announcement",
                 senderString, TextFormat.LIGHT_PURPLE + msg));
+        DiscordMain.submitString(String.format("[Server] %s", msg));
         return true;
     }
 }
