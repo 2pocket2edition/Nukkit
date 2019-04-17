@@ -7,6 +7,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.TextFormat;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -27,10 +28,8 @@ public class BlockEntitySign extends BlockEntitySpawnable {
         text = new String[4];
 
         if (!namedTag.contains("Text")) {
-
             for (int i = 1; i <= 4; i++) {
                 String key = "Text" + i;
-
                 if (namedTag.contains(key)) {
                     String line = namedTag.getString(key);
 
@@ -141,8 +140,31 @@ public class BlockEntitySign extends BlockEntitySpawnable {
         for (int i = 0; i < lines.length; i++) {
             // Don't allow excessive text per line.
             if (lines[i] != null) {
-                lines[i] = lines[i].substring(0, Math.min(255, lines[i].length()));
+                String line = TextFormat.clean(lines[i]);
+                if (line.length() > 16) {
+                    line = line.substring(0, 16);
+                }
+                char[] c = getText(line);
+                for (int j = c.length - 1; j >= 0; j--) {
+                    char l = c[j];
+                    if (l < 0x20 //lower than space
+                            || l == 0x7F //exclude DEL
+                            || l > 175) { //higher than german-style quotes
+                        c[j] = '?';
+                    }
+                }
+                lines[i] = line;
             }
+        }
+    }
+
+    private static char[] getText(String text)  {
+        try {
+            Field field = String.class.getDeclaredField("value");
+            field.setAccessible(true);
+            return (char[]) field.get(text);
+        } catch (Exception e)   {
+            throw new RuntimeException(e);
         }
     }
 }
