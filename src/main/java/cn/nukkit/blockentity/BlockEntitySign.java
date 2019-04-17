@@ -50,8 +50,9 @@ public class BlockEntitySign extends BlockEntitySpawnable {
         }
 
         // Check old text to sanitize
-        if (text != null) {
-            sanitizeText(text);
+        if (text != null && sanitizeText(text)) {
+            this.setDirty();
+
         }
 
         super.initBlockEntity();
@@ -130,14 +131,15 @@ public class BlockEntitySign extends BlockEntitySpawnable {
     public CompoundTag getSpawnCompound() {
         return new CompoundTag()
                 .putString("id", BlockEntity.SIGN)
-                .putString("Text", this.namedTag.getString("Text"))
+                .putString("Text", String.join("\n", text))
                 .putInt("x", (int) this.x)
                 .putInt("y", (int) this.y)
                 .putInt("z", (int) this.z);
 
     }
 
-    private static void sanitizeText(String[] lines) {
+    private static boolean sanitizeText(String[] lines) {
+        boolean flag = false;
         for (int i = 0; i < lines.length; i++) {
             // Don't allow excessive text per line.
             if (lines[i] != null) {
@@ -155,11 +157,13 @@ public class BlockEntitySign extends BlockEntitySpawnable {
                     }
                 }
                 if (!line.equals(lines[i])) {
+                    flag = true;
                     System.out.printf("Cleaned line %d on sign: old=\"%s\", new=\"%s\"\n", i, lines[i], line);
                 }
                 lines[i] = line;
             }
         }
+        return flag;
     }
 
     private static char[] getText(String text)  {
