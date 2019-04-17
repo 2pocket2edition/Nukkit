@@ -27,7 +27,7 @@ public class RandomSpawn {
     }
 
     public static Position getSpawnPos(Level level) {
-        return getSpawnPos(level, new Position(0, 128, 0, level), 256, 512);
+        return getSpawnPos(level, new Position(0, 128, 0, level), 256, 2048);
     }
 
     public static Position getSpawnPos(Level level, Position pos, int radius, int maxTries) {

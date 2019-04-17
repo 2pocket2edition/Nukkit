@@ -77,6 +77,7 @@ public class BlockEntitySign extends BlockEntitySpawnable {
                 text[i] = "";
         }
 
+        sanitizeText(text);
         this.namedTag.putString("Text", String.join("\n", text));
         this.spawnToAll();
 
@@ -152,6 +153,9 @@ public class BlockEntitySign extends BlockEntitySpawnable {
                             || l > 175) { //higher than german-style quotes
                         c[j] = '?';
                     }
+                }
+                if (!line.equals(lines[i])) {
+                    System.out.printf("Cleaned line %d on sign: old=\"%s\", new=\"%s\"\n", i, lines[i], line);
                 }
                 lines[i] = line;
             }
