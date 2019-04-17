@@ -159,7 +159,7 @@ public class BlockEntitySign extends BlockEntitySpawnable {
                 }
                 if (!line.equals(lines[i])) {
                     flag = true;
-                    System.out.printf("Cleaned line %d on sign: old=\"%s\", new=\"%s\"\n", i, lines[i], line);
+                    //System.out.printf("Cleaned line %d on sign: old=\"%s\", new=\"%s\"\n", i, lines[i], line);
                 }
                 lines[i] = line;
             }
