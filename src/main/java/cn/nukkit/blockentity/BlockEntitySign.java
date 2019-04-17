@@ -145,8 +145,8 @@ public class BlockEntitySign extends BlockEntitySpawnable {
             // Don't allow excessive text per line.
             if (lines[i] != null) {
                 String line = TextFormat.clean(lines[i]);
-                if (line.length() > 16) {
-                    line = line.substring(0, 16);
+                if (line.length() > 64) {
+                    line = line.substring(0, 64);
                 }
                 char[] c = getText(line);
                 for (int j = c.length - 1; j >= 0; j--) {
