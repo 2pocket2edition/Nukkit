@@ -61,7 +61,8 @@ public class BlockEntitySign extends BlockEntitySpawnable {
     @Override
     public void saveNBT() {
         super.saveNBT();
-        this.namedTag.remove("Creator");
+        this.namedTag.remove("Creator")
+                .putString("Text", String.join("\n", text));
     }
 
     @Override
