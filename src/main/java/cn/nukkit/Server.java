@@ -15,6 +15,7 @@ import cn.nukkit.entity.projectile.*;
 import cn.nukkit.event.HandlerList;
 import cn.nukkit.event.level.LevelInitEvent;
 import cn.nukkit.event.level.LevelLoadEvent;
+import cn.nukkit.event.server.BatchPacketsEvent;
 import cn.nukkit.event.server.PlayerDataSerializeEvent;
 import cn.nukkit.event.server.QueryRegenerateEvent;
 import cn.nukkit.inventory.CraftingManager;
@@ -572,7 +573,7 @@ public class Server {
         return recipients.length;
     }
 
-    public int broadcastMessage(String message, Collection<CommandSender> recipients) {
+    public int broadcastMessage(String message, Collection<? extends CommandSender> recipients) {
         for (CommandSender recipient : recipients) {
             recipient.sendMessage(message);
         }
@@ -580,7 +581,7 @@ public class Server {
         return recipients.size();
     }
 
-    public int broadcastMessage(TextContainer message, Collection<CommandSender> recipients) {
+    public int broadcastMessage(TextContainer message, Collection<? extends CommandSender> recipients) {
         for (CommandSender recipient : recipients) {
             recipient.sendMessage(message);
         }
@@ -651,6 +652,12 @@ public class Server {
 
     public void batchPackets(Player[] players, DataPacket[] packets, boolean forceSync) {
         if (players == null || packets == null || players.length == 0 || packets.length == 0) {
+            return;
+        }
+
+        BatchPacketsEvent ev = new BatchPacketsEvent(players, packets, forceSync);
+        getPluginManager().callEvent(ev);
+        if (ev.isCancelled()) {
             return;
         }
 
@@ -802,10 +809,6 @@ public class Server {
                 this.rcon.close();
             }
 
-            if (nameLookup != null) {
-                nameLookup.close();
-            }
-
             this.getLogger().debug("Disabling all plugins");
             this.pluginManager.disablePlugins();
 
@@ -832,6 +835,10 @@ public class Server {
             for (SourceInterface interfaz : this.network.getInterfaces()) {
                 interfaz.shutdown();
                 this.network.unregisterInterface(interfaz);
+            }
+
+            if (nameLookup != null) {
+                nameLookup.close();
             }
 
             this.getLogger().debug("Disabling timings");
@@ -1554,7 +1561,8 @@ public class Server {
 
     @Deprecated
     public CompoundTag getOfflinePlayerData(String name) {
-        return getOfflinePlayerDataInternal(name, true);
+        Optional<UUID> uuid = lookupName(name);
+        return getOfflinePlayerDataInternal(uuid.map(UUID::toString).orElse(name), true);
     }
 
     private CompoundTag getOfflinePlayerDataInternal(String name, boolean runEvent) {
@@ -1611,7 +1619,7 @@ public class Server {
                 .putBoolean("OnGround", true)
                 .putBoolean("Invulnerable", false);
 
-        this.saveOfflinePlayerData(name, nbt);
+        this.saveOfflinePlayerData(name, nbt, true, runEvent);
         return nbt;
     }
 
@@ -1628,7 +1636,8 @@ public class Server {
     }
 
     public void saveOfflinePlayerData(String name, CompoundTag tag, boolean async) {
-        saveOfflinePlayerData(name, tag, async, true);
+        Optional<UUID> uuid = lookupName(name);
+        saveOfflinePlayerData(uuid.map(UUID::toString).orElse(name), tag, async, true);
     }
 
     private void saveOfflinePlayerData(String name, CompoundTag tag, boolean async, boolean runEvent) {
@@ -1640,7 +1649,7 @@ public class Server {
             }
 
             this.getScheduler().scheduleTask(new Task() {
-                protected boolean hasRun = false;
+                boolean hasRun = false;
 
                 @Override
                 public void onRun(int currentTick) {
