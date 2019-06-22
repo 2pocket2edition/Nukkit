@@ -232,7 +232,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     private BlockEnderChest viewingEnderChest = null;
 
-    protected int lastEnderPearl = -1;
+    protected int lastEnderPearl = 20;
 
     private LoginChainData loginChainData;
 
@@ -1286,19 +1286,19 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public boolean isSurvival() {
-        return (this.gamemode & 0x01) == 0;
+        return this.gamemode == SURVIVAL;
     }
 
     public boolean isCreative() {
-        return (this.gamemode & 0x01) > 0;
+        return this.gamemode == CREATIVE;
     }
 
     public boolean isSpectator() {
-        return this.gamemode == 3;
+        return this.gamemode == SPECTATOR;
     }
 
     public boolean isAdventure() {
-        return (this.gamemode & 0x02) > 0;
+        return this.gamemode == ADVENTURE;
     }
 
     @Override
@@ -1563,7 +1563,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public boolean setMotion(Vector3 motion) {
         if (super.setMotion(motion)) {
             if (this.chunk != null) {
-                this.getLevel().addEntityMotion(this, this.motionX, this.motionY, this.motionZ);  //Send to others
+                this.addMotion(this.motionX, this.motionY, this.motionZ);  //Send to others
                 SetEntityMotionPacket pk = new SetEntityMotionPacket();
                 pk.eid = this.id;
                 pk.motionX = (float) motion.x;
@@ -1661,7 +1661,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     this.inAirTicks = 0;
                     this.highestPosition = this.y;
                 } else {
-                    if (this.checkMovement && !this.isGliding() && !server.getAllowFlight() && !this.getAdventureSettings().get(Type.ALLOW_FLIGHT) && this.inAirTicks > 20 && !this.isSleeping() && !this.isImmobile() && !this.isSwimming()) {
+                    if (this.checkMovement && !this.isGliding() && !server.getAllowFlight() && !this.getAdventureSettings().get(Type.ALLOW_FLIGHT) && this.inAirTicks > 20 && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null) {
                         double expectedVelocity = (-this.getGravity()) / ((double) this.getDrag()) - ((-this.getGravity()) / ((double) this.getDrag())) * Math.exp(-((double) this.getDrag()) * ((double) (this.inAirTicks - this.startAirTicks)));
                         double diff = (this.speed.y - expectedVelocity) * (this.speed.y - expectedVelocity);
 
@@ -1797,7 +1797,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public boolean canInteract(Vector3 pos, double maxDistance) {
-        return this.canInteract(pos, maxDistance, 0.6);
+        return this.canInteract(pos, maxDistance, 6.0);
     }
 
     public boolean canInteract(Vector3 pos, double maxDistance, double maxDiff) {
@@ -1888,8 +1888,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         }
 
         this.adventureSettings = new AdventureSettings(this)
-                .set(Type.WORLD_IMMUTABLE, isAdventure())
-                .set(Type.WORLD_BUILDER, !isAdventure())
+                .set(Type.WORLD_IMMUTABLE, isAdventure() || isSpectator())
+                .set(Type.WORLD_BUILDER, !isAdventure() && !isSpectator())
                 .set(Type.AUTO_JUMP, true)
                 .set(Type.ALLOW_FLIGHT, isCreative())
                 .set(Type.NO_CLIP, isSpectator());
@@ -2092,7 +2092,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     this.loginChainData = ClientChainData.read(loginPacket);
 
                     if (!loginChainData.isXboxAuthed() && server.getPropertyBoolean("xbox-auth")) {
-                        kick(PlayerKickEvent.Reason.UNKNOWN, "disconnectionScreen.notAuthenticated", false);
+                        this.close("", "disconnectionScreen.notAuthenticated");
                     }
 
                     if (this.server.getOnlinePlayers().size() >= this.server.getMaxPlayers() && this.kick(PlayerKickEvent.Reason.SERVER_FULL, "disconnectionScreen.serverFull", false)) {
@@ -2351,6 +2351,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                             Block block = target.getSide(face);
                             if (block.getId() == Block.FIRE) {
                                 this.level.setBlock(block, new BlockAir(), true);
+                                this.level.addLevelSoundEvent(block, LevelSoundEventPacket.SOUND_EXTINGUISH_FIRE);
                                 break;
                             }
                             if (!this.isCreative()) {
@@ -3825,10 +3826,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return false;
         }
 
-        if (this.isCreative()
-                && source.getCause() != DamageCause.SUICIDE
-                && source.getCause() != DamageCause.VOID
-                ) {
+        if (this.isSpectator() || (this.isCreative() && source.getCause() != DamageCause.SUICIDE)) {
             //source.setCancelled();
             return false;
         } else if (this.getAdventureSettings().get(Type.ALLOW_FLIGHT) && source.getCause() == DamageCause.FALL) {
@@ -4536,7 +4534,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 Server.broadcastPacket(entity.getViewers().values(), pk);
                 this.dataPacket(pk);
 
-                this.inventory.addItem(item.clone());
+                if (!this.isCreative()) {
+                    this.inventory.addItem(item.clone());
+                }
                 entity.close();
                 return true;
             } else if (entity instanceof EntityThrownTrident && ((EntityThrownTrident) entity).hadCollision) {
