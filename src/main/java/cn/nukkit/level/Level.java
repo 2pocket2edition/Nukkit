@@ -224,6 +224,8 @@ public class Level implements ChunkManager, Metadatable {
     public int tickRateTime = 0;
     public int tickRateCounter = 0;
 
+    protected final Object mutex = new Object[0];
+
     private Class<? extends Generator> generatorClass;
     private IterableThreadLocal<Generator> generators = new IterableThreadLocal<Generator>() {
         @Override
@@ -1288,6 +1290,11 @@ public class Level implements ChunkManager, Metadatable {
         int maxY = NukkitMath.ceilDouble(bb.getMaxY());
         int maxZ = NukkitMath.ceilDouble(bb.getMaxZ());
 
+        if (maxX - minX >= 10 || maxY - minY >= 10 || maxZ - minZ >= 10)    {
+            //don't try to scan too many blocks at once
+            return new Block[0];
+        }
+
         List<Block> collides = new ArrayList<>();
 
         if (targetFirst) {
@@ -1452,43 +1459,45 @@ public class Level implements ChunkManager, Metadatable {
         return this.getChunk(x >> 4, z >> 4, false).getFullBlock(x & 0x0f, y & 0xff, z & 0x0f);
     }
 
-    public synchronized Block getBlock(Vector3 pos) {
+    public Block getBlock(Vector3 pos) {
         return this.getBlock(pos.getFloorX(), pos.getFloorY(), pos.getFloorZ());
     }
 
-    public synchronized Block getBlock(Vector3 pos, boolean load) {
+    public Block getBlock(Vector3 pos, boolean load) {
         return this.getBlock(pos.getFloorX(), pos.getFloorY(), pos.getFloorZ(), load);
     }
 
-    public synchronized Block getBlock(int x, int y, int z) {
+    public Block getBlock(int x, int y, int z) {
         return getBlock(x, y, z, true);
     }
 
-    public synchronized Block getBlock(int x, int y, int z, boolean load) {
-        int fullState;
-        if (y >= 0 && y < 256) {
-            int cx = x >> 4;
-            int cz = z >> 4;
-            BaseFullChunk chunk;
-            if (load) {
-                chunk = getChunk(cx, cz);
-            } else {
-                chunk = getChunkIfLoaded(cx, cz);
-            }
-            if (chunk != null) {
-                fullState = chunk.getFullBlock(x & 0xF, y, z & 0xF);
+    public Block getBlock(int x, int y, int z, boolean load) {
+        synchronized (this.mutex) {
+            int fullState;
+            if (y >= 0 && y < 256) {
+                int cx = x >> 4;
+                int cz = z >> 4;
+                BaseFullChunk chunk;
+                if (load) {
+                    chunk = getChunk(cx, cz);
+                } else {
+                    chunk = getChunkIfLoaded(cx, cz);
+                }
+                if (chunk != null) {
+                    fullState = chunk.getFullBlock(x & 0xF, y, z & 0xF);
+                } else {
+                    fullState = 0;
+                }
             } else {
                 fullState = 0;
             }
-        } else {
-            fullState = 0;
+            Block block = Block.fullList[fullState & 0xFFF].clone();
+            block.x = x;
+            block.y = y;
+            block.z = z;
+            block.level = this;
+            return block;
         }
-        Block block = Block.fullList[fullState & 0xFFF].clone();
-        block.x = x;
-        block.y = y;
-        block.z = z;
-        block.level = this;
-        return block;
     }
 
     public void updateAllLight(Vector3 pos) {
@@ -1640,66 +1649,68 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     @Override
-    public synchronized void setBlockFullIdAt(int x, int y, int z, int fullId) {
+    public void setBlockFullIdAt(int x, int y, int z, int fullId) {
         setBlock(x, y, z, Block.fullList[fullId], false, false);
     }
 
-    public synchronized boolean setBlock(Vector3 pos, Block block) {
+    public boolean setBlock(Vector3 pos, Block block) {
         return this.setBlock(pos, block, false);
     }
 
-    public synchronized boolean setBlock(Vector3 pos, Block block, boolean direct) {
+    public boolean setBlock(Vector3 pos, Block block, boolean direct) {
         return this.setBlock(pos, block, direct, true);
     }
 
-    public synchronized boolean setBlock(Vector3 pos, Block block, boolean direct, boolean update) {
+    public boolean setBlock(Vector3 pos, Block block, boolean direct, boolean update) {
         return setBlock((int) pos.x, (int) pos.y, (int) pos.z, block, direct, update);
     }
 
-    public synchronized boolean setBlock(int x, int y, int z, Block block, boolean direct, boolean update) {
+    public boolean setBlock(int x, int y, int z, Block block, boolean direct, boolean update) {
         if (y < 0 || y >= 256) {
             return false;
         }
-        BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
-        Block blockPrevious;
-//        synchronized (chunk) {
-        blockPrevious = chunk.getAndSetBlock(x & 0xF, y, z & 0xF, block);
-        if (blockPrevious.getFullId() == block.getFullId()) {
-            return false;
-        }
-//        }
-        block.x = x;
-        block.y = y;
-        block.z = z;
-        block.level = this;
-        int cx = x >> 4;
-        int cz = z >> 4;
-        long index = Level.chunkHash(cx, cz);
-        if (direct) {
-            this.sendBlocks(this.getChunkPlayers(cx, cz).values().toArray(new Player[0]), new Block[]{block}, UpdateBlockPacket.FLAG_ALL_PRIORITY);
-        } else {
-            addBlockChange(index, x, y, z);
-        }
+        synchronized (this.mutex) {
+            BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
+            Block blockPrevious;
+            //        synchronized (chunk) {
+            blockPrevious = chunk.getAndSetBlock(x & 0xF, y, z & 0xF, block);
+            if (blockPrevious.getFullId() == block.getFullId()) {
+                return false;
+            }
+            //        }
+            block.x = x;
+            block.y = y;
+            block.z = z;
+            block.level = this;
+            int cx = x >> 4;
+            int cz = z >> 4;
+            long index = Level.chunkHash(cx, cz);
+            if (direct) {
+                this.sendBlocks(this.getChunkPlayers(cx, cz).values().toArray(new Player[0]), new Block[]{block}, UpdateBlockPacket.FLAG_ALL_PRIORITY);
+            } else {
+                addBlockChange(index, x, y, z);
+            }
 
-        for (ChunkLoader loader : this.getChunkLoaders(cx, cz)) {
-            loader.onBlockChanged(block);
-        }
-        if (update) {
-            if (blockPrevious.isTransparent() != block.isTransparent() || blockPrevious.getLightLevel() != block.getLightLevel()) {
-                addLightUpdate(x, y, z);
+            for (ChunkLoader loader : this.getChunkLoaders(cx, cz)) {
+                loader.onBlockChanged(block);
             }
-            BlockUpdateEvent ev = new BlockUpdateEvent(block);
-            this.server.getPluginManager().callEvent(ev);
-            if (!ev.isCancelled()) {
-                for (Entity entity : this.getNearbyEntities(new SimpleAxisAlignedBB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1))) {
-                    entity.scheduleUpdate();
+            if (update) {
+                if (blockPrevious.isTransparent() != block.isTransparent() || blockPrevious.getLightLevel() != block.getLightLevel()) {
+                    addLightUpdate(x, y, z);
                 }
-                block = ev.getBlock();
-                block.onUpdate(BLOCK_UPDATE_NORMAL);
-                this.updateAround(x, y, z);
+                BlockUpdateEvent ev = new BlockUpdateEvent(block);
+                this.server.getPluginManager().callEvent(ev);
+                if (!ev.isCancelled()) {
+                    for (Entity entity : this.getNearbyEntities(new SimpleAxisAlignedBB(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1))) {
+                        entity.scheduleUpdate();
+                    }
+                    block = ev.getBlock();
+                    block.onUpdate(BLOCK_UPDATE_NORMAL);
+                    this.updateAround(x, y, z);
+                }
             }
+            return true;
         }
-        return true;
     }
 
     private void addBlockChange(int x, int y, int z) {
@@ -2269,70 +2280,92 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     @Override
-    public synchronized int getBlockIdAt(int x, int y, int z) {
-        return this.getChunk(x >> 4, z >> 4, true).getBlockId(x & 0x0f, y & 0xff, z & 0x0f);
-    }
-
-    @Override
-    public synchronized void setBlockIdAt(int x, int y, int z, int id) {
-        this.getChunk(x >> 4, z >> 4, true).setBlockId(x & 0x0f, y & 0xff, z & 0x0f, id & 0xff);
-        addBlockChange(x, y, z);
-        temporalVector.setComponents(x, y, z);
-        for (ChunkLoader loader : this.getChunkLoaders(x >> 4, z >> 4)) {
-            loader.onBlockChanged(temporalVector);
+    public int getBlockIdAt(int x, int y, int z) {
+        synchronized (this.mutex) {
+            return this.getChunk(x >> 4, z >> 4, true).getBlockId(x & 0x0f, y & 0xff, z & 0x0f);
         }
     }
 
-    public synchronized void setBlockAt(int x, int y, int z, int id, int data) {
-        BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
-        chunk.setBlockId(x & 0x0f, y & 0xff, z & 0x0f, id & 0xff);
-        chunk.setBlockData(x & 0x0f, y & 0xff, z & 0x0f, data & 0xf);
-        addBlockChange(x, y, z);
-        temporalVector.setComponents(x, y, z);
-        for (ChunkLoader loader : this.getChunkLoaders(x >> 4, z >> 4)) {
-            loader.onBlockChanged(temporalVector);
+    @Override
+    public void setBlockIdAt(int x, int y, int z, int id) {
+        synchronized (this.mutex) {
+            this.getChunk(x >> 4, z >> 4, true).setBlockId(x & 0x0f, y & 0xff, z & 0x0f, id & 0xff);
+            addBlockChange(x, y, z);
+            temporalVector.setComponents(x, y, z);
+            for (ChunkLoader loader : this.getChunkLoaders(x >> 4, z >> 4)) {
+                loader.onBlockChanged(temporalVector);
+            }
         }
     }
 
-    public synchronized int getBlockExtraDataAt(int x, int y, int z) {
-        return this.getChunk(x >> 4, z >> 4, true).getBlockExtraData(x & 0x0f, y & 0xff, z & 0x0f);
-    }
-
-    public synchronized void setBlockExtraDataAt(int x, int y, int z, int id, int data) {
-        this.getChunk(x >> 4, z >> 4, true).setBlockExtraData(x & 0x0f, y & 0xff, z & 0x0f, (data << 8) | id);
-
-        this.sendBlockExtraData(x, y, z, id, data);
-    }
-
-    @Override
-    public synchronized int getBlockDataAt(int x, int y, int z) {
-        return this.getChunk(x >> 4, z >> 4, true).getBlockData(x & 0x0f, y & 0xff, z & 0x0f);
-    }
-
-    @Override
-    public synchronized void setBlockDataAt(int x, int y, int z, int data) {
-        this.getChunk(x >> 4, z >> 4, true).setBlockData(x & 0x0f, y & 0xff, z & 0x0f, data & 0x0f);
-        addBlockChange(x, y, z);
-        temporalVector.setComponents(x, y, z);
-        for (ChunkLoader loader : this.getChunkLoaders(x >> 4, z >> 4)) {
-            loader.onBlockChanged(temporalVector);
+    public void setBlockAt(int x, int y, int z, int id, int data) {
+        synchronized (this.mutex) {
+            BaseFullChunk chunk = this.getChunk(x >> 4, z >> 4, true);
+            chunk.setBlockId(x & 0x0f, y & 0xff, z & 0x0f, id & 0xff);
+            chunk.setBlockData(x & 0x0f, y & 0xff, z & 0x0f, data & 0xf);
+            addBlockChange(x, y, z);
+            temporalVector.setComponents(x, y, z);
+            for (ChunkLoader loader : this.getChunkLoaders(x >> 4, z >> 4)) {
+                loader.onBlockChanged(temporalVector);
+            }
         }
     }
 
-    public synchronized int getBlockSkyLightAt(int x, int y, int z) {
-        return this.getChunk(x >> 4, z >> 4, true).getBlockSkyLight(x & 0x0f, y & 0xff, z & 0x0f);
+    public int getBlockExtraDataAt(int x, int y, int z) {
+        synchronized (this.mutex) {
+            return this.getChunk(x >> 4, z >> 4, true).getBlockExtraData(x & 0x0f, y & 0xff, z & 0x0f);
+        }
     }
 
-    public synchronized void setBlockSkyLightAt(int x, int y, int z, int level) {
-        this.getChunk(x >> 4, z >> 4, true).setBlockSkyLight(x & 0x0f, y & 0xff, z & 0x0f, level & 0x0f);
+    public void setBlockExtraDataAt(int x, int y, int z, int id, int data) {
+        synchronized (this.mutex) {
+            this.getChunk(x >> 4, z >> 4, true).setBlockExtraData(x & 0x0f, y & 0xff, z & 0x0f, (data << 8) | id);
+
+            this.sendBlockExtraData(x, y, z, id, data);
+        }
     }
 
-    public synchronized int getBlockLightAt(int x, int y, int z) {
-        return this.getChunk(x >> 4, z >> 4, true).getBlockLight(x & 0x0f, y & 0xff, z & 0x0f);
+    @Override
+    public int getBlockDataAt(int x, int y, int z) {
+        synchronized (this.mutex) {
+            return this.getChunk(x >> 4, z >> 4, true).getBlockData(x & 0x0f, y & 0xff, z & 0x0f);
+        }
     }
 
-    public synchronized void setBlockLightAt(int x, int y, int z, int level) {
-        this.getChunk(x >> 4, z >> 4, true).setBlockLight(x & 0x0f, y & 0xff, z & 0x0f, level & 0x0f);
+    @Override
+    public void setBlockDataAt(int x, int y, int z, int data) {
+        synchronized (this.mutex) {
+            this.getChunk(x >> 4, z >> 4, true).setBlockData(x & 0x0f, y & 0xff, z & 0x0f, data & 0x0f);
+            addBlockChange(x, y, z);
+            temporalVector.setComponents(x, y, z);
+            for (ChunkLoader loader : this.getChunkLoaders(x >> 4, z >> 4)) {
+                loader.onBlockChanged(temporalVector);
+            }
+        }
+    }
+
+    public int getBlockSkyLightAt(int x, int y, int z) {
+        synchronized (this.mutex) {
+            return this.getChunk(x >> 4, z >> 4, true).getBlockSkyLight(x & 0x0f, y & 0xff, z & 0x0f);
+        }
+    }
+
+    public void setBlockSkyLightAt(int x, int y, int z, int level) {
+        synchronized (this.mutex) {
+            this.getChunk(x >> 4, z >> 4, true).setBlockSkyLight(x & 0x0f, y & 0xff, z & 0x0f, level & 0x0f);
+        }
+    }
+
+    public int getBlockLightAt(int x, int y, int z) {
+        synchronized (this.mutex) {
+            return this.getChunk(x >> 4, z >> 4, true).getBlockLight(x & 0x0f, y & 0xff, z & 0x0f);
+        }
+    }
+
+    public void setBlockLightAt(int x, int y, int z, int level) {
+        synchronized (this.mutex) {
+            this.getChunk(x >> 4, z >> 4, true).setBlockLight(x & 0x0f, y & 0xff, z & 0x0f, level & 0x0f);
+        }
     }
 
     public int getBiomeId(int x, int z) {
@@ -2684,42 +2717,44 @@ public class Level implements ChunkManager, Metadatable {
         return forceLoadChunk(index, x, z, generate) != null;
     }
 
-    private synchronized BaseFullChunk forceLoadChunk(long index, int x, int z, boolean generate) {
-        this.timings.syncChunkLoadTimer.startTiming();
-        BaseFullChunk chunk = this.provider.getChunk(x, z, generate);
-        if (chunk == null) {
-            if (generate) {
-                throw new IllegalStateException("Could not create new Chunk");
+    private BaseFullChunk forceLoadChunk(long index, int x, int z, boolean generate) {
+        synchronized (this.mutex) {
+            this.timings.syncChunkLoadTimer.startTiming();
+            BaseFullChunk chunk = this.provider.getChunk(x, z, generate);
+            if (chunk == null) {
+                if (generate) {
+                    throw new IllegalStateException("Could not create new Chunk");
+                }
+                this.timings.syncChunkLoadTimer.stopTiming();
+                return chunk;
+            }
+
+            if (chunk.getProvider() != null) {
+                this.server.getPluginManager().callEvent(new ChunkLoadEvent(chunk, !chunk.isGenerated()));
+            } else {
+                this.unloadChunk(x, z, false);
+                this.timings.syncChunkLoadTimer.stopTiming();
+                return chunk;
+            }
+
+            chunk.initChunk();
+
+            if (!chunk.isLightPopulated() && chunk.isPopulated()
+                    && this.getServer().getConfig("chunk-ticking.light-updates", false)) {
+                this.getServer().getScheduler().scheduleAsyncTask(new LightPopulationTask(this, chunk));
+            }
+
+            if (this.isChunkInUse(index)) {
+                this.unloadQueue.remove(index);
+                for (ChunkLoader loader : this.getChunkLoaders(x, z)) {
+                    loader.onChunkLoaded(chunk);
+                }
+            } else {
+                this.unloadQueue.put(index, System.currentTimeMillis());
             }
             this.timings.syncChunkLoadTimer.stopTiming();
             return chunk;
         }
-
-        if (chunk.getProvider() != null) {
-            this.server.getPluginManager().callEvent(new ChunkLoadEvent(chunk, !chunk.isGenerated()));
-        } else {
-            this.unloadChunk(x, z, false);
-            this.timings.syncChunkLoadTimer.stopTiming();
-            return chunk;
-        }
-
-        chunk.initChunk();
-
-        if (!chunk.isLightPopulated() && chunk.isPopulated()
-                && this.getServer().getConfig("chunk-ticking.light-updates", false)) {
-            this.getServer().getScheduler().scheduleAsyncTask(new LightPopulationTask(this, chunk));
-        }
-
-        if (this.isChunkInUse(index)) {
-            this.unloadQueue.remove(index);
-            for (ChunkLoader loader : this.getChunkLoaders(x, z)) {
-                loader.onChunkLoaded(chunk);
-            }
-        } else {
-            this.unloadQueue.put(index, System.currentTimeMillis());
-        }
-        this.timings.syncChunkLoadTimer.stopTiming();
-        return chunk;
     }
 
     private void queueUnloadChunk(int x, int z) {
@@ -2757,58 +2792,60 @@ public class Level implements ChunkManager, Metadatable {
         return this.unloadChunk(x, z, safe, true);
     }
 
-    public synchronized boolean unloadChunk(int x, int z, boolean safe, boolean trySave) {
-        if (safe && this.isChunkInUse(x, z)) {
-            return false;
-        }
-
-        if (!this.isChunkLoaded(x, z)) {
-            return true;
-        }
-
-        this.timings.doChunkUnload.startTiming();
-
-        BaseFullChunk chunk = this.getChunk(x, z);
-
-        if (chunk != null && chunk.getProvider() != null) {
-            ChunkUnloadEvent ev = new ChunkUnloadEvent(chunk);
-            this.server.getPluginManager().callEvent(ev);
-            if (ev.isCancelled()) {
-                this.timings.doChunkUnload.stopTiming();
+    public boolean unloadChunk(int x, int z, boolean safe, boolean trySave) {
+        synchronized (this.mutex) {
+            if (safe && this.isChunkInUse(x, z)) {
                 return false;
             }
-        }
 
-        try {
-            if (chunk != null) {
-                if (trySave && this.getAutoSave()) {
-                    int entities = 0;
-                    for (Entity e : chunk.getEntities().values()) {
-                        if (e instanceof Player) {
-                            continue;
-                        }
-                        ++entities;
-                    }
+            if (!this.isChunkLoaded(x, z)) {
+                return true;
+            }
 
-                    if (chunk.hasChanged() || !chunk.getBlockEntities().isEmpty() || entities > 0) {
-                        this.provider.setChunk(x, z, chunk);
-                        this.provider.saveChunk(x, z);
-                    }
-                }
-                for (ChunkLoader loader : this.getChunkLoaders(x, z)) {
-                    loader.onChunkUnloaded(chunk);
+            this.timings.doChunkUnload.startTiming();
+
+            BaseFullChunk chunk = this.getChunk(x, z);
+
+            if (chunk != null && chunk.getProvider() != null) {
+                ChunkUnloadEvent ev = new ChunkUnloadEvent(chunk);
+                this.server.getPluginManager().callEvent(ev);
+                if (ev.isCancelled()) {
+                    this.timings.doChunkUnload.stopTiming();
+                    return false;
                 }
             }
-            this.provider.unloadChunk(x, z, safe);
-        } catch (Exception e) {
-            MainLogger logger = this.server.getLogger();
-            logger.error(this.server.getLanguage().translateString("nukkit.level.chunkUnloadError", e.toString()));
-            logger.logException(e);
+
+            try {
+                if (chunk != null) {
+                    if (trySave && this.getAutoSave()) {
+                        int entities = 0;
+                        for (Entity e : chunk.getEntities().values()) {
+                            if (e instanceof Player) {
+                                continue;
+                            }
+                            ++entities;
+                        }
+
+                        if (chunk.hasChanged() || !chunk.getBlockEntities().isEmpty() || entities > 0) {
+                            this.provider.setChunk(x, z, chunk);
+                            this.provider.saveChunk(x, z);
+                        }
+                    }
+                    for (ChunkLoader loader : this.getChunkLoaders(x, z)) {
+                        loader.onChunkUnloaded(chunk);
+                    }
+                }
+                this.provider.unloadChunk(x, z, safe);
+            } catch (Exception e) {
+                MainLogger logger = this.server.getLogger();
+                logger.error(this.server.getLanguage().translateString("nukkit.level.chunkUnloadError", e.toString()));
+                logger.logException(e);
+            }
+
+            this.timings.doChunkUnload.stopTiming();
+
+            return true;
         }
-
-        this.timings.doChunkUnload.stopTiming();
-
-        return true;
     }
 
     public boolean isSpawnChunk(int X, int Z) {
