@@ -1,9 +1,16 @@
 package cn.nukkit.utils;
 
 import cn.nukkit.Server;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
+import java.util.function.Consumer;
 
 public class Watchdog extends Thread {
     private final Server server;
@@ -15,6 +22,7 @@ public class Watchdog extends Thread {
         this.server = server;
         this.time = time;
         this.running = true;
+        this.setDaemon(true);
     }
 
     public void kill() {
@@ -32,22 +40,36 @@ public class Watchdog extends Thread {
                 long diff = System.currentTimeMillis() - current;
                 if (diff > time) {
                     if (responding) {
-                        MainLogger logger = this.server.getLogger();
-                        logger.emergency("--------- Server stopped responding --------- (" + (diff / 1000d) + "s)");
-                        logger.emergency("Please report this to nukkit:");
-                        logger.emergency(" - https://github.com/NukkitX/Nukkit/issues/new");
-                        logger.emergency("---------------- Main thread ----------------");
-
-                        dumpThread(ManagementFactory.getThreadMXBean().getThreadInfo(this.server.getPrimaryThread().getId(), Integer.MAX_VALUE), logger);
-
-                        logger.emergency("---------------- All threads ----------------");
-                        ThreadInfo[] threads = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
-                        for (int i = 0; i < threads.length; i++) {
-                            if (i != 0) logger.emergency("------------------------------");
-                            dumpThread(threads[i], logger);
-                        }
-                        logger.emergency("---------------------------------------------");
                         responding = false;
+                        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(new File(String.format("stall_%d.txt", System.currentTimeMillis()))))) {
+                            Consumer<String> logger = s -> {
+                                    this.server.getLogger().emergency(s);
+                                    try {
+                                        os.write(s.getBytes("UTF-8"));
+                                    } catch (UnsupportedOperationException | IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                            };
+                            logger.accept("--------- Server stopped responding --------- (" + (diff / 1000d) + "s)");
+                            logger.accept("Please report this to nukkit:");
+                            logger.accept(" - https://github.com/NukkitX/Nukkit/issues/new");
+                            logger.accept("---------------- Main thread ----------------");
+
+                            dumpThread(ManagementFactory.getThreadMXBean().getThreadInfo(this.server.getPrimaryThread().getId(), Integer.MAX_VALUE), logger);
+
+                            logger.accept("---------------- All threads ----------------");
+                            ThreadInfo[] threads = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+                            for (int i = 0; i < threads.length; i++) {
+                                if (i != 0)
+                                    logger.accept("------------------------------");
+                                dumpThread(threads[i], logger);
+                            }
+                            logger.accept("---------------------------------------------");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            Runtime.getRuntime().exit(999);
+                        }
                     }
                 } else {
                     responding = true;
@@ -61,20 +83,20 @@ public class Watchdog extends Thread {
         }
     }
 
-    private static void dumpThread(ThreadInfo thread, Logger logger) {
-        logger.emergency("Current Thread: " + thread.getThreadName());
-        logger.emergency("\tPID: " + thread.getThreadId() + " | Suspended: " + thread.isSuspended() + " | Native: " + thread.isInNative() + " | State: " + thread.getThreadState());
+    private static void dumpThread(ThreadInfo thread, Consumer<String> logger) {
+        logger.accept("Current Thread: " + thread.getThreadName());
+        logger.accept("\tPID: " + thread.getThreadId() + " | Suspended: " + thread.isSuspended() + " | Native: " + thread.isInNative() + " | State: " + thread.getThreadState());
         // Monitors
         if (thread.getLockedMonitors().length != 0) {
-            logger.emergency("\tThread is waiting on monitor(s):");
+            logger.accept("\tThread is waiting on monitor(s):");
             for (MonitorInfo monitor : thread.getLockedMonitors()) {
-                logger.emergency("\t\tLocked on:" + monitor.getLockedStackFrame());
+                logger.accept("\t\tLocked on:" + monitor.getLockedStackFrame());
             }
         }
 
-        logger.emergency("\tStack:");
+        logger.accept("\tStack:");
         for (StackTraceElement stack : thread.getStackTrace()) {
-            logger.emergency("\t\t" + stack);
+            logger.accept("\t\t" + stack);
         }
     }
 }
