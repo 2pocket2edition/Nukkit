@@ -1283,6 +1283,8 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public Block[] getCollisionBlocks(AxisAlignedBB bb, boolean targetFirst) {
+        int i = 0;
+
         int minX = NukkitMath.floorDouble(bb.getMinX());
         int minY = NukkitMath.floorDouble(bb.getMinY());
         int minZ = NukkitMath.floorDouble(bb.getMinZ());
@@ -1290,10 +1292,19 @@ public class Level implements ChunkManager, Metadatable {
         int maxY = NukkitMath.ceilDouble(bb.getMaxY());
         int maxZ = NukkitMath.ceilDouble(bb.getMaxZ());
 
-        if (maxX - minX >= 10 || maxY - minY >= 10 || maxZ - minZ >= 10)    {
+        /*if (maxX - minX >= 10 || maxY - minY >= 10 || maxZ - minZ >= 10)    {
             //don't try to scan too many blocks at once
+            this.server.getLogger().error(String.format(
+                    "Attempting to update too large an area: (%d,%d,%d),(%d,%d,%d)",
+                    minX,
+                    minY,
+                    minZ,
+                    maxX,
+                    maxY,
+                    maxZ
+            ));
             return new Block[0];
-        }
+        }*/
 
         List<Block> collides = new ArrayList<>();
 
@@ -1301,6 +1312,18 @@ public class Level implements ChunkManager, Metadatable {
             for (int z = minZ; z <= maxZ; ++z) {
                 for (int x = minX; x <= maxX; ++x) {
                     for (int y = minY; y <= maxY; ++y) {
+                        if (++i >= 100) {
+                            this.server.getLogger().error(String.format(
+                                    "Attempting to update too large an area: (%d,%d,%d),(%d,%d,%d)",
+                                    minX,
+                                    minY,
+                                    minZ,
+                                    maxX,
+                                    maxY,
+                                    maxZ
+                            ));
+                            return new Block[0];
+                        }
                         Block block = this.getBlock(this.temporalVector.setComponents(x, y, z), false);
                         if (block != null && block.getId() != 0 && block.collidesWithBB(bb)) {
                             return new Block[]{block};
@@ -1312,6 +1335,18 @@ public class Level implements ChunkManager, Metadatable {
             for (int z = minZ; z <= maxZ; ++z) {
                 for (int x = minX; x <= maxX; ++x) {
                     for (int y = minY; y <= maxY; ++y) {
+                        if (++i > 100) {
+                            this.server.getLogger().error(String.format(
+                                    "Attempting to update too large an area: (%d,%d,%d),(%d,%d,%d)",
+                                    minX,
+                                    minY,
+                                    minZ,
+                                    maxX,
+                                    maxY,
+                                    maxZ
+                            ));
+                            return new Block[0];
+                        }
                         Block block = this.getBlock(this.temporalVector.setComponents(x, y, z), false);
                         if (block != null && block.getId() != 0 && block.collidesWithBB(bb)) {
                             collides.add(block);

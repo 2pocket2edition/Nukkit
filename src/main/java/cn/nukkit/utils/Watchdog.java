@@ -45,7 +45,7 @@ public class Watchdog extends Thread {
                             Consumer<String> logger = s -> {
                                     this.server.getLogger().emergency(s);
                                     try {
-                                        os.write(s.getBytes("UTF-8"));
+                                        os.write(String.format("%s\n", s).getBytes("UTF-8"));
                                     } catch (UnsupportedOperationException | IOException e) {
                                         throw new RuntimeException(e);
                                     }
