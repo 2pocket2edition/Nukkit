@@ -41,7 +41,7 @@ public class TellCommand extends VanillaCommand {
 
         Player player = sender.getServer().getPlayer(name);
         if (player == null) {
-            sender.sendMessage(TextFormat.colorize("&cThat player is not online"));
+            sender.sendMessage(TextFormat.colorize("\u00A7cThat player is not online"));
             return true;
         }
 
@@ -58,8 +58,8 @@ public class TellCommand extends VanillaCommand {
             msg = msg.substring(0, msg.length() - 1);
         }
 
-        sender.sendMessage("&5[&dme &5-> &d" + player.getName() + "&5] &d" + msg);
-        player.sendMessage("&5[&d" + sender.getName() + " &5-> &dme&5] &d" + msg);
+        sender.sendMessage("\u00A75[\u00A7dme \u00A75-> \u00A7d" + player.getName() + "\u00A75] \u00A7d" + msg);
+        player.sendMessage("\u00A75[\u00A7d" + sender.getName() + " \u00A75-> \u00A7dme\u00A75] \u00A7d" + msg);
         player.lastDM = sender.getName();
 
         return true;
