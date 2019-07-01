@@ -15,6 +15,8 @@ public class EntityEndCrystal extends Entity {
 
     public static final int NETWORK_ID = 71;
 
+    protected boolean detonated = false;
+
     @Override
     public int getNetworkId() {
         return NETWORK_ID;
@@ -44,14 +46,17 @@ public class EntityEndCrystal extends Entity {
             return false;
         }
 
-        Position pos = this.getPosition();
-        Explosion explode = new Explosion(pos, 6, this);
+        if (!this.detonated) {
+            this.detonated = true;
+            Position pos = this.getPosition();
+            Explosion explode = new Explosion(pos, 6, this);
 
-        close();
+            this.close();
 
-        if (this.level.getGameRules().getBoolean(GameRule.TNT_EXPLODES)) {
-            explode.explodeA();
-            explode.explodeB();
+            if (this.level.getGameRules().getBoolean(GameRule.TNT_EXPLODES)) {
+                explode.explodeA();
+                explode.explodeB();
+            }
         }
 
         return true;
