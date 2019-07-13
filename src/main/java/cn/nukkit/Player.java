@@ -101,6 +101,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     public String lastDM = "°"; //random char that can't be in a name
     public boolean showCoords = true;
+    public long lastMessage = System.currentTimeMillis();
 
     public static final int SURVIVAL = 0;
     public static final int CREATIVE = 1;
@@ -1661,7 +1662,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     this.inAirTicks = 0;
                     this.highestPosition = this.y;
                 } else {
-                    if (this.checkMovement && !this.isGliding() && !server.getAllowFlight() && !this.getAdventureSettings().get(Type.ALLOW_FLIGHT) && this.inAirTicks > 20 && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null) {
+                    if (this.checkMovement && !this.isGliding() && !server.getAllowFlight() && !this.getAdventureSettings().get(Type.ALLOW_FLIGHT) && this.inAirTicks > 20 && !this.isSleeping() && !this.isImmobile() && !this.isSwimming() && this.riding == null && !this.hasEffect(Effect.LEVITATION)) {
                         double expectedVelocity = (-this.getGravity()) / ((double) this.getDrag()) - ((-this.getGravity()) / ((double) this.getDrag())) * Math.exp(-((double) this.getDrag()) * ((double) (this.inAirTicks - this.startAirTicks)));
                         double diff = (this.speed.y - expectedVelocity) * (this.speed.y - expectedVelocity);
 
@@ -2247,6 +2248,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     Vector3 newPos = new Vector3(movePlayerPacket.x, movePlayerPacket.y - this.getEyeHeight(), movePlayerPacket.z);
 
                     if (newPos.distanceSquared(this) < 0.01 && movePlayerPacket.yaw % 360 == this.yaw && movePlayerPacket.pitch % 360 == this.pitch) {
+                        break;
+                    }
+
+                    if (newPos.distanceSquared(this) > 100) {
+                        this.sendPosition(this, movePlayerPacket.yaw, movePlayerPacket.pitch, MovePlayerPacket.MODE_RESET);
                         break;
                     }
 
@@ -3270,9 +3276,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
         return true;
     }
-
-    public long lastMessage = System.currentTimeMillis();
-
     public boolean kick() {
         return this.kick("");
     }
