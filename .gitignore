@@ -50,5 +50,5 @@ recipes.json
 *.7z
 
 #Nukkit data dir
-data
+data/
 data/*
