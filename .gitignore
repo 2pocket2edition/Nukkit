@@ -171,7 +171,7 @@ modules.xml
 .mtj.tmp/
 
 # Package Files #
-*.jar
+nukkit-1.0-SNAPSHOT.jar
 *.war
 *.nar
 *.ear
