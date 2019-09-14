@@ -77,7 +77,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
     }
 
     @Override
-    public double getMaxY() {
+    public double getMaxY()  {
         return this.y + 1 - getFluidHeightPercent();
     }
 
