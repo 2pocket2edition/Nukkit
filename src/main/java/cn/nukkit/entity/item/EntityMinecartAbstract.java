@@ -174,8 +174,8 @@ public abstract class EntityMinecartAbstract extends EntityVehicle {
             // Ensure that the block is a rail
             if (Rail.isRailBlock(block)) {
                 processMovement(dx, dy, dz, (BlockRail) block);
-                if (block instanceof BlockRailActivator) {
-                    // Activate the minecart/TNT
+                // Activate the minecart/TNT
+                if (block instanceof BlockRailActivator && ((BlockRailActivator) block).isActive()) {
                     activate(dx, dy, dz, (block.getDamage() & 0x8) != 0);
                 }
             } else {
@@ -282,7 +282,7 @@ public abstract class EntityMinecartAbstract extends EntityVehicle {
     }
 
     @Override
-    public boolean onInteract(Player p, Item item) {
+    public boolean onInteract(Player p, Item item, Vector3 clickedPos) {
         if (!passengers.isEmpty() && isRideable()) {
             return false;
         }

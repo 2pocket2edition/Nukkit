@@ -13,15 +13,17 @@ import java.lang.management.ThreadInfo;
 import java.util.function.Consumer;
 
 public class Watchdog extends Thread {
+
     private final Server server;
     private final long time;
-    public boolean running = true;
+    public boolean running;
     private boolean responding = true;
 
     public Watchdog(Server server, long time) {
         this.server = server;
         this.time = time;
         this.running = true;
+        this.setName("Watchdog");
         this.setDaemon(true);
     }
 
