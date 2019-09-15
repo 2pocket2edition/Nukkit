@@ -42,7 +42,7 @@ public class StatusCommand extends VanillaCommand {
         sender.sendMessage(TextFormat.GOLD + "Uptime: " + format.format(new Date(time)));
 
         TextFormat tpsColor = TextFormat.GREEN;
-        float tps = server.getTicksPerSecond();
+        float tps = server.getTicksPerSecondAverage();
         if (tps < 17) {
             tpsColor = TextFormat.GOLD;
         } else if (tps < 12) {
