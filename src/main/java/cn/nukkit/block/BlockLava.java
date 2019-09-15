@@ -160,4 +160,23 @@ public class BlockLava extends BlockLiquid {
             super.addVelocityToEntity(entity, vector);
         }
     }
+
+    @Override
+    protected boolean canSpreadInto(int fullId) {
+        if ((fullId >>> 4) == LAVA || (fullId >>> 4) == STILL_LAVA) {
+            if ((fullId & 0x8) != 0)  { //flowing down
+                return false;
+            } else {
+                //only flow into lava that is more than one level lower than this
+                return (fullId & 0x7) > this.getDamage() + 1;
+            }
+        } else {
+            return flowable[fullId >>> 4];
+        }
+    }
+
+    @Override
+    protected void spreadIntoBlock(int selfFullId, int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        super.spreadIntoBlock(selfFullId, targetFullId, x, y, z, deltaX, deltaY, deltaZ);
+    }
 }

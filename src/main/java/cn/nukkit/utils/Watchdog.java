@@ -13,6 +13,7 @@ import java.lang.management.ThreadInfo;
 import java.util.function.Consumer;
 
 public class Watchdog extends Thread {
+    private static final boolean ENABLE = !Boolean.parseBoolean(System.getProperty("2p2e.nowatchdog", "false"));
 
     private final Server server;
     private final long time;
@@ -36,7 +37,7 @@ public class Watchdog extends Thread {
 
     @Override
     public void run() {
-        while (this.running && server.isRunning()) {
+        while (ENABLE && this.running && server.isRunning()) {
             long current = server.getNextTick();
             if (current != 0) {
                 long diff = System.currentTimeMillis() - current;

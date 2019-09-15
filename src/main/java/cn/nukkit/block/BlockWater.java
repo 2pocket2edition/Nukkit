@@ -56,4 +56,23 @@ public class BlockWater extends BlockLiquid {
     public int tickRate() {
         return 5;
     }
+
+    @Override
+    protected boolean canSpreadInto(int fullId) {
+        if ((fullId >>> 4) == WATER || (fullId >>> 4) == STILL_WATER) {
+            if ((fullId & 0x8) != 0)  { //flowing down
+                return false;
+            } else {
+                //only flow into water that is more than one level lower than this
+                return (fullId & 0x7) > this.getDamage() + 1;
+            }
+        } else {
+            return flowable[fullId >>> 4];
+        }
+    }
+
+    @Override
+    protected void spreadIntoBlock(int selfFullId, int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        super.spreadIntoBlock(selfFullId, targetFullId, x, y, z, deltaX, deltaY, deltaZ);
+    }
 }

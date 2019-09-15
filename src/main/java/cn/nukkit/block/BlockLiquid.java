@@ -1,18 +1,11 @@
 package cn.nukkit.block;
 
 import cn.nukkit.entity.Entity;
-import cn.nukkit.event.block.BlockFromToEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Sound;
-import cn.nukkit.level.particle.SmokeParticle;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
-import cn.nukkit.network.protocol.LevelSoundEventPacket;
-import it.unimi.dsi.fastutil.longs.Long2ByteOpenHashMap;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * author: MagicDroidX
@@ -110,6 +103,40 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
     protected void checkForHarden() {
     }
 
+    protected abstract boolean canSpreadInto(int fullId);
+
+    protected void spreadIntoBlock(int selfFullId, int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        int toSet = selfFullId ^ (selfFullId & 0xF); //strip meta
+        if ((selfFullId & 0x8) != 0)    {
+            //downwards flowing liquids should have their "offspring" be at full height
+            toSet |= (deltaX != 0 || deltaZ != 0) ? 0x1 : 0x8;
+        } else if (deltaY < 0) {
+            //if the next fluid will be flowing downwards, only set the down flag
+            toSet |= 0x8;
+        } else {
+            //otherwise, we're just flowing normally to the side, so just increment the side counter
+            toSet |= (selfFullId & 0x7) + 1;
+        }
+        this.level.setBlockFullIdAt(x + deltaX, y + deltaY, z + deltaZ, toSet);
+        this.level.scheduleUpdate(this.level.getBlock(x + deltaX, y + deltaY, z + deltaZ), this.tickRate());
+    }
+
+    protected void spreadToSides(int selfFullId, int x, int y, int z)  {
+        int fullId;
+        if (this.canSpreadInto(fullId = this.level.getFullBlock(x + 1, y, z)))   {
+            this.spreadIntoBlock(selfFullId, fullId, x, y, z, 1, 0, 0);
+        }
+        if (this.canSpreadInto(fullId = this.level.getFullBlock(x, y, z + 1)))   {
+            this.spreadIntoBlock(selfFullId, fullId, x, y, z, 0, 0, 1);
+        }
+        if (this.canSpreadInto(fullId = this.level.getFullBlock(x - 1, y, z)))   {
+            this.spreadIntoBlock(selfFullId, fullId, x, y, z, -1, 0, 0);
+        }
+        if (this.canSpreadInto(fullId = this.level.getFullBlock(x, y, z - 1)))   {
+            this.spreadIntoBlock(selfFullId, fullId, x, y, z, 0, 0, -1);
+        }
+    }
+
     @Override
     public int onUpdate(int type) {
         if (type == Level.BLOCK_UPDATE_NORMAL) {
@@ -117,6 +144,49 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
             this.level.scheduleUpdate(this, this.tickRate());
             return 0;
         } else if (type == Level.BLOCK_UPDATE_SCHEDULED) {
+            final int meta = this.getDamage(); //allow JIT to do register inlining
+            final int fullId = (this.getId() << 4) | meta;
+            final int x = this.getFloorX();
+            final int y = this.getFloorY();
+            final int z = this.getFloorZ();
+
+            int otherFullId; //scratch variable
+
+            //first of all, check if we can spread into any neighboring blocks
+            if ((meta >>> 3) != 0) {
+                //we are a liquid flowing down
+                if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
+                    //spread one block downwards
+                    this.spreadIntoBlock(fullId, otherFullId, x, y, z, 0, -1, 0);
+                } else {
+                    //we can't continue to flow downwards, so spread to the sides instead
+                    if ((meta & 0x7) < 0x7) {
+                        //don't spread to sides if we are already at the lowest water level
+                        this.spreadToSides(fullId, x, y, z);
+                    }
+                }
+            } else if (meta == 0) {
+                //we are a source block
+                //spread to sides and downwards
+                this.spreadToSides(fullId, x, y, z);
+                if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
+                    //spread one block downwards
+                    this.spreadIntoBlock(fullId, otherFullId, x, y, z, 0, -1, 0);
+                }
+            } else {
+                //we are a flowing liquid block
+                //flow downwards if we can, to the sides otherwise
+                if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
+                    //spread one block downwards
+                    this.spreadIntoBlock(fullId, otherFullId, x, y, z, 0, -1, 0);
+                } else {
+                    //we can't flow downwards, so spread to the sides instead
+                    if ((meta & 0x7) < 0x7) {
+                        //don't spread to sides if we are already at the lowest water level
+                        this.spreadToSides(fullId, x, y, z);
+                    }
+                }
+            }
         }
         return 0;
     }
