@@ -126,6 +126,10 @@ public class DiscordMain {
     }
 
     private static void workOffQueue(boolean sync) {
+        if (channel == null)    {
+            SEND_QUEUE.clear();
+            return;
+        }
         BUILDER.setLength(0);
         while (SEND_QUEUE.peek() != null && BUILDER.length() + SEND_QUEUE.peek().length() + 1 <= 2000) {
             BUILDER.append(SEND_QUEUE.poll()).append('\n');

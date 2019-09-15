@@ -1,10 +1,17 @@
 package net.daporkchop.mcpe;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.format.Chunk;
+import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.scheduler.Task;
+import gnu.trove.impl.sync.TSynchronizedIntSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import lombok.NonNull;
 
 import java.util.HashMap;
@@ -13,18 +20,29 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class UtilsPE {
+    public static final TIntSet BANNED_BLOCKS = new TIntHashSet();
+
     public static final int SERVER_SHUTDOWN_TIME_SECONDS = (int) TimeUnit.HOURS.toSeconds(6L);
     private static final int SHUTDOWN_TICKS = SERVER_SHUTDOWN_TIME_SECONDS * 20;
 
-    public static final int random(int max) {
+    static {
+        BANNED_BLOCKS.addAll(new int[] {
+                BlockID.BEDROCK,
+                BlockID.END_PORTAL,
+                BlockID.END_PORTAL_FRAME,
+                BlockID.INVISIBLE_BEDROCK
+        });
+    }
+
+    public static int random(int max) {
         return ThreadLocalRandom.current().nextInt(max);
     }
 
-    public static final int mRound(int value, int factor) {
+    public static int mRound(int value, int factor) {
         return Math.round(value / factor) * factor;
     }
 
-    public static final void init(final Server s) {
+    public static void init(final Server s) {
         /*s.getScheduler().scheduleDelayedRepeatingTask(new Task() {
             @Override
             public void onRun(int currentTick) {
@@ -91,6 +109,18 @@ public class UtilsPE {
                     }
                 }, time);
             });
+        }
+    }
+
+    public static void stripBannedBlocks(FullChunk chunk)   {
+        for (int x = 15; x >= 0; x--)   {
+            for (int z = 15; z >= 0; z--)   {
+                for (int y = 255; y > 0; y--)  {
+                    if (BANNED_BLOCKS.contains(chunk.getBlockId(x, y, z)))  {
+                        chunk.setBlockId(x, y, z, BlockID.AIR);
+                    }
+                }
+            }
         }
     }
 

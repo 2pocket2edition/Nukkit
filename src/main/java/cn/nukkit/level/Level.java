@@ -61,6 +61,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import net.daporkchop.mcpe.UtilsPE;
 
 import java.io.File;
 import java.io.IOException;
@@ -2146,6 +2147,10 @@ public class Level implements ChunkManager, Metadatable {
                 }
             }
 
+            if (UtilsPE.BANNED_BLOCKS.contains(block.getId()))  {
+                event.setCancelled();
+            }
+
             this.server.getPluginManager().callEvent(event);
             if (event.isCancelled()) {
                 return null;
@@ -2765,6 +2770,7 @@ public class Level implements ChunkManager, Metadatable {
             }
 
             if (chunk.getProvider() != null) {
+                UtilsPE.stripBannedBlocks(chunk);
                 this.server.getPluginManager().callEvent(new ChunkLoadEvent(chunk, !chunk.isGenerated()));
             } else {
                 this.unloadChunk(x, z, false);
