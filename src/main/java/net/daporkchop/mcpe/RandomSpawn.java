@@ -37,8 +37,8 @@ public class RandomSpawn {
                     zPos = Utils.rand(-radius, radius + 1) + pos.getFloorZ(),
                     yPos = Utils.rand(5, 256);
             if (unsafe_blocks.contains(level.getBlockIdAt(xPos, yPos, zPos))
-                    && !(yPos + 1 >= 255 || level.getBlockIdAt(xPos, yPos + 1, zPos) == BlockID.AIR)
-                    && !(yPos + 2 >= 255 || level.getBlockIdAt(xPos, yPos + 2, zPos) == BlockID.AIR)) {
+                    || !(yPos + 1 >= 255 || level.getBlockIdAt(xPos, yPos + 1, zPos) == BlockID.AIR)
+                    || !(yPos + 2 >= 255 || level.getBlockIdAt(xPos, yPos + 2, zPos) == BlockID.AIR)) {
                 continue;
             }
             pos = new Position(xPos + 0.5d, yPos + 1.001d, zPos + 0.5d, level);
