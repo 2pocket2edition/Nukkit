@@ -197,7 +197,46 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
             int otherFullId; //scratch variable
 
-            //first of all, check if we can spread into any neighboring blocks
+            //first of all, examine decay and update if needed
+            if (meta != 0)  {
+                //source blocks cannot decay
+                int level = meta & 0x7;
+                if ((meta >>> 3) != 0) {
+                    //we are a liquid flowing down
+                    if (!this.isSelfType(this.level.getFullBlock(x, y + 1, z))) {
+                        //block above is not of this type, so we need to decay
+                        /*level += decay;
+                        if (level > 7)  {*/
+                            //reset to air if below lowest level
+                            this.level.setBlockFullIdAt(x, y, z, AIR << 4);
+                            this.level.updateAroundFast(x, y, z);
+                            return 0;
+                        /*} else {
+                            System.out.printf("Block id: %d\n", fullId >>> 4);
+                            this.level.setBlockFullIdAt(x, y, z, (fullId ^ (fullId & 0xF)) | level);
+                            this.level.scheduleUpdate(this, this.tickRate());
+                        }*/
+                    }
+                } else {
+                    //we are a liquid flowing sideways
+                    /*if (!this.isSelfType(this.level.getFullBlock(x, y + 1, z))) {
+                        //block above is not of this type, so we need to decay
+                        level += decay;
+                        if (level > 7)  {
+                            //reset to air if below lowest level
+                            this.level.setBlockFullIdAt(x, y, z, AIR << 4);
+                            this.level.updateAroundFast(x, y, z);
+                            return 0;
+                        } else {
+                            System.out.printf("Block id: %d\n", fullId >>> 4);
+                            this.level.setBlockFullIdAt(x, y, z, (fullId ^ (fullId & 0xF)) | level);
+                            this.level.scheduleUpdate(this, this.tickRate());
+                        }
+                    }*/
+                }
+            }
+
+            //then check if we can spread into any neighboring blocks
             if ((meta >>> 3) != 0) {
                 //we are a liquid flowing down
                 if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
