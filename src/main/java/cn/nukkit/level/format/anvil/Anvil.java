@@ -16,6 +16,7 @@ import cn.nukkit.utils.ChunkException;
 import cn.nukkit.utils.ThreadCache;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -72,9 +73,11 @@ public class Anvil extends BaseLevelProvider {
             new File(path + "/region").mkdirs();
         }
 
+        File levelDat = new File(path + "/level.dat");
+        if (levelDat.exists()) return;
+
         CompoundTag levelData = new CompoundTag("Data")
                 .putCompound("GameRules", new CompoundTag())
-
                 .putLong("DayTime", 0)
                 .putInt("GameType", 0)
                 .putString("generatorName", Generator.getGeneratorName(generator))
@@ -96,7 +99,7 @@ public class Anvil extends BaseLevelProvider {
                 .putLong("Time", 0)
                 .putLong("SizeOnDisk", 0);
 
-        NBTIO.writeGZIPCompressed(new CompoundTag().putCompound("Data", levelData), new FileOutputStream(path + "level.dat"), ByteOrder.BIG_ENDIAN);
+        NBTIO.writeGZIPCompressed(new CompoundTag().putCompound("Data", levelData), new BufferedOutputStream(new FileOutputStream(levelDat)), ByteOrder.BIG_ENDIAN);
     }
 
     @Override
