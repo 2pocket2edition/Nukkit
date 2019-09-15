@@ -79,6 +79,7 @@ public class BlockWater extends BlockLiquid {
                 //other lava into cobblestone
                 this.level.setBlockFullIdAt(x, y, z, COBBLESTONE << 4);
             }
+            this.level.updateAroundFast(x, y, z);
             return true;
         }
         return super.doReplace(targetFullId, x, y, z, deltaX, deltaY, deltaZ);

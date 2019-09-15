@@ -119,7 +119,7 @@ public class BlockLava extends BlockLiquid {
                 //lava flowing downwards into water makes smooth stone
                 this.level.setBlockFullIdAt(x, y, z, STONE << 4);
                 this.triggerLavaMixEffects(x, y, z);
-                this.level.scheduleUpdate(this, this.tickRate());
+                this.level.updateAroundFast(x, y, z);
             } else {
                 //lava flowing into water from any other direction makes cobblestone
                 this.level.setBlockFullIdAt(x - deltaX, y, z - deltaZ, COBBLESTONE << 4);
