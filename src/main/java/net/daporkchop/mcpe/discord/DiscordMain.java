@@ -62,8 +62,6 @@ public class DiscordMain {
                             }
 
                             if (event.getChannel().getIdLong() == 412992591148220418L) {
-                                event.getMessage().delete().queue();
-
                                 if (msg.length() > 255) {
                                     return;
                                 }
