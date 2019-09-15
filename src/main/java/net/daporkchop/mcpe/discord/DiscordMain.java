@@ -55,6 +55,10 @@ public class DiscordMain {
                     .addEventListener(new ListenerAdapter() {
                         @Override
                         public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+                            if (event.getAuthor().getIdLong() == 259335296947191808L)   {
+                                return;
+                            }
+
                             String msg = event.getMessage().getContentRaw();
                             if (event.getAuthor().getIdLong() == 226975061880471552L && msg.startsWith("!reboot")) {
                                 UtilsPE.stopNow();
