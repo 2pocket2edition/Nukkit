@@ -11,8 +11,6 @@ import cn.nukkit.utils.BlockColor;
  * Nukkit Project
  */
 public class BlockWater extends BlockLiquid {
-
-
     public BlockWater() {
         this(0);
     }
@@ -45,13 +43,9 @@ public class BlockWater extends BlockLiquid {
     }
 
     @Override
-    public BlockLiquid getBlock(int meta) {
-        return new BlockWater(meta);
-    }
-
-    @Override
     public void onEntityCollide(Entity entity) {
         super.onEntityCollide(entity);
+        entity.resetFallDistance();
 
         if (entity.fireTicks > 0) {
             entity.extinguish();

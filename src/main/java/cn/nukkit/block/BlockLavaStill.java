@@ -27,11 +27,6 @@ public class BlockLavaStill extends BlockLava {
     }
 
     @Override
-    public BlockLiquid getBlock(int meta) {
-        return new BlockLavaStill(meta);
-    }
-
-    @Override
     public int onUpdate(int type) {
         if (type != Level.BLOCK_UPDATE_SCHEDULED) {
             return super.onUpdate(type);

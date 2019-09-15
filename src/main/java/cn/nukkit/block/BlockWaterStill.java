@@ -23,10 +23,4 @@ public class BlockWaterStill extends BlockWater {
     public String getName() {
         return "Still Water";
     }
-
-    @Override
-    public BlockLiquid getBlock(int meta) {
-        return new BlockWaterStill(meta);
-    }
-
 }
