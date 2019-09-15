@@ -100,12 +100,32 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
         return 1;
     }
 
+    protected abstract boolean isSelfType(int fullId);
+
     protected void checkForHarden() {
     }
 
-    protected abstract boolean canSpreadInto(int fullId);
+    protected boolean canSpreadInto(int fullId) {
+        return flowable[fullId >>> 4];
+    }
 
     protected void spreadIntoBlock(int selfFullId, int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        if (this.isSelfType(targetFullId))  {
+            //we are going to be replacing another block of this type, ensure that the level would make that possible
+            if ((targetFullId & 0xF) == 0 || (targetFullId & 0x8) != 0) {
+                //don't replace source or downwards flowing blocks in any case
+                return;
+            } else if ((selfFullId & 0xF) == 0 || (selfFullId & 0x8) != 0)  {
+                //source or downwards flowing blocks can always replace other blocks of their same type
+            } else if ((selfFullId & 0x7) + 1 > 7 || (selfFullId & 0x7) + 1 > (targetFullId & 0x7)) {
+                //don't replace other blocks if this block cannot flow any further, or the target block is a higher level than this one
+                return;
+            }
+        } else if ((targetFullId >>> 4) != AIR && this.doReplace(targetFullId, x, y, z, deltaX, deltaY, deltaZ)) {
+            //if replacing something that isn't air and the handler returns true, don't set the block
+            return;
+        }
+
         int toSet = selfFullId ^ (selfFullId & 0xF); //strip meta
         if ((selfFullId & 0x8) != 0)    {
             //downwards flowing liquids should have their "offspring" be at full height
@@ -117,23 +137,29 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
             //otherwise, we're just flowing normally to the side, so just increment the side counter
             toSet |= (selfFullId & 0x7) + 1;
         }
-        this.level.setBlockFullIdAt(x + deltaX, y + deltaY, z + deltaZ, toSet);
-        this.level.scheduleUpdate(this.level.getBlock(x + deltaX, y + deltaY, z + deltaZ), this.tickRate());
+        this.level.setBlockFullIdAt(x, y, z, toSet);
+        this.level.scheduleUpdate(this.level.getBlock(x, y, z), this.tickRate());
+    }
+
+    protected boolean doReplace(int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ)   {
+        //TODO: override in water and lava classes for generation of other block types
+        this.level.useBreakOn(new Vector3(x, y, z));
+        return false;
     }
 
     protected void spreadToSides(int selfFullId, int x, int y, int z)  {
         int fullId;
         if (this.canSpreadInto(fullId = this.level.getFullBlock(x + 1, y, z)))   {
-            this.spreadIntoBlock(selfFullId, fullId, x, y, z, 1, 0, 0);
+            this.spreadIntoBlock(selfFullId, fullId, x + 1, y, z, 1, 0, 0);
         }
         if (this.canSpreadInto(fullId = this.level.getFullBlock(x, y, z + 1)))   {
-            this.spreadIntoBlock(selfFullId, fullId, x, y, z, 0, 0, 1);
+            this.spreadIntoBlock(selfFullId, fullId, x, y, z + 1, 0, 0, 1);
         }
         if (this.canSpreadInto(fullId = this.level.getFullBlock(x - 1, y, z)))   {
-            this.spreadIntoBlock(selfFullId, fullId, x, y, z, -1, 0, 0);
+            this.spreadIntoBlock(selfFullId, fullId, x - 1, y, z, -1, 0, 0);
         }
         if (this.canSpreadInto(fullId = this.level.getFullBlock(x, y, z - 1)))   {
-            this.spreadIntoBlock(selfFullId, fullId, x, y, z, 0, 0, -1);
+            this.spreadIntoBlock(selfFullId, fullId, x, y, z - 1, 0, 0, -1);
         }
     }
 
@@ -157,7 +183,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                 //we are a liquid flowing down
                 if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
                     //spread one block downwards
-                    this.spreadIntoBlock(fullId, otherFullId, x, y, z, 0, -1, 0);
+                    this.spreadIntoBlock(fullId, otherFullId, x, y - 1, z, 0, -1, 0);
                 } else {
                     //we can't continue to flow downwards, so spread to the sides instead
                     if ((meta & 0x7) < 0x7) {
@@ -171,14 +197,14 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                 this.spreadToSides(fullId, x, y, z);
                 if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
                     //spread one block downwards
-                    this.spreadIntoBlock(fullId, otherFullId, x, y, z, 0, -1, 0);
+                    this.spreadIntoBlock(fullId, otherFullId, x, y - 1, z, 0, -1, 0);
                 }
             } else {
                 //we are a flowing liquid block
                 //flow downwards if we can, to the sides otherwise
                 if (this.canSpreadInto(otherFullId = this.level.getFullBlock(x, y - 1, z)))  {
                     //spread one block downwards
-                    this.spreadIntoBlock(fullId, otherFullId, x, y, z, 0, -1, 0);
+                    this.spreadIntoBlock(fullId, otherFullId, x, y - 1, z, 0, -1, 0);
                 } else {
                     //we can't flow downwards, so spread to the sides instead
                     if ((meta & 0x7) < 0x7) {

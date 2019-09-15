@@ -162,7 +162,15 @@ public class BlockLava extends BlockLiquid {
     }
 
     @Override
+    protected boolean isSelfType(int fullId) {
+        return (fullId >>> 4) == LAVA || (fullId >>> 4) == STILL_LAVA;
+    }
+
+    @Override
     protected boolean canSpreadInto(int fullId) {
+        if (true)   {
+            return super.canSpreadInto(fullId);
+        }
         if ((fullId >>> 4) == LAVA || (fullId >>> 4) == STILL_LAVA) {
             if ((fullId & 0x8) != 0)  { //flowing down
                 return false;

@@ -58,7 +58,15 @@ public class BlockWater extends BlockLiquid {
     }
 
     @Override
+    protected boolean isSelfType(int fullId) {
+        return (fullId >>> 4) == WATER || (fullId >>> 4) == STILL_WATER;
+    }
+
+    @Override
     protected boolean canSpreadInto(int fullId) {
+        if (true)   {
+            return super.canSpreadInto(fullId);
+        }
         if ((fullId >>> 4) == WATER || (fullId >>> 4) == STILL_WATER) {
             if ((fullId & 0x8) != 0)  { //flowing down
                 return false;
