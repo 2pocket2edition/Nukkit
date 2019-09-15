@@ -124,6 +124,14 @@ public class UtilsPE {
                 chunk.setBlockId(x, 0, z, BlockID.BEDROCK);
             }
         }
+
+        if (chunk.getProvider().getLevel().getDimension() == Level.DIMENSION_NETHER)    {
+            for (int x = 15; x >= 0; x--)   {
+                for (int z = 15; z >= 0; z--)   {
+                    chunk.setBlockId(x, 127, z, BlockID.BEDROCK);
+                }
+            }
+        }
     }
 
     /**
