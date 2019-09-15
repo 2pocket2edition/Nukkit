@@ -3,6 +3,9 @@ package cn.nukkit.level;
 import cn.nukkit.Server;
 import cn.nukkit.level.generator.Generator;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 public enum EnumLevel {
     OVERWORLD,
     NETHER,
@@ -61,7 +64,7 @@ public enum EnumLevel {
             return null;
         } else {
             if (current.level == OVERWORLD.level) {
-                return new Position(mRound(current.getFloorX() >> 3, 128), mRound(current.getFloorY(), 32), mRound(current.getFloorZ() >> 3, 128), NETHER.level);
+                return new Position(mRound(current.getFloorX() >> 3, 128), mRound(min(max(current.getFloorY(), 110), 33), 32), mRound(current.getFloorZ() >> 3, 128), NETHER.level);
             } else if (current.level == NETHER.level) {
                 return new Position(mRound(current.getFloorX() << 3, 1024), mRound(current.getFloorY(), 32), mRound(current.getFloorZ() << 3, 1024), OVERWORLD.level);
             } else {
