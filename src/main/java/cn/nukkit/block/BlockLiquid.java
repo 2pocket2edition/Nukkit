@@ -15,6 +15,14 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
     public int adjacentSources = 0;
     private Vector3 flowVector;
 
+    public static boolean isWater(int fullId)   {
+        return (fullId >>> 4) == WATER || (fullId >>> 4) == STILL_WATER;
+    }
+
+    public static boolean isLava(int fullId)   {
+        return (fullId >>> 4) == LAVA || (fullId >>> 4) == STILL_LAVA;
+    }
+
     protected BlockLiquid(int meta) {
         super(meta);
     }

@@ -1254,6 +1254,22 @@ public class Level implements ChunkManager, Metadatable {
         }
     }
 
+    public void updateAroundFast(int x, int y, int z) {
+        this.normalUpdateQueue.add(this.getBlock(x + 1, y, z));
+        this.normalUpdateQueue.add(this.getBlock(x, y + 1, z));
+        this.normalUpdateQueue.add(this.getBlock(x, y, z + 1));
+        this.normalUpdateQueue.add(this.getBlock(x - 1, y, z));
+        this.normalUpdateQueue.add(this.getBlock(x, y - 1, z));
+        this.normalUpdateQueue.add(this.getBlock(x, y, z - 1));
+    }
+
+    public void scheduleUpdateFaster(int x, int y, int z, int delay) {
+        BlockUpdateEntry entry = new BlockUpdateEntry(new Vector3(x, y, z), this.getBlock(x, y, z), ((long) delay) + this.getCurrentTick(), 0);
+        if (!this.updateQueue.contains(entry)) {
+            this.updateQueue.add(entry);
+        }
+    }
+
     public boolean cancelSheduledUpdate(Vector3 pos, Block block) {
         return this.updateQueue.remove(new BlockUpdateEntry(pos, block));
     }

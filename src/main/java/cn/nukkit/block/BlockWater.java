@@ -59,24 +59,7 @@ public class BlockWater extends BlockLiquid {
 
     @Override
     protected boolean isSelfType(int fullId) {
-        return (fullId >>> 4) == WATER || (fullId >>> 4) == STILL_WATER;
-    }
-
-    @Override
-    protected boolean canSpreadInto(int fullId) {
-        if (true)   {
-            return super.canSpreadInto(fullId);
-        }
-        if ((fullId >>> 4) == WATER || (fullId >>> 4) == STILL_WATER) {
-            if ((fullId & 0x8) != 0)  { //flowing down
-                return false;
-            } else {
-                //only flow into water that is more than one level lower than this
-                return (fullId & 0x7) > this.getDamage() + 1;
-            }
-        } else {
-            return flowable[fullId >>> 4];
-        }
+        return isWater(fullId);
     }
 
     @Override

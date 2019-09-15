@@ -163,28 +163,29 @@ public class BlockLava extends BlockLiquid {
 
     @Override
     protected boolean isSelfType(int fullId) {
-        return (fullId >>> 4) == LAVA || (fullId >>> 4) == STILL_LAVA;
-    }
-
-    @Override
-    protected boolean canSpreadInto(int fullId) {
-        if (true)   {
-            return super.canSpreadInto(fullId);
-        }
-        if ((fullId >>> 4) == LAVA || (fullId >>> 4) == STILL_LAVA) {
-            if ((fullId & 0x8) != 0)  { //flowing down
-                return false;
-            } else {
-                //only flow into lava that is more than one level lower than this
-                return (fullId & 0x7) > this.getDamage() + 1;
-            }
-        } else {
-            return flowable[fullId >>> 4];
-        }
+        return isLava(fullId);
     }
 
     @Override
     protected void spreadIntoBlock(int selfFullId, int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
         super.spreadIntoBlock(selfFullId, targetFullId, x, y, z, deltaX, deltaY, deltaZ);
+    }
+
+    @Override
+    protected boolean doReplace(int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        if (isWater(targetFullId))  {
+            if (deltaY < 0) {
+                //lava flowing downwards into water makes smooth stone
+                this.level.setBlockFullIdAt(x, y, z, STONE << 4);
+            } else {
+                //lava flowing into water from any other direction makes cobblestone
+                this.level.setBlockFullIdAt(x, y, z, COBBLESTONE << 4);
+            }
+            return true;
+        } else {
+            //no need to break the block, because even if it makes drops they'll be burned up instantly
+            //the block will be set to lava afterwards by spreadIntoBlock
+            return false;
+        }
     }
 }
