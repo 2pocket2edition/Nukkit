@@ -1,6 +1,7 @@
 package net.daporkchop.mcpe;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import gnu.trove.impl.sync.TSynchronizedIntSet;
@@ -34,12 +35,13 @@ public class RandomSpawn {
         for (int tries = 0; tries < maxTries; tries++) {
             int xPos = Utils.rand(-radius, radius + 1) + pos.getFloorX(),
                     zPos = Utils.rand(-radius, radius + 1) + pos.getFloorZ(),
-                    yPos = level.getHighestBlockAt(xPos, zPos);
-            int under = level.getBlockIdAt(xPos, yPos, zPos);
-            if (unsafe_blocks.contains(under)) {
+                    yPos = Utils.rand(5, 256);
+            if (unsafe_blocks.contains(level.getBlockIdAt(xPos, yPos, zPos))
+                    && !(yPos + 1 <= 255 || level.getBlockIdAt(xPos, yPos + 1, zPos) == BlockID.AIR)
+                    && !(yPos + 2 <= 255 || level.getBlockIdAt(xPos, yPos + 2, zPos) == BlockID.AIR)) {
                 continue;
             }
-            pos = new Position(xPos + 0.5f, yPos + 1, zPos + 0.5f, level);
+            pos = new Position(xPos + 0.5d, yPos + 1.001d, zPos + 0.5d, level);
             break;
         }
 
