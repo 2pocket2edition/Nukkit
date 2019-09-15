@@ -28,6 +28,7 @@ public class UtilsPE {
     static {
         BANNED_BLOCKS.addAll(new int[] {
                 BlockID.BEDROCK,
+                BlockID.DRAGON_EGG,
                 BlockID.END_PORTAL,
                 BlockID.END_PORTAL_FRAME,
                 BlockID.INVISIBLE_BEDROCK
@@ -120,6 +121,7 @@ public class UtilsPE {
                         chunk.setBlockId(x, y, z, BlockID.AIR);
                     }
                 }
+                chunk.setBlockId(x, 0, z, BlockID.BEDROCK);
             }
         }
     }

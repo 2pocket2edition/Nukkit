@@ -27,7 +27,7 @@ public class RandomSpawn {
     }
 
     public static Position getSpawnPos(Level level) {
-        return getSpawnPos(level, new Position(0, 128, 0, level), 32, 2048);
+        return getSpawnPos(level, new Position(0, 128, 0, level), 256, 2048);
     }
 
     public static Position getSpawnPos(Level level, Position pos, int radius, int maxTries) {
@@ -47,7 +47,7 @@ public class RandomSpawn {
         return pos;
     }
 
-    public static final boolean isUnafe(int id) {
+    public static boolean isUnafe(int id) {
         return UNSAFE_BLOCKS.contains(id);
     }
 }
