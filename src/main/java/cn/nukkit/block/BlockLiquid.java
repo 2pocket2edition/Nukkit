@@ -4,6 +4,8 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBlock;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Sound;
+import cn.nukkit.level.particle.SmokeParticle;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 
@@ -110,7 +112,8 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
     protected abstract boolean isSelfType(int fullId);
 
-    protected void checkForHarden() {
+    protected boolean checkForHarden(int x, int y, int z) {
+        return false;
     }
 
     protected boolean canSpreadInto(int fullId) {
@@ -118,6 +121,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
     }
 
     protected void spreadIntoBlock(int selfFullId, int targetFullId, int x, int y, int z, int deltaX, int deltaY, int deltaZ) {
+        int decay = this.getFlowDecayPerBlock();
         if (this.isSelfType(targetFullId))  {
             //we are going to be replacing another block of this type, ensure that the level would make that possible
             if ((targetFullId & 0xF) == 0 || (targetFullId & 0x8) != 0) {
@@ -125,7 +129,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                 return;
             } else if ((selfFullId & 0xF) == 0 || (selfFullId & 0x8) != 0)  {
                 //source or downwards flowing blocks can always replace other blocks of their same type
-            } else if ((selfFullId & 0x7) + 1 > 7 || (selfFullId & 0x7) + 1 > (targetFullId & 0x7)) {
+            } else if ((selfFullId & 0x7) + decay > 7 || (selfFullId & 0x7) + decay > (targetFullId & 0x7)) {
                 //don't replace other blocks if this block cannot flow any further, or the target block is a higher level than this one
                 return;
             }
@@ -143,7 +147,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
             toSet |= 0x8;
         } else {
             //otherwise, we're just flowing normally to the side, so just increment the side counter
-            toSet |= (selfFullId & 0x7) + 1;
+            toSet |= (selfFullId & 0x7) + decay;
         }
         this.level.setBlockFullIdAt(x, y, z, toSet);
         this.level.scheduleUpdate(this.level.getBlock(x, y, z), this.tickRate());
@@ -173,16 +177,23 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
     @Override
     public int onUpdate(int type) {
+        final int x = this.getFloorX();
+        final int y = this.getFloorY();
+        final int z = this.getFloorZ();
+
         if (type == Level.BLOCK_UPDATE_NORMAL) {
-            this.checkForHarden();
+            if (false && !this.checkForHarden(x, y, z))   {
+            }
             this.level.scheduleUpdate(this, this.tickRate());
             return 0;
         } else if (type == Level.BLOCK_UPDATE_SCHEDULED) {
+            if (this.checkForHarden(x, y, z))   {
+                return 0;
+            }
+
             final int meta = this.getDamage(); //allow JIT to do register inlining
             final int fullId = (this.getId() << 4) | meta;
-            final int x = this.getFloorX();
-            final int y = this.getFloorY();
-            final int z = this.getFloorZ();
+            final int decay = this.getFlowDecayPerBlock();
 
             int otherFullId; //scratch variable
 
@@ -194,7 +205,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                     this.spreadIntoBlock(fullId, otherFullId, x, y - 1, z, 0, -1, 0);
                 } else {
                     //we can't continue to flow downwards, so spread to the sides instead
-                    if ((meta & 0x7) < 0x7) {
+                    if ((meta & 0x7) + decay <= 0x7) {
                         //don't spread to sides if we are already at the lowest water level
                         this.spreadToSides(fullId, x, y, z);
                     }
@@ -215,7 +226,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                     this.spreadIntoBlock(fullId, otherFullId, x, y - 1, z, 0, -1, 0);
                 } else {
                     //we can't flow downwards, so spread to the sides instead
-                    if ((meta & 0x7) < 0x7) {
+                    if ((meta & 0x7) + decay <= 0x7) {
                         //don't spread to sides if we are already at the lowest water level
                         this.spreadToSides(fullId, x, y, z);
                     }
@@ -223,6 +234,14 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
             }
         }
         return 0;
+    }
+
+    protected void triggerLavaMixEffects(int x, int y, int z) {
+        this.level.addSound(new Vector3(x + 0.5d, y + 0.5d, z + 0.5d), Sound.RANDOM_FIZZ, 1, 2.6F + (float) (Math.random() * 2.0d - 1.0d) * 0.8F);
+
+        for (int i = 0; i < 8; i++) {
+            this.level.addParticle(new SmokeParticle(new Vector3(x + Math.random(), y + 1.2d, z + Math.random())));
+        }
     }
 
     @Override
@@ -234,14 +253,6 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
     public double getResistance() {
         return 500;
     }
-
-    /*protected void triggerLavaMixEffects(Vector3 pos) {
-        this.getLevel().addSound(pos.add(0.5, 0.5, 0.5), Sound.RANDOM_FIZZ, 1, 2.6F + (ThreadLocalRandom.current().nextFloat() - ThreadLocalRandom.current().nextFloat()) * 0.8F);
-
-        for (int i = 0; i < 8; ++i) {
-            this.getLevel().addParticle(new SmokeParticle(pos.add(Math.random(), 1.2, Math.random())));
-        }
-    }*/
 
     @Override
     public boolean canPassThrough() {

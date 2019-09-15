@@ -26,11 +26,11 @@ public class BlockLavaStill extends BlockLava {
         return "Still Lava";
     }
 
-    @Override
+    /*@Override
     public int onUpdate(int type) {
         if (type != Level.BLOCK_UPDATE_SCHEDULED) {
             return super.onUpdate(type);
         }
         return 0;
-    }
+    }*/
 }

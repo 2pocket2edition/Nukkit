@@ -4,20 +4,15 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.item.EntityPrimedTNT;
-import cn.nukkit.event.block.BlockIgniteEvent;
 import cn.nukkit.event.entity.EntityCombustByBlockEvent;
 import cn.nukkit.event.entity.EntityDamageByBlockEvent;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.item.Item;
-import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.BlockColor;
-
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * author: MagicDroidX
@@ -75,60 +70,6 @@ public class BlockLava extends BlockLiquid {
         return ret;
     }
 
-    @Override
-    public int onUpdate(int type) {
-        int result = super.onUpdate(type);
-
-        if (type == Level.BLOCK_UPDATE_RANDOM && this.level.gameRules.getBoolean(GameRule.DO_FIRE_TICK)) {
-            Random random = ThreadLocalRandom.current();
-
-            int i = random.nextInt(3);
-
-            if (i > 0) {
-                for (int k = 0; k < i; ++k) {
-                    Vector3 v = this.add(random.nextInt(3) - 1, 1, random.nextInt(3) - 1);
-                    Block block = this.getLevel().getBlock(v);
-
-                    if (block.getId() == AIR) {
-                        if (this.isSurroundingBlockFlammable(block)) {
-                            BlockIgniteEvent e = new BlockIgniteEvent(block, this, null, BlockIgniteEvent.BlockIgniteCause.LAVA);
-                            this.level.getServer().getPluginManager().callEvent(e);
-
-                            if (!e.isCancelled()) {
-                                BlockFire fire = new BlockFire();
-                                this.getLevel().setBlock(v, fire, true);
-                                this.getLevel().scheduleUpdate(fire, fire.tickRate());
-                                return Level.BLOCK_UPDATE_RANDOM;
-                            }
-
-                            return 0;
-                        }
-                    } else if (block.isSolid()) {
-                        return Level.BLOCK_UPDATE_RANDOM;
-                    }
-                }
-            } else {
-                for (int k = 0; k < 3; ++k) {
-                    Vector3 v = this.add(random.nextInt(3) - 1, 0, random.nextInt(3) - 1);
-                    Block block = this.getLevel().getBlock(v);
-
-                    if (block.up().getId() == AIR && block.getBurnChance() > 0) {
-                        BlockIgniteEvent e = new BlockIgniteEvent(block, this, null, BlockIgniteEvent.BlockIgniteCause.LAVA);
-                        this.level.getServer().getPluginManager().callEvent(e);
-
-                        if (!e.isCancelled()) {
-                            BlockFire fire = new BlockFire();
-                            this.getLevel().setBlock(v, fire, true);
-                            this.getLevel().scheduleUpdate(fire, fire.tickRate());
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
-    }
-
     protected boolean isSurroundingBlockFlammable(Block block) {
         for (BlockFace face : BlockFace.values()) {
             if (block.getSide(face).getBurnChance() > 0) {
@@ -177,9 +118,12 @@ public class BlockLava extends BlockLiquid {
             if (deltaY < 0) {
                 //lava flowing downwards into water makes smooth stone
                 this.level.setBlockFullIdAt(x, y, z, STONE << 4);
+                this.triggerLavaMixEffects(x, y, z);
+                this.level.scheduleUpdate(this, this.tickRate());
             } else {
                 //lava flowing into water from any other direction makes cobblestone
-                this.level.setBlockFullIdAt(x, y, z, COBBLESTONE << 4);
+                this.level.setBlockFullIdAt(x - deltaX, y, z - deltaZ, COBBLESTONE << 4);
+                this.triggerLavaMixEffects(x - deltaX, y, z - deltaZ);
             }
             return true;
         } else {
@@ -187,5 +131,29 @@ public class BlockLava extends BlockLiquid {
             //the block will be set to lava afterwards by spreadIntoBlock
             return false;
         }
+    }
+
+    @Override
+    public int onUpdate(int type) {
+        return super.onUpdate(type);
+    }
+
+    @Override
+    protected boolean checkForHarden(int x, int y, int z) {
+        if (isWater(this.level.getFullBlock(x + 1, y, z))
+                || isWater(this.level.getFullBlock(x, y, z + 1))
+                || isWater(this.level.getFullBlock(x - 1, y, z))
+                || isWater(this.level.getFullBlock(x, y, z - 1)))   {
+            if (this.getDamage() == 0)  {
+                //this is a source block, turn into obsidian
+                this.level.setBlockFullIdAt(x, y, z, OBSIDIAN << 4);
+            } else {
+                //everything else should turn into cobblestone
+                this.level.setBlockFullIdAt(x, y, z, COBBLESTONE << 4);
+            }
+            this.level.updateAroundFast(x, y, z);
+            return true;
+        }
+        return false;
     }
 }
