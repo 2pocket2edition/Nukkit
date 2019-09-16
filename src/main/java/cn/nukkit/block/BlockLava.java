@@ -135,6 +135,10 @@ public class BlockLava extends BlockLiquid {
 
     @Override
     public int onUpdate(int type) {
+        if (type == Level.BLOCK_UPDATE_RANDOM)  {
+            //TODO: light things on fire
+            return 0;
+        }
         return super.onUpdate(type);
     }
 

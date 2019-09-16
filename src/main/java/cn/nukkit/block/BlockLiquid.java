@@ -139,8 +139,8 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
         int toSet = selfFullId ^ (selfFullId & 0xF); //strip meta
         if ((selfFullId & 0x8) != 0) {
-            //downwards flowing liquids should have their "offspring" be at full height
-            toSet |= (deltaX != 0 || deltaZ != 0) ? 0x1 : 0x8;
+            //downwards flowing liquids should have their "offspring" be at full height - (decay)
+            toSet |= (deltaX != 0 || deltaZ != 0) ? decay : 0x8;
         } else if (deltaY < 0) {
             //if the next fluid will be flowing downwards, only set the down flag
             toSet |= 0x8;
@@ -268,7 +268,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                 } else {
                     //we can't continue to flow downwards, so spread to the sides instead
                     if ((meta & 0x7) + decay <= 7) {
-                        //don't spread to sides if we are already at the lowest water level
+                        //don't spread to sides if we are already at the lowest level
                         this.spreadToSides(fullId, x, y, z);
                     }
                 }
@@ -289,7 +289,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                 } else {
                     //we can't flow downwards, so spread to the sides instead
                     if ((meta & 0x7) + decay <= 7) {
-                        //don't spread to sides if we are already at the lowest water level
+                        //don't spread to sides if we are already at the lowest level
                         this.spreadToSides(fullId, x, y, z);
                     }
                 }
