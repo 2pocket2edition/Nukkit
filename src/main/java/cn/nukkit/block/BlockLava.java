@@ -209,4 +209,14 @@ public class BlockLava extends BlockLiquid {
         }
         return false;
     }
+
+    @Override
+    protected int getStillId() {
+        return STILL_LAVA;
+    }
+
+    @Override
+    protected int getFlowingId() {
+        return LAVA;
+    }
 }

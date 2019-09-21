@@ -137,7 +137,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
             return;
         }
 
-        int toSet = selfFullId ^ (selfFullId & 0xF); //strip meta
+        int toSet = this.getFlowingId() << 4; //strip meta
         if ((selfFullId & 0x8) != 0) {
             //downwards flowing liquids should have their "offspring" be at full height - (decay)
             toSet |= (deltaX != 0 || deltaZ != 0) ? decay : 0x8;
@@ -174,6 +174,14 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
         }
     }
 
+    protected boolean canBeInfinite()   {
+        return false;
+    }
+
+    protected abstract int getStillId();
+
+    protected abstract int getFlowingId();
+
     @Override
     public int onUpdate(int type) {
         final int x = this.getFloorX();
@@ -198,6 +206,31 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
 
             //first of all, examine decay and update if needed
             if (meta != 0) {
+                //if this block can make infinite sources, scan for neighboring source blocks
+                if (this.canBeInfinite())   {
+                    int neighboringSources = 0;
+                    if (this.isSelfType(otherFullId = this.level.getFullBlock(x + 1, y, z)) && (otherFullId & 0xF) == 0)    {
+                        neighboringSources++;
+                    }
+                    if (this.isSelfType(otherFullId = this.level.getFullBlock(x, y, z + 1)) && (otherFullId & 0xF) == 0)    {
+                        neighboringSources++;
+                    }
+                    if (this.isSelfType(otherFullId = this.level.getFullBlock(x - 1, y, z)) && (otherFullId & 0xF) == 0)    {
+                        neighboringSources++;
+                    }
+                    if (this.isSelfType(otherFullId = this.level.getFullBlock(x, y, z - 1)) && (otherFullId & 0xF) == 0)    {
+                        neighboringSources++;
+                    }
+                    if (this.isSelfType(otherFullId = this.level.getFullBlock(x, y + 1, z)) && (otherFullId & 0xF) == 0)    {
+                        neighboringSources++;
+                    }
+                    if (neighboringSources >= 2)    {
+                        this.level.setBlockFullIdAt(x, y, z, this.getStillId() << 4);
+                        this.level.updateAroundFast(x, y, z);
+                        return 0;
+                    }
+                }
+
                 //source blocks cannot decay
                 int level = meta & 0x7;
                 if ((meta >>> 3) != 0) {
@@ -221,7 +254,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                             //reset to air with no inputs
                             this.level.setBlockFullIdAt(x, y, z, AIR << 4);
                         } else {
-                            this.level.setBlockFullIdAt(x, y, z, (fullId ^ (fullId & 0xF)) | (incomingLevel + decay));
+                            this.level.setBlockFullIdAt(x, y, z, (this.getFlowingId() << 4) | (incomingLevel + decay));
                         }
                         this.level.updateAroundFast(x, y, z);
                         return 0;
@@ -230,7 +263,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                     //we are a liquid flowing sideways
                     if (this.isSelfType(this.level.getFullBlock(x, y + 1, z)))  {
                         //turn into liquid flowing downwards
-                        this.level.setBlockFullIdAt(x, y, z, (fullId ^ (fullId & 0xF)) | 0x8);
+                        this.level.setBlockFullIdAt(x, y, z, (this.getFlowingId() << 4) | 0x8);
                         this.level.updateAroundFast(x, y, z);
                     } else {
                         int incomingLevel = 8;
@@ -251,7 +284,7 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                                 //reset to air with no inputs
                                 this.level.setBlockFullIdAt(x, y, z, AIR << 4);
                             } else {
-                                this.level.setBlockFullIdAt(x, y, z, (fullId ^ (fullId & 0xF)) | (incomingLevel + decay));
+                                this.level.setBlockFullIdAt(x, y, z, (this.getFlowingId() << 4) | (incomingLevel + decay));
                             }
                             this.level.updateAroundFast(x, y, z);
                         }
@@ -293,6 +326,10 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
                         this.spreadToSides(fullId, x, y, z);
                     }
                 }
+            }
+
+            if (meta == 0)  {
+                this.level.setBlockFullIdAt(x, y, z, this.getStillId() << 4);
             }
         }
         return 0;

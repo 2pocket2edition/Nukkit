@@ -86,14 +86,6 @@ public class BlockWater extends BlockLiquid {
     }
 
     @Override
-    public int onUpdate(int type) {
-        /*if (type == Level.BLOCK_UPDATE_NORMAL)  {
-            //check if this block should harden
-        }*/
-        return super.onUpdate(type);
-    }
-
-    @Override
     protected boolean checkForHarden(int x, int y, int z) {
         if (isLava(this.level.getFullBlock(x + 1, y, z)))   {
             ((BlockLiquid) this.level.getBlock(x + 1, y, z)).checkForHarden(x + 1, y, z);
@@ -108,5 +100,20 @@ public class BlockWater extends BlockLiquid {
             ((BlockLiquid) this.level.getBlock(x, y, z - 1)).checkForHarden(x, y, z - 1);
         }
         return super.checkForHarden(x, y, z);
+    }
+
+    @Override
+    protected boolean canBeInfinite() {
+        return true;
+    }
+
+    @Override
+    protected int getStillId() {
+        return STILL_WATER;
+    }
+
+    @Override
+    protected int getFlowingId() {
+        return WATER;
     }
 }
