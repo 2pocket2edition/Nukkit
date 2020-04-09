@@ -56,7 +56,7 @@ public class DiscordMain {
 
         try {
             String token = DiscordUtils.getToken().trim();
-            Preconditions.checkState(token.isEmpty(), "Discord token is not set!");
+            Preconditions.checkState(!token.isEmpty(), "Discord token is not set!");
             jda = JDABuilder.createLight(token)
                     .setStatus(OnlineStatus.IDLE)
                     .setActivity(Activity.of(Activity.ActivityType.DEFAULT, "starting..."))
