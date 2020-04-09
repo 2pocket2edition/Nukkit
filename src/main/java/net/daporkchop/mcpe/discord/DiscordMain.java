@@ -2,17 +2,18 @@ package net.daporkchop.mcpe.discord;
 
 import cn.nukkit.Server;
 import cn.nukkit.utils.TextFormat;
+import com.google.common.base.Preconditions;
+import lombok.experimental.UtilityClass;
 import net.daporkchop.mcpe.UtilsPE;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.EmbedBuilder;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.entities.Game;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.AccountType;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.awt.Color;
 import java.time.LocalDateTime;
@@ -25,15 +26,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+@UtilityClass
 public class DiscordMain {
-    private static final Queue<String> SEND_QUEUE = new ConcurrentLinkedQueue<>();
-    private static JDA jda;
-    private static final Timer         timer   = new Timer();
-    private static final StringBuilder BUILDER = new StringBuilder(2000);
+    private final Queue<String> SEND_QUEUE = new ConcurrentLinkedQueue<>();
+    private JDA jda;
+    private final StringBuilder BUILDER = new StringBuilder(2000);
 
-    private static TextChannel channel;
+    private TextChannel channel;
 
-    public static void submitString(String input) {
+    private final boolean ENABLE = Boolean.parseBoolean(System.getProperty("2p2e.discord", "true"));
+
+    public void submitString(String input) {
+        if (!ENABLE)    {
+            return;
+        }
+
         input = TextFormat.clean(input.replaceAll("`", ""));
         if (input.length() >= 800) {
             return;
@@ -42,17 +49,18 @@ public class DiscordMain {
         SEND_QUEUE.add(input);
     }
 
-    public static final void start() {
+    public void start() {
+        if (!ENABLE)    {
+            return;
+        }
+
         try {
             String token = DiscordUtils.getToken().trim();
-            if (token.isEmpty()) {
-                return;
-            }
-            jda = new JDABuilder(AccountType.BOT)
-                    .setToken(token)
-                    .setStatus(OnlineStatus.ONLINE)
-                    .setGame(Game.of(Game.GameType.STREAMING, "starting", "https://www.twitch.tv/daporkchop_"))
-                    .addEventListener(new ListenerAdapter() {
+            Preconditions.checkState(token.isEmpty(), "Discord token is not set!");
+            jda = JDABuilder.createLight(token)
+                    .setStatus(OnlineStatus.IDLE)
+                    .setActivity(Activity.of(Activity.ActivityType.DEFAULT, "starting..."))
+                    .addEventListeners(new ListenerAdapter() {
                         @Override
                         public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
                             if (event.getAuthor().getIdLong() == 259335296947191808L)   {
@@ -98,25 +106,8 @@ public class DiscordMain {
                             }
                         }
                     })
-                    .buildBlocking();
+                    .build().awaitReady();
             channel = jda.getTextChannelById(412992591148220418L);
-            if (channel != null) {
-                submitString("Server started!");
-
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        workOffQueue(false);
-                    }
-                }, 2000, 2000);
-            }
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Server server = Server.getInstance();
-                    jda.getPresence().setGame(Game.of(Game.GameType.STREAMING, "Online " + server.getOnlinePlayers().size() + "/" + server.getMaxPlayers(), "https://www.twitch.tv/daporkchop_"));
-                }
-            }, 10000, 30000);
         } catch (Throwable t) {
             t.printStackTrace();
             Runtime.getRuntime().exit(0);
@@ -125,8 +116,23 @@ public class DiscordMain {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    public void started()   {
+        Server.getInstance().getScheduler().scheduleRepeatingTask(DiscordMain::updateStatus, 30 * 20, true); //30 seconds
+        submitString("Server started!");
+        Server.getInstance().getScheduler().scheduleRepeatingTask(() -> workOffQueue(false), 30, true); //1.5 seconds
+    }
+
+    private static void updateStatus()  {
+        if (ENABLE) {
+            Server server = Server.getInstance();
+            jda.getPresence().setStatus(OnlineStatus.ONLINE);
+            jda.getPresence().setActivity(Activity.of(Activity.ActivityType.WATCHING, String.format("%d/%d players", server.getOnlinePlayers().size(), server.getMaxPlayers())));
+        }
+    }
+
     private static void workOffQueue(boolean sync) {
-        if (channel == null)    {
+        if (!ENABLE || channel == null)    {
             SEND_QUEUE.clear();
             return;
         }
@@ -143,24 +149,13 @@ public class DiscordMain {
     }
 
     public static void shutdown() {
-        if (jda == null) {
+        if (!ENABLE || jda == null) {
             return;
         }
-        timer.purge();
-        timer.cancel();
         submitString("Server shutting down!");
         while (!SEND_QUEUE.isEmpty()) {
             workOffQueue(true);
         }
         jda.shutdown();
-    }
-
-    public static void leaveAllServers() {
-        List<Guild> guilds = new ArrayList<>(jda.getGuilds());
-        System.out.println("Leaving " + guilds.size() + " guilds");
-        for (Guild guild : guilds) {
-            guild.leave().queue();
-        }
-        System.out.println("Done!");
     }
 }

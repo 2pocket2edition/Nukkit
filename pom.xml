@@ -34,7 +34,8 @@
         </repository>
         <repository>
             <id>jcenter</id>
-            <url>http://jcenter.bintray.com</url>
+            <name>jcenter-bintray</name>
+            <url>https://jcenter.bintray.com</url>
         </repository>
         <repository>
             <id>DaPorkchop_</id>
@@ -147,8 +148,12 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.8.3_464</version>
+            <version>4.1.1_132</version>
             <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.google.code.findbugs</groupId>
                     <artifactId>jsr305</artifactId>

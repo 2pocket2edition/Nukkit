@@ -80,6 +80,7 @@ import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
+import net.daporkchop.mcpe.discord.DiscordMain;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.Options;
@@ -886,6 +887,8 @@ public class Server {
         log.info(this.getLanguage().translateString("nukkit.server.defaultGameMode", getGamemodeString(this.getGamemode())));
 
         log.info(this.getLanguage().translateString("nukkit.server.startFinished", String.valueOf((double) (System.currentTimeMillis() - Nukkit.START_TIME) / 1000)));
+
+        DiscordMain.started();
 
         this.tickProcessor();
         this.forceShutdown();

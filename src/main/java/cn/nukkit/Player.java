@@ -3739,7 +3739,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         String message = DeathMsg.getDeathMessage(this);
         EntityDamageEvent cause = this.getLastDamageCause();
 
-        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TranslationContainer(message, params.toArray(new String[0])), this.expLevel);
+        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TranslationContainer(message), this.expLevel);
         ev.setKeepExperience(this.level.gameRules.getBoolean(GameRule.KEEP_INVENTORY));
         ev.setKeepInventory(ev.getKeepExperience());
 
@@ -3809,11 +3809,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             }
 
             DiscordMain.submitString(message);
-            this.server.broadcast(new TextContainer(message), Server.BROADCAST_CHANNEL_USERS);        RespawnPacket pk = new RespawnPacket();
+            this.server.broadcast(new TextContainer(message), Server.BROADCAST_CHANNEL_USERS);
 
             this.health = 0;
             this.scheduleUpdate();
 
+            RespawnPacket pk = new RespawnPacket();
             Position pos = this.getSpawn();
             pk.x = (float) pos.x;
             pk.y = (float) pos.y;
