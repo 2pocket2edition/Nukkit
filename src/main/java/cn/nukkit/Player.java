@@ -3970,7 +3970,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             }
 
             DiscordMain.submitString(message);
-            this.server.broadcast(new TextContainer(message), Server.BROADCAST_CHANNEL_USERS);
 
             RespawnPacket pk = new RespawnPacket();
             Position pos = new Position();//this.getSpawn();
