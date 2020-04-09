@@ -224,9 +224,11 @@ creativeitems.json
 recipes.json
 /discordtoken.txt
 
-/plugins/PocketVote/config.yml
 *.7z
+
+/plugins/PocketVote/
 
 #Nukkit data dir
 data/
 data/*
+backups/
