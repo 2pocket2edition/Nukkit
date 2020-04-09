@@ -4,9 +4,9 @@ import cn.nukkit.Server;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import lombok.experimental.UtilityClass;
-import net.twoptwoe.mobplugin.utils.Utils;
 
 import java.util.BitSet;
 import java.util.Random;
@@ -68,6 +68,37 @@ public class RandomSpawn {
         }
 
         return pos;
+    }
+
+    public Position getSafeSpawnNear(Position position) {
+        if (isSafe(position = position.add(0.5d, 0.001d, 0.5d))) {
+            position.level.getServer().getLogger().info("Spawn position at " + position + " was already safe");
+            return position;
+        }
+        for (int r = 1; r <= 2; r++) {
+            for (int dy = -r; dy <= r; dy++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    for (int dz = -r; dz <= r; dz++) {
+                        Position p = position.add(dx, dy, dz);
+                        if (isSafe(p)) {
+                            position.level.getServer().getLogger().info("Found safe spawn position at " + p);
+                            return p;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean isSafe(Position position) {
+        int x = position.getFloorX() & 0xF;
+        int y = position.getFloorY() - 1;
+        int z = position.getFloorZ() & 0xF;
+        FullChunk chunk = position.getChunk();
+        return y >= 0 && !UNSAFE_BLOCKS.get(chunk.getBlockId(x, y, z))
+                && (y + 1 >= 256 || chunk.getBlockId(x, y + 1, z) == BlockID.AIR)
+                && (y + 2 >= 256 || chunk.getBlockId(x, y + 2, z) == BlockID.AIR);
     }
 
     public boolean isUnsafe(int id) {
