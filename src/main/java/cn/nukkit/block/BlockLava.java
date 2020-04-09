@@ -157,7 +157,7 @@ public class BlockLava extends BlockLiquid {
                             this.level.getServer().getPluginManager().callEvent(e);
 
                             if (!e.isCancelled()) {
-                                BlockFire fire = new BlockFire();
+                                Block fire = Block.get(BlockID.FIRE);
                                 this.getLevel().setBlock(v, fire, true);
                                 this.getLevel().scheduleUpdate(fire, fire.tickRate());
                                 break IGNITE;
@@ -179,7 +179,7 @@ public class BlockLava extends BlockLiquid {
                         this.level.getServer().getPluginManager().callEvent(e);
 
                         if (!e.isCancelled()) {
-                            BlockFire fire = new BlockFire();
+                            Block fire = Block.get(BlockID.FIRE);
                             this.getLevel().setBlock(v, fire, true);
                             this.getLevel().scheduleUpdate(fire, fire.tickRate());
                         }

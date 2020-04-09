@@ -72,10 +72,10 @@ public class BlockSignPost extends BlockTransparentMeta implements Faceable {
 
             if (face == BlockFace.UP) {
                 setDamage((int) Math.floor(((player.yaw + 180) * 16 / 360) + 0.5) & 0x0f);
-                getLevel().setBlock(block, new BlockSignPost(getDamage()), true);
+                getLevel().setBlock(block, Block.get(BlockID.SIGN_POST, getDamage()), true);
             } else {
                 setDamage(face.getIndex());
-                getLevel().setBlock(block, new BlockWallSign(getDamage()), true);
+                getLevel().setBlock(block, Block.get(BlockID.WALL_SIGN, getDamage()), true);
             }
 
             if (player != null) {
@@ -88,9 +88,8 @@ public class BlockSignPost extends BlockTransparentMeta implements Faceable {
                 }
             }
 
-            new BlockEntitySign(getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
-
-            return true;
+            BlockEntitySign sign = (BlockEntitySign) BlockEntity.createBlockEntity(BlockEntity.SIGN, getLevel().getChunk((int) block.x >> 4, (int) block.z >> 4), nbt);
+            return sign != null;
         }
 
         return false;
@@ -126,6 +125,6 @@ public class BlockSignPost extends BlockTransparentMeta implements Faceable {
 
     @Override
     public BlockFace getBlockFace() {
-        return BlockFace.fromHorizontalIndex(this.getDamage() & 0x07);
+        return BlockFace.fromIndex(this.getDamage() & 0x07);
     }
 }

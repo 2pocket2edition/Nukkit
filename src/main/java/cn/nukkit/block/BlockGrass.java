@@ -6,6 +6,7 @@ import cn.nukkit.event.block.BlockSpreadEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.generator.object.ObjectTallGrass;
+import cn.nukkit.level.particle.BoneMealParticle;
 import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.BlockColor;
@@ -42,22 +43,25 @@ public class BlockGrass extends BlockDirt {
 
     @Override
     public String getName() {
-        return "Grass";
+        return "Grass Block";
     }
 
     @Override
     public boolean onActivate(Item item, Player player) {
         if (item.getId() == Item.DYE && item.getDamage() == 0x0F) {
-            item.count--;
-            ObjectTallGrass.growGrass(this.getLevel(), this, new NukkitRandom(), 15, 10);
+            if (player != null && (player.gamemode & 0x01) == 0) {
+                item.count--;
+            }
+            this.level.addParticle(new BoneMealParticle(this));
+            ObjectTallGrass.growGrass(this.getLevel(), this, new NukkitRandom());
             return true;
         } else if (item.isHoe()) {
             item.useOn(this);
-            this.getLevel().setBlock(this, new BlockFarmland());
+            this.getLevel().setBlock(this, Block.get(BlockID.FARMLAND));
             return true;
         } else if (item.isShovel()) {
             item.useOn(this);
-            this.getLevel().setBlock(this, new BlockGrassPath());
+            this.getLevel().setBlock(this, Block.get(BlockID.GRASS_PATH));
             return true;
         }
 
@@ -72,9 +76,9 @@ public class BlockGrass extends BlockDirt {
             y = random.nextRange((int) y - 2, (int) y + 2);
             z = random.nextRange((int) z - 1, (int) z + 1);
             Block block = this.getLevel().getBlock(new Vector3(x, y, z));
-            if (block.getId() == Block.DIRT) {
+            if (block.getId() == Block.DIRT && block.getDamage() == 0) {
                 if (block.up() instanceof BlockAir) {
-                    BlockSpreadEvent ev = new BlockSpreadEvent(block, this, new BlockGrass());
+                    BlockSpreadEvent ev = new BlockSpreadEvent(block, this, Block.get(BlockID.GRASS));
                     Server.getInstance().getPluginManager().callEvent(ev);
                     if (!ev.isCancelled()) {
                         this.getLevel().setBlock(block, ev.getNewState());
@@ -82,7 +86,7 @@ public class BlockGrass extends BlockDirt {
                 }
              } else if (block.getId() == Block.GRASS) {
                 if (block.up() instanceof BlockSolid) {
-                    BlockSpreadEvent ev = new BlockSpreadEvent(block, this, new BlockDirt());
+                    BlockSpreadEvent ev = new BlockSpreadEvent(block, this, Block.get(BlockID.DIRT));
                     Server.getInstance().getPluginManager().callEvent(ev);
                     if (!ev.isCancelled()) {
                         this.getLevel().setBlock(block, ev.getNewState());

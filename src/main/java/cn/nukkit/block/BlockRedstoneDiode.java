@@ -6,6 +6,7 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.BlockFace;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.utils.BlockColor;
 import cn.nukkit.utils.Faceable;
 
 /**
@@ -26,7 +27,7 @@ public abstract class BlockRedstoneDiode extends BlockFlowable implements Faceab
     @Override
     public boolean onBreak(Item item) {
         Vector3 pos = getLocation();
-        this.level.setBlock(this, new BlockAir(), true, true);
+        this.level.setBlock(this, Block.get(BlockID.AIR), true, true);
 
         for (BlockFace face : BlockFace.values()) {
             this.level.updateAroundRedstone(pos.getSide(face), null);
@@ -202,5 +203,10 @@ public abstract class BlockRedstoneDiode extends BlockFlowable implements Faceab
     @Override
     public BlockFace getBlockFace() {
         return BlockFace.fromHorizontalIndex(this.getDamage() & 0x07);
+    }
+
+    @Override
+    public BlockColor getColor() {
+        return BlockColor.AIR_BLOCK_COLOR;
     }
 }

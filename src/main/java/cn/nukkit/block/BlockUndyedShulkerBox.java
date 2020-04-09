@@ -16,8 +16,10 @@ import cn.nukkit.math.BlockFace;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
+import cn.nukkit.nbt.tag.Tag;
 import cn.nukkit.utils.BlockColor;
-import cn.nukkit.utils.DyeColor;
+
+import java.util.Map;
 
 /**
  *
@@ -96,16 +98,6 @@ public class BlockUndyedShulkerBox extends BlockTransparent {
     }
 
     @Override
-    public Item[] getDrops(Item item) {
-        if (item.isPickaxe() && item.getTier() >= ItemTool.TIER_WOODEN) {
-            return new Item[]{
-                    this.toItem()
-            };
-        }
-        return new Item[0];
-    }
-
-    @Override
     public boolean place(Item item, Block block, Block target, BlockFace face, double fx, double fy, double fz, Player player) {
         this.getLevel().setBlock(block, this, true);
         CompoundTag nbt = BlockEntity.getDefaultCompound(this, BlockEntity.SHULKER_BOX)
@@ -117,15 +109,21 @@ public class BlockUndyedShulkerBox extends BlockTransparent {
 
         CompoundTag t = item.getNamedTag();
 
-        if (t != null) {
-            if (t.contains("Items")) {
-                nbt.putList(t.getList("Items"));
+        // This code gets executed when the player has broken the shulker box and placed it back (©Kevims 2020)
+        if (t != null && t.contains("Items")) {
+            nbt.putList(t.getList("Items"));
+        }
+
+        // This code gets executed when the player has copied the shulker box in creative mode (©Kevims 2020)
+        if (item.hasCustomBlockData()) {
+            Map<String, Tag> customData = item.getCustomBlockData().getTags();
+            for (Map.Entry<String, Tag> tag : customData.entrySet()) {
+                nbt.put(tag.getKey(), tag.getValue());
             }
         }
 
-        new BlockEntityShulkerBox(this.getLevel().getChunk(this.getFloorX() >> 4, this.getFloorZ() >> 4), nbt);
-
-        return true;
+        BlockEntityShulkerBox box = (BlockEntityShulkerBox) BlockEntity.createBlockEntity(BlockEntity.SHULKER_BOX, this.getLevel().getChunk(this.getFloorX() >> 4, this.getFloorZ() >> 4), nbt);
+        return box != null;
     }
 
     @Override
@@ -142,7 +140,10 @@ public class BlockUndyedShulkerBox extends BlockTransparent {
                 box = (BlockEntityShulkerBox) t;
             } else {
                 CompoundTag nbt = BlockEntity.getDefaultCompound(this, BlockEntity.SHULKER_BOX);
-                box = new BlockEntityShulkerBox(this.getLevel().getChunk(this.getFloorX() >> 4, this.getFloorZ() >> 4), nbt);
+                box = (BlockEntityShulkerBox) BlockEntity.createBlockEntity(BlockEntity.SHULKER_BOX, this.getLevel().getChunk(this.getFloorX() >> 4, this.getFloorZ() >> 4), nbt);
+                if (box == null) {
+                    return false;
+                }
             }
 
             Block block = this.getSide(BlockFace.fromIndex(box.namedTag.getByte("facing")));

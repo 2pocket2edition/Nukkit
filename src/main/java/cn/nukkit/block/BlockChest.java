@@ -133,7 +133,11 @@ public class BlockChest extends BlockTransparentMeta implements Faceable {
             }
         }
 
-        BlockEntityChest blockEntity = new BlockEntityChest(this.getLevel().getChunk((int) (this.x) >> 4, (int) (this.z) >> 4), nbt);
+        BlockEntityChest blockEntity = (BlockEntityChest) BlockEntity.createBlockEntity(BlockEntity.CHEST, this.getLevel().getChunk((int) (this.x) >> 4, (int) (this.z) >> 4), nbt);
+
+        if (blockEntity == null) {
+            return false;
+        }
 
         if (chest != null) {
             chest.pairWith(blockEntity);
@@ -149,7 +153,7 @@ public class BlockChest extends BlockTransparentMeta implements Faceable {
         if (t instanceof BlockEntityChest) {
             ((BlockEntityChest) t).unpair();
         }
-        this.getLevel().setBlock(this, new BlockAir(), true, true);
+        this.getLevel().setBlock(this, Block.get(BlockID.AIR), true, true);
 
         return true;
     }
@@ -173,7 +177,10 @@ public class BlockChest extends BlockTransparentMeta implements Faceable {
                         .putInt("x", (int) this.x)
                         .putInt("y", (int) this.y)
                         .putInt("z", (int) this.z);
-                chest = new BlockEntityChest(this.getLevel().getChunk((int) (this.x) >> 4, (int) (this.z) >> 4), nbt);
+                chest = (BlockEntityChest) BlockEntity.createBlockEntity(BlockEntity.CHEST, this.getLevel().getChunk((int) (this.x) >> 4, (int) (this.z) >> 4), nbt);
+                if (chest == null) {
+                    return false;
+                }
             }
 
             if (chest.namedTag.contains("Lock") && chest.namedTag.get("Lock") instanceof StringTag) {
