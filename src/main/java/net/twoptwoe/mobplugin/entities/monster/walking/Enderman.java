@@ -17,6 +17,7 @@ import net.twoptwoe.mobplugin.utils.Utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Enderman extends WalkingMonster {
 
@@ -100,7 +101,7 @@ public class Enderman extends WalkingMonster {
     }
 
     public boolean teleport(int radius, Position ok) {
-        Position pos = RandomSpawn.getSpawnPos(level, ok, radius, 256);
+        Position pos = RandomSpawn.getSpawnPos(level, ThreadLocalRandom.current(), ok, radius, 256);
         if (pos.y > 1000) {
             return false;
         }

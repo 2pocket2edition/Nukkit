@@ -101,6 +101,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public String lastDM = "°"; //random char that can't be in a name
     public boolean showCoords = true;
     public long lastMessage = System.currentTimeMillis();
+    public long deaths = 0L;
 
     public static final int SURVIVAL = 0;
     public static final int CREATIVE = 1;
@@ -752,7 +753,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         if (this.spawnPosition != null && this.spawnPosition.isValidSpawn()) {
             return this.spawnPosition;
         } else {
-            return RandomSpawn.getSpawnPos(level);
+            this.spawnPosition = null;
+            return RandomSpawn.getSpawnPos(this.level, new Random(this.uuid.getMostSignificantBits() ^ this.uuid.getLeastSignificantBits() ^ this.deaths));
         }
     }
 
@@ -866,7 +868,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         setTimePacket.time = this.level.getTime();
         this.dataPacket(setTimePacket);
 
-        Position pos = this.level.getSafeSpawn(this);
+        Position pos = this.clone();
 
         PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(this, pos, true);
 
@@ -1926,20 +1928,21 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.setLevel(level);
         }
 
-        if (nbt.contains("SpawnLevel")) {
-            Level spawnLevel = this.server.getLevelByName(nbt.getString("SpawnLevel"));
+        if (nbt.contains("2p2e_SpawnLevel")) {
+            Level spawnLevel = this.server.getLevelByName(nbt.getString("2p2e_SpawnLevel"));
             if (spawnLevel == null) {
-                log.warn("Spawn point is in invalid level: \"%s\"", nbt.getString("SpawnLevel"));
+                log.warn("Spawn point is in invalid level: \"%s\"", nbt.getString("2p2e_SpawnLevel"));
                 this.spawnPosition = null;
             } else {
                 this.spawnPosition = new Position(
-                        nbt.getInt("SpawnX"),
-                        nbt.getInt("SpawnZ"),
-                        nbt.getInt("SpawnY"),
+                        nbt.getInt("2p2e_SpawnX"),
+                        nbt.getInt("2p2e_SpawnZ"),
+                        nbt.getInt("2p2e_SpawnY"),
                         level
                 );
             }
         }
+        this.deaths = nbt.getLong("2p2e_DeathCounter");
 
         for (Tag achievement : nbt.getCompound("Achievements").getAllTags()) {
             if (!(achievement instanceof ByteTag)) {
@@ -1996,14 +1999,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return;
         }
 
-        Level level = this.server.getLevelByName(this.namedTag.getString("SpawnLevel"));
-        if(level != null){
-            this.spawnPosition = new Position(this.namedTag.getInt("SpawnX"), this.namedTag.getInt("SpawnY"), this.namedTag.getInt("SpawnZ"), level);
-        }else{
-            this.spawnPosition = this.level.getSafeSpawn();
+        Level level = this.server.getLevelByName(this.namedTag.getString("2p2e_SpawnLevel"));
+        if (level != null) {
+            this.spawnPosition = new Position(this.namedTag.getInt("2p2e_SpawnX"), this.namedTag.getInt("2p2e_SpawnY"), this.namedTag.getInt("2p2e_SpawnZ"), level);
         }
-
-        spawnPosition = this.getSpawn();
+        this.deaths = this.namedTag.getLong("2p2e_DeathCounter");
 
         StartGamePacket startGamePacket = new StartGamePacket();
         startGamePacket.entityUniqueId = this.id;
@@ -2018,9 +2018,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         startGamePacket.dimension = /*(byte) (this.level.getDimension() & 0xff)*/0;
         startGamePacket.worldGamemode = getClientFriendlyGamemode(this.gamemode);
         startGamePacket.difficulty = this.server.getDifficulty();
-        startGamePacket.spawnX = spawnPosition.getFloorX();
-        startGamePacket.spawnY = spawnPosition.getFloorY();
-        startGamePacket.spawnZ = spawnPosition.getFloorZ();
+        startGamePacket.spawnX = this.spawnPosition == null ? 0 : spawnPosition.getFloorX();
+        startGamePacket.spawnY = this.spawnPosition == null ? 128 : spawnPosition.getFloorY();
+        startGamePacket.spawnZ = this.spawnPosition == null ? 0 : spawnPosition.getFloorZ();
         startGamePacket.hasAchievementsDisabled = true;
         startGamePacket.dayCycleStopTime = -1;
         startGamePacket.rainLevel = 0;
@@ -3686,11 +3686,17 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         if (this.level != null) {
             this.namedTag.putString("Level", this.level.getFolderName());
             if (this.spawnPosition != null && this.spawnPosition.getLevel() != null) {
-                this.namedTag.putString("SpawnLevel", this.spawnPosition.getLevel().getFolderName());
-                this.namedTag.putInt("SpawnX", (int) this.spawnPosition.x);
-                this.namedTag.putInt("SpawnY", (int) this.spawnPosition.y);
-                this.namedTag.putInt("SpawnZ", (int) this.spawnPosition.z);
+                this.namedTag.putString("2p2e_SpawnLevel", this.spawnPosition.getLevel().getFolderName());
+                this.namedTag.putInt("2p2e_SpawnX", (int) this.spawnPosition.x);
+                this.namedTag.putInt("2p2e_SpawnY", (int) this.spawnPosition.y);
+                this.namedTag.putInt("2p2e_SpawnZ", (int) this.spawnPosition.z);
+            } else {
+                this.namedTag.remove("2p2e_SpawnLevel");
+                this.namedTag.remove("2p2e_SpawnX");
+                this.namedTag.remove("2p2e_SpawnY");
+                this.namedTag.remove("2p2e_SpawnZ");
             }
+            this.namedTag.putLong("2p2e_DeathCounter", this.deaths);
 
             CompoundTag achievements = new CompoundTag();
             for (String achievement : this.achievements) {
@@ -3726,20 +3732,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             return;
         }
 
-        if (this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
-            for (Item item : this.getDrops()) {
-                this.level.dropItem(this, item, null, true, 40);
-            }
-
-            if (this.inventory != null) {
-                this.inventory.clearAll();
-            }
-        }
-
+        boolean showMessages = this.level.getGameRules().getBoolean(GameRule.SHOW_DEATH_MESSAGE);
         String message = DeathMsg.getDeathMessage(this);
         EntityDamageEvent cause = this.getLastDamageCause();
 
-        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TranslationContainer(message), this.expLevel);
+        PlayerDeathEvent ev = new PlayerDeathEvent(this, this.getDrops(), new TextContainer(message), this.expLevel);
         ev.setKeepExperience(this.level.gameRules.getBoolean(GameRule.KEEP_INVENTORY));
         ev.setKeepInventory(ev.getKeepExperience());
 
@@ -3778,6 +3775,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.stopFishing(false);
             }
 
+            this.deaths++;
             this.health = 0;
             this.extinguish();
             this.scheduleUpdate();
@@ -3795,7 +3793,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 }
             }
 
-            if (this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
+            if (!ev.getKeepExperience() && this.level.getGameRules().getBoolean(GameRule.DO_ENTITY_DROPS)) {
                 if (this.isSurvival() || this.isAdventure()) {
                     int exp = ev.getExperience() * 7;
                     if (exp > 100) exp = 100;
@@ -3804,22 +3802,18 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                 this.setExperience(0, 0);
             }
 
-            if (this.level != EnumLevel.OVERWORLD.getLevel())   {
-                this.teleportImmediate(new Location(0, -100, 0, EnumLevel.OVERWORLD.getLevel()));
+            if (showMessages && !ev.getDeathMessage().toString().isEmpty()) {
+                this.server.broadcast(ev.getDeathMessage(), Server.BROADCAST_CHANNEL_USERS);
             }
 
             DiscordMain.submitString(message);
             this.server.broadcast(new TextContainer(message), Server.BROADCAST_CHANNEL_USERS);
-
-            this.health = 0;
-            this.scheduleUpdate();
 
             RespawnPacket pk = new RespawnPacket();
             Position pos = this.getSpawn();
             pk.x = (float) pos.x;
             pk.y = (float) pos.y;
             pk.z = (float) pos.z;
-
             pk.respawnState = RespawnPacket.STATE_SEARCHING_FOR_SPAWN;
 
             this.dataPacket(pk);
@@ -3839,6 +3833,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         this.server.getPluginManager().callEvent(playerRespawnEvent);
 
         Position respawnPos = playerRespawnEvent.getRespawnPosition();
+        this.server.getLogger().info("Respawning at " + respawnPos);
 
         this.sendExperience();
         this.sendExperienceLevel();

@@ -80,6 +80,7 @@ import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
+import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.discord.DiscordMain;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
@@ -883,6 +884,8 @@ public class Server {
 
         //todo send usage setting
         this.tickCounter = 0;
+
+        RandomSpawn.init(this);
 
         log.info(this.getLanguage().translateString("nukkit.server.defaultGameMode", getGamemodeString(this.getGamemode())));
 
