@@ -19,7 +19,7 @@ public class RandomSpawn {
     private final BitSet UNSAFE_BLOCKS = new BitSet();
 
     private final int RADIUS    = 256;
-    private final int MAX_TRIES = 128;
+    private final int MAX_TRIES = 8;
 
     static {
         UNSAFE_BLOCKS.set(BlockID.AIR);
@@ -65,14 +65,15 @@ public class RandomSpawn {
                 if (!UNSAFE_BLOCKS.get(chunk.getBlockId(x & 0xF, y, z & 0xF))
                         && (y + 1 >= 256 || chunk.getBlockId(x & 0xF, y + 1, z & 0xF) == BlockID.AIR)
                         && (y + 2 >= 256 || chunk.getBlockId(x & 0xF, y + 2, z & 0xF) == BlockID.AIR)) {
-                    level.getServer().getLogger().info("Generated spawn position at " + new Position(x + 0.5d, y + 1.001d, z + 0.5d, level));
                     positions.add(new Position(x + 0.5d, y + 1.001d, z + 0.5d, level));
                     break;
                 }
             }
         }
 
-        return positions.stream().max(Comparator.comparingDouble(Position::getY)).orElse(pos);
+        pos = positions.stream().max(Comparator.comparingDouble(Position::getY)).orElse(pos);
+        level.getServer().getLogger().info("Generated spawn position at " + pos);
+        return pos;
     }
 
     public Position getSafeSpawnNear(Position position) {
