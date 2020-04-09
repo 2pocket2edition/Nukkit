@@ -1,6 +1,6 @@
 #!/bin/bash
 
-wget --no-check-certificate --header="Host: jenkins.daporkchop.net" https://10.0.0.21/job/Minecraft/job/2p2e/job/NukkitX/job/master/lastSuccessfulBuild/artifact/target/nukkit-1.0-SNAPSHOT.jar
+wget --no-check-certificate --header="Host: jenkins.daporkchop.net" https://10.0.0.20/job/Minecraft/job/2p2e/job/NukkitX/job/master/lastSuccessfulBuild/artifact/target/nukkit-1.0-SNAPSHOT.jar
 
 java -Xmx3G -Xms1G \
 -XX:+UseG1GC \
