@@ -19,18 +19,6 @@ pipeline {
                 }
             }
         }
-
-        stage ('Deploy') {
-            when {
-                branch "master"
-            }
-            steps {
-                sh 'mvn javadoc:javadoc javadoc:jar source:jar deploy -DskipTests'
-                step([$class: 'JavadocArchiver',
-                        javadocDir: 'target/site/apidocs',
-                        keepAll: false])
-            }
-        }
     }
 
     post {
