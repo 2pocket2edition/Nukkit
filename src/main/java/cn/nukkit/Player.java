@@ -1105,6 +1105,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.respawn();
         }
 
+        this.server.getScheduler().scheduleDelayedTask(() -> {
+            this.sendTitle("\u00A7c2p2e temp server", null, 0, 80, 5);
+            this.sendMessage("Welcome to the 2p2e temp server!");
+        }, 60 + 80);
     }
 
     protected boolean orderChunks() {
