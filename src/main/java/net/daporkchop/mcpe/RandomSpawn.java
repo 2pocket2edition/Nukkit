@@ -8,7 +8,10 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import lombok.experimental.UtilityClass;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
 
 @UtilityClass
@@ -16,7 +19,7 @@ public class RandomSpawn {
     private final BitSet UNSAFE_BLOCKS = new BitSet();
 
     private final int RADIUS    = 256;
-    private final int MAX_TRIES = 2048;
+    private final int MAX_TRIES = 128;
 
     static {
         UNSAFE_BLOCKS.set(BlockID.AIR);
@@ -53,6 +56,7 @@ public class RandomSpawn {
     }
 
     public Position getSpawnPos(Level level, Random random, Position pos, int radius, int maxTries) {
+        List<Position> positions = new ArrayList<>(maxTries);
         for (int tries = 0; tries < maxTries; tries++) {
             int x = random.nextInt(radius << 1) - radius + pos.getFloorX();
             int z = random.nextInt(radius << 1) - radius + pos.getFloorZ();
@@ -62,12 +66,13 @@ public class RandomSpawn {
                         && (y + 1 >= 256 || chunk.getBlockId(x & 0xF, y + 1, z & 0xF) == BlockID.AIR)
                         && (y + 2 >= 256 || chunk.getBlockId(x & 0xF, y + 2, z & 0xF) == BlockID.AIR)) {
                     level.getServer().getLogger().info("Generated spawn position at " + new Position(x + 0.5d, y + 1.001d, z + 0.5d, level));
-                    return new Position(x + 0.5d, y + 1.001d, z + 0.5d, level);
+                    positions.add(new Position(x + 0.5d, y + 1.001d, z + 0.5d, level));
+                    break;
                 }
             }
         }
 
-        return pos;
+        return positions.stream().max(Comparator.comparingDouble(Position::getY)).orElse(pos);
     }
 
     public Position getSafeSpawnNear(Position position) {
