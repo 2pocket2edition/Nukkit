@@ -1,6 +1,7 @@
 package net.twoptwoe.mobplugin.entities.monster;
 
 import cn.nukkit.entity.Entity;
+import cn.nukkit.level.Level;
 
 public interface Monster {
 
@@ -35,5 +36,4 @@ public interface Monster {
     void setMinDamage(int damage, int difficulty);
 
     void setMaxDamage(int damage, int difficulty);
-
 }

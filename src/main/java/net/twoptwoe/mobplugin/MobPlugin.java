@@ -101,8 +101,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MobPlugin extends PluginBase implements Listener {
 
+    public static final double MIN_SPAWN_DISTANCE = 16.0d * 16.0d;
+    public static final double MAX_SPAWN_DISTANCE = 48.0d * 48.0d;
+
     @SuppressWarnings("serial")
-    public static final TIntFloatMap armorValues = new TIntFloatHashMap() {
+    public static final TIntFloatMap armorValues    = new TIntFloatHashMap() {
         {
             put(Item.LEATHER_CAP, 1f);
             put(Item.LEATHER_TUNIC, 3f);
@@ -126,10 +129,10 @@ public class MobPlugin extends PluginBase implements Listener {
             put(Item.DIAMOND_BOOTS, 3f);
         }
     };
-    public static boolean MOB_AI_ENABLED = true;
+    public static       boolean      MOB_AI_ENABLED = true;
     @SuppressWarnings("unchecked")
-    private static Class<? extends Entity>[]
-            animals = new Class[]{
+    private static      Class<? extends Entity>[]
+                                     animals        = new Class[]{
             Rabbit.class,
             Chicken.class,
             Cow.class,
@@ -145,7 +148,7 @@ public class MobPlugin extends PluginBase implements Listener {
             Pig.class,
             Sheep.class
     },
-            monsters_ow = new Class[]{
+            monsters_ow                             = new Class[]{
                     Creeper.class,
                     Enderman.class,
                     Skeleton.class,
@@ -156,7 +159,7 @@ public class MobPlugin extends PluginBase implements Listener {
                     Spider.class,
                     Spider.class
             },
-            monsters_nether = new Class[]{
+            monsters_nether                         = new Class[]{
                     Blaze.class,
                     Ghast.class,
                     PigZombie.class,
@@ -166,7 +169,7 @@ public class MobPlugin extends PluginBase implements Listener {
                     PigZombie.class,
                     PigZombie.class
             },
-            monsters_end = new Class[]{
+            monsters_end                            = new Class[]{
                     Enderman.class
             };
     private static ThreadLocal<HashSet<FullChunk>> spawnChunks = ThreadLocal.withInitial(HashSet::new);
@@ -204,7 +207,7 @@ public class MobPlugin extends PluginBase implements Listener {
                         return;
                     }
                     Entity entityObj;
-                    if (entity == Sheep.class)  {
+                    if (entity == Sheep.class) {
                         entityObj = create(entity.getSimpleName(), new Position(xPos, yPos, zPos, event.getLevel()), Sheep.randomColor(new Random(((chunk.getX() & 0xFFFFFFFFL) << 32L) | (chunk.getZ() & 0xFFFFFFFFL))));
                     } else {
                         entityObj = create(entity.getSimpleName(), new Position(xPos, yPos, zPos, event.getLevel()));
@@ -299,15 +302,23 @@ public class MobPlugin extends PluginBase implements Listener {
                             break CHUNK;
                         }*/
                     }
-                    Entity entity = create(clazz.getSimpleName(), new Location(xPos, yPos, zPos, level));
-                    level.addEntity(entity);
+                    Location loc = new Location(xPos + 0.5d, yPos + 0.001d, zPos + 0.5d, level);
+
+                    double dist = Double.MAX_VALUE;
+                    for (Player player : server.getOnlinePlayers().values()) {
+                        dist = Math.min(dist, player.distanceSquared(loc));
+                    }
+
+                    if (dist >= MIN_SPAWN_DISTANCE && dist <= MAX_SPAWN_DISTANCE) {
+                        level.addEntity(create(clazz.getSimpleName(), loc));
+                    }
                 }
             });
             chunks.clear();
         });
     }
 
-    protected static boolean isSlimeChunk(int chunkX, int chunkZ)   {
+    protected static boolean isSlimeChunk(int chunkX, int chunkZ) {
         return ((chunkX * 1461535919 ^ chunkZ * 930001883) & 0xF) == 0;
     }
 

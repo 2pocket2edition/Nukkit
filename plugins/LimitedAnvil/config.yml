@@ -1,0 +1,19 @@
+configVersion: 2
+
+repairCost: 2
+renameCost: 1
+maxNameLength: 30
+
+form.anvil.title_en_US: "Anvil"
+form.anvil.message.air_en_US: "§cYou must hold an item in your hand"
+form.anvil.message.noxp_en_US: "§cYou don't have enough XP"
+form.anvil.rename.title_en_US: "Rename"
+form.anvil.rename.label_en_US: "§6Rename the item in your hand\n\n\n\n\n§eCost: §d1\n§eXP: §d"
+form.anvil.rename.description_en_US: "§aName:"
+form.anvil.rename.message.nametoolong_en_US: "§cThe name is too long. Limit: 30 characters"
+form.anvil.rename.message.success_en_US: "§aItem renamed"
+form.anvil.repair.title_en_US: "Repair"
+form.anvil.repair.label_en_US: "§6Combine the item in your hand with another item in your inventory and repair it\n\n\n\n\n\n\n§eCost: §d2\n§eXP: §d"
+form.anvil.repair.message.twoitems_en_US: "§cYou need two items to repair and combine them"
+form.anvil.repair.message.nottool_en_US: "§cYou can only repair tools and armor"
+form.anvil.repair.message.success_en_US: "§aItem repaired"

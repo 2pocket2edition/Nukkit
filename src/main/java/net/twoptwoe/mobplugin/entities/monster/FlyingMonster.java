@@ -8,6 +8,7 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
+import net.twoptwoe.mobplugin.MobPlugin;
 import net.twoptwoe.mobplugin.entities.FlyingEntity;
 import net.twoptwoe.mobplugin.utils.Utils;
 
@@ -136,7 +137,8 @@ public abstract class FlyingMonster extends FlyingEntity implements Monster {
 
     @Override
     public boolean onUpdate(int currentTick) {
-        if (this.server.getDifficulty() < 1) {
+        if (this.server.getDifficulty() < 1
+                || this.level.getPlayers().values().stream().mapToDouble(this::distanceSquared).min().orElse(Double.MAX_VALUE) > MobPlugin.MAX_SPAWN_DISTANCE) {
             this.close();
             return false;
         }

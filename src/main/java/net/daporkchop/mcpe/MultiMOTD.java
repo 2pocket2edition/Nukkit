@@ -4,6 +4,7 @@ import net.twoptwoe.mobplugin.utils.Utils;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,14 @@ import java.util.Scanner;
  */
 public class MultiMOTD {
     private static List<String> motds;
-    private static final String newLine = System.getProperty("line.separator");
 
     static {
         try {
             File file = new File(".", "motds.txt");
             if (file.exists()) {
-                motds = Files.readAllLines(file.getAbsoluteFile().toPath(), Charset.forName("UTF-8"));
+                motds = Files.readAllLines(file.getAbsoluteFile().toPath(), StandardCharsets.UTF_8);
                 motds.removeIf(String::isEmpty);
+                motds.sort(String.CASE_INSENSITIVE_ORDER);
             } else {
                 file.createNewFile();
                 motds = new ArrayList<>();
@@ -41,10 +42,11 @@ public class MultiMOTD {
     public static void putMOTD(String motd) {
         synchronized (motds) {
             motds.add(motd);
-            try {
-                Writer output = new BufferedWriter(new FileWriter(new File(".", "motds.txt"), true));
-                output.append(motd + newLine);
-                output.close();
+            motds.sort(String.CASE_INSENSITIVE_ORDER);
+            try (Writer output = new BufferedWriter(new FileWriter(new File(".", "motds.txt"), false))) {
+                for (String s : motds)   {
+                    output.append(s).append('\n');
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
