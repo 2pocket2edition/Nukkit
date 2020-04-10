@@ -914,7 +914,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             this.sendMessage("Your home bed was missing or obstructed");
         }
         this.spawnPosition = null;
-        return RandomSpawn.getSpawnPos(this.level, new Random(this.uuid.getMostSignificantBits() ^ this.uuid.getLeastSignificantBits() ^ this.deaths));
+        return RandomSpawn.getSpawnPos(this.server.getDefaultLevel(), new Random(this.uuid.getMostSignificantBits() ^ this.uuid.getLeastSignificantBits() ^ this.deaths));
     }
 
     public void sendChunk(int x, int z, DataPacket packet) {
