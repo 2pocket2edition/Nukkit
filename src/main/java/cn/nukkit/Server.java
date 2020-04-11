@@ -80,6 +80,7 @@ import co.aikar.timings.Timings;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.log4j.Log4j2;
+import net.daporkchop.mcpe.MultiMOTD;
 import net.daporkchop.mcpe.RandomSpawn;
 import net.daporkchop.mcpe.discord.DiscordMain;
 import org.iq80.leveldb.CompressionType;
@@ -1449,11 +1450,11 @@ public class Server {
     }
 
     public String getMotd() {
-        return this.getPropertyString("motd", "A Nukkit Powered Server");
+        return MultiMOTD.getMOTD();
     }
 
     public String getSubMotd() {
-        return this.getPropertyString("sub-motd", "https://nukkitx.com");
+        return "https://2p2e.net";
     }
 
     public boolean getForceResources() {
