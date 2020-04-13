@@ -1,0 +1,5 @@
+interval: 1800
+messages:
+  - "&cjoin the discord: &o&9https://discord.gg/E9KfsPN"
+  - "&cuse &l/coords&r&c to show/hide your coordinates"
+  - "&cthis is a temp server, and will be reset once NukkitX 2.0 is released"

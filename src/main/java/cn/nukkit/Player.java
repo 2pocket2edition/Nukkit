@@ -255,7 +255,6 @@ import java.util.function.Consumer;
 public class Player extends EntityHuman implements CommandSender, InventoryHolder, ChunkLoader, IPlayer {
 
     public String lastDM = "°"; //random char that can't be in a name
-    public boolean showCoords = true;
     public long lastMessage = System.currentTimeMillis();
     public long deaths = 0L;
 
@@ -2194,6 +2193,11 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         startGamePacket.worldName = this.getServer().getNetwork().getName();
         startGamePacket.generator = 1; //0 old, 1 infinite, 2 flat
         this.dataPacket(startGamePacket);
+
+        GameRulesChangedPacket gameRulesChangedPacket = new GameRulesChangedPacket();
+        gameRulesChangedPacket.gameRules = this.getLevel().getGameRules();
+        gameRulesChangedPacket.showCoords = this.namedTag.getBoolean("2p2e_showCoords");
+        this.dataPacket(gameRulesChangedPacket);
 
         this.dataPacket(new BiomeDefinitionListPacket());
         this.dataPacket(new AvailableEntityIdentifiersPacket());
@@ -4808,6 +4812,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             GameRulesChangedPacket gameRulesChanged = new GameRulesChangedPacket();
             gameRulesChanged.gameRules = level.getGameRules();
+            gameRulesChanged.showCoords = this.namedTag.getBoolean("2p2e_showCoords");
             this.dataPacket(gameRulesChanged);
             return true;
         }

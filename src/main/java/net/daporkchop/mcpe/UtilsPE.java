@@ -6,12 +6,13 @@ import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.scheduler.Task;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 
+import java.io.File;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -37,28 +38,24 @@ public class UtilsPE {
         return Math.round(value / factor) * factor;
     }
 
+    @SuppressWarnings("deprecation")
     public static void init(final Server s) {
-        s.getScheduler().scheduleRepeatingTask(new Task() {
-            @Override
-            public void onRun(int currentTick) {
-                Server.getInstance().getNetwork().setName(MultiMOTD.getMOTD());
+        //update motd randomly
+        s.getScheduler().scheduleRepeatingTask(() -> Server.getInstance().getNetwork().setName(MultiMOTD.getMOTD()), 1);
+
+        //kill players on nether roof
+        s.getScheduler().scheduleDelayedRepeatingTask(() -> Server.getInstance().getOnlinePlayers().forEach((uuid, player) -> {
+            if (player.level.getDimension() == Level.DIMENSION_NETHER && player.getY() > 127.5d) {
+                EntityDamageEvent ev = new EntityDamageEvent(player, EntityDamageEvent.DamageCause.VOID, Integer.MAX_VALUE);
+                player.getServer().getPluginManager().callEvent(ev);
+                if (!ev.isCancelled()) {
+                    player.setLastDamageCause(ev);
+                    player.setHealth(0);
+                }
             }
-        }, 2);
-        s.getScheduler().scheduleDelayedRepeatingTask(new Task() {
-            @Override
-            public void onRun(int currentTick) {
-                Server.getInstance().getOnlinePlayers().forEach((uuid, player) -> {
-                    if (player.level.getDimension() == Level.DIMENSION_NETHER && player.getY() > 127.5d) {
-                        EntityDamageEvent ev = new EntityDamageEvent(player, EntityDamageEvent.DamageCause.VOID, Integer.MAX_VALUE);
-                        player.getServer().getPluginManager().callEvent(ev);
-                        if (!ev.isCancelled()) {
-                            player.setLastDamageCause(ev);
-                            player.setHealth(0);
-                        }
-                    }
-                });
-            }
-        }, 40, 40);
+        }), 40, 40);
+
+        //auto-reboot
         new HashMap<Integer, String>() {
             {
                 this.register(TimeUnit.MINUTES, 10L);
@@ -84,16 +81,22 @@ public class UtilsPE {
                 int time = (int) unit.toSeconds(amount);
                 this.put(SHUTDOWN_TICKS - time * 20, amount == 0L ? "" : String.format("§c§lServer restarting in %d %s...", amount, unitName));
             }
-        }.forEach((time, msg) -> s.getScheduler().scheduleDelayedTask(new Task() {
-            @Override
-            public void onRun(int currentTick) {
-                if (msg.isEmpty()) {
-                    stopNow();
-                } else {
-                    Server.getInstance().broadcastMessage(msg);
-                }
+        }.forEach((time, msg) -> s.getScheduler().scheduleDelayedTask(() -> {
+            if (msg.isEmpty()) {
+                stopNow();
+            } else {
+                Server.getInstance().broadcastMessage(msg);
             }
         }, time));
+
+        //random broadcast messages
+        Config broadcastConfig = new Config(new File(s.getFilePath(), "broadcasts.yml"), Config.YAML);
+        List<String> messageList = broadcastConfig.getStringList("messages");
+        if (!messageList.isEmpty()) {
+            String[] broadcastMessages = messageList.stream().map(TextFormat::colorize).toArray(String[]::new);
+            int interval = broadcastConfig.getInt("interval", 120 * 20);
+            s.getScheduler().scheduleRepeatingTask(() -> Server.getInstance().broadcastMessage(broadcastMessages[ThreadLocalRandom.current().nextInt(broadcastMessages.length)]), interval);
+        }
     }
 
     public static void stripBannedBlocks(FullChunk chunk) {

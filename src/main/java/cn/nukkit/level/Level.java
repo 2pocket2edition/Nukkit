@@ -892,7 +892,7 @@ public class Level implements ChunkManager, Metadatable {
             this.chunkPackets.clear();
         }
 
-        if (gameRules.isStale()) {
+        if (false && gameRules.isStale()) { //never broadcast gamerule updates
             GameRulesChangedPacket packet = new GameRulesChangedPacket();
             packet.gameRules = gameRules;
             Server.broadcastPacket(players.values().toArray(new Player[0]), packet);

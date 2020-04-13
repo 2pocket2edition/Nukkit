@@ -232,3 +232,4 @@ recipes.json
 data/
 data/*
 backups/
+stall_*.txt
