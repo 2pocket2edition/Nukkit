@@ -15,14 +15,14 @@ settings:
  deprecated-verbose: true
  #Number of AsyncTask workers
  #If set to auto, it'll try to detect the number of cores (and at least 4)
- async-workers: auto
+ async-workers: 6
 
 network:
  #Threshold for batching packets, in bytes. Only these packets will be compressed
  #Set to 0 to compress everything, -1 to disable
  batch-threshold: 256
  #Compression level used of Zlib when sending batched packets. Higher = more CPU, less bandwidth usage
- compression-level: 7
+ compression-level: 2
  #Use AsyncTasks for compression. Adds half/one tick delay, less CPU load on main thread
  async-compression: true
 
@@ -58,16 +58,16 @@ level-settings:
  #The default format that levels will use when created
  default-format: anvil
  #Automatically change levels tick rate to maintain 20 ticks per second
- auto-tick-rate: true
+ auto-tick-rate: false
  auto-tick-rate-limit: 20
  #Sets the base tick rate (1 = 20 ticks per second, 2 = 10 ticks per second, etc.)
  base-tick-rate: 1
  #Tick all players each tick even when other settings disallow this
- always-tick-players: false
+ always-tick-players: true
 
 chunk-sending:
  #Amount of chunks sent to players per tick
- per-tick: 4
+ per-tick: 1
  #Amount of chunks sent around each player
  max-chunks: 192
  #Amount of chunks that need to be sent before spawning the player
@@ -86,9 +86,9 @@ chunk-ticking:
 
 chunk-generation:
  #Max. amount of chunks in the waiting queue to be generated
- queue-size: 8
+ queue-size: 3
  #Max. amount of chunks in the waiting queue to be populated
- population-queue-size: 8
+ population-queue-size: 3
 
 ticks-per:
  animal-spawns: 400
@@ -117,9 +117,10 @@ aliases:
 worlds:
  #These settings will override the generator set in server.properties and allows loading multiple levels
  #Example:
- #world:
- # seed: 404
- # generator: FLAT:2;7,59x1,3x3,2;1;decoration(treecount=80 grasscount=45)
+ world:
+  seed: nyef
+  generator: default
  nether:
-  seed: 12345
+  seed: nyef
   generator: nether
+
