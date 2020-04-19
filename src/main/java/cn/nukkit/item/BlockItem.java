@@ -16,15 +16,15 @@ public class BlockItem extends Item {
     }
 
     public Block getBlock() {
-        return Block.get(this.getId(), this.getDamage());
+        return Block.get(this.getId(), this.getMeta());
     }
 
     @Override
-    public void setDamage(int meta) {
-        if (BlockRegistry.get().hasMeta(getId(), meta)) {
-            super.setDamage(meta);
+    public void setMeta(int meta) {
+        if ((meta & 0xffff) == 0xffff || BlockRegistry.get().hasMeta(getId(), meta)) {
+            super.setMeta(meta);
         } else {
-            super.setDamage(0);
+            super.setMeta(0);
         }
     }
 

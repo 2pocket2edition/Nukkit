@@ -1,19 +1,13 @@
 package cn.nukkit.form.element;
 
-public class ElementLabel extends Element {
+import lombok.ToString;
 
-    private final String type = "label"; //This variable is used for JSON import operations. Do NOT delete :) -- @Snake1999
-    private String text = "";
+import javax.annotation.Nonnull;
 
-    public ElementLabel(String text) {
-        this.text = text;
-    }
+@ToString
+public final class ElementLabel extends Element {
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
+    public ElementLabel(@Nonnull String elementId, @Nonnull String elementText) {
+        super(ElementType.LABEL, elementId, elementText);
     }
 }

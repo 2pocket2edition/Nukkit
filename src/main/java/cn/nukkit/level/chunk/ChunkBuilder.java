@@ -3,8 +3,8 @@ package cn.nukkit.level.chunk;
 import cn.nukkit.level.BlockUpdate;
 import cn.nukkit.level.Level;
 import com.google.common.base.Preconditions;
-import gnu.trove.map.TIntShortMap;
-import gnu.trove.map.hash.TIntShortHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ShortMap;
+import it.unimi.dsi.fastutil.ints.Int2ShortOpenHashMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +14,14 @@ public class ChunkBuilder {
     private final int x;
     private final int z;
     private final Level level;
-    private final TIntShortMap extraData = new TIntShortHashMap();
+    private final Int2ShortMap extraData = new Int2ShortOpenHashMap();
     private final List<BlockUpdate> blockUpdates = new ArrayList<>();
     private final List<ChunkDataLoader> chunkDataLoaders = new ArrayList<>();
     private ChunkSection[] sections;
     private byte[] biomes;
     private int[] heightMap;
     private boolean dirty;
-    private boolean generated;
-    private boolean populated;
+    private int state = IChunk.STATE_NEW;
 
     public ChunkBuilder(int x, int z, Level level) {
         this.x = x;
@@ -70,13 +69,8 @@ public class ChunkBuilder {
         return this;
     }
 
-    public ChunkBuilder generated() {
-        this.generated = true;
-        return this;
-    }
-
-    public ChunkBuilder populated() {
-        this.populated = true;
+    public ChunkBuilder state(int state) {
+        this.state = state;
         return this;
     }
 
@@ -91,8 +85,9 @@ public class ChunkBuilder {
         Preconditions.checkNotNull(this.heightMap, "heightMap");
         Chunk chunk = new Chunk(new UnsafeChunk(this.x, this.z, this.level, this.sections, this.biomes,
                 this.heightMap), this.chunkDataLoaders, this.blockUpdates);
-        chunk.setGenerated(this.generated);
-        chunk.setPopulated(this.populated);
+        if (this.state != IChunk.STATE_NEW)  {
+            chunk.setState(this.state);
+        }
         chunk.setDirty(this.dirty);
         return chunk;
     }

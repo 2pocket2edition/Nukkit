@@ -5,10 +5,10 @@ import cn.nukkit.item.ItemIds;
 import cn.nukkit.item.ItemTool;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Level;
-import cn.nukkit.math.NukkitRandom;
 import cn.nukkit.utils.Identifier;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static cn.nukkit.block.BlockIds.LIT_REDSTONE_ORE;
 
@@ -23,12 +23,12 @@ public class BlockOreRedstone extends BlockSolid {
     }
 
     @Override
-    public double getHardness() {
+    public float getHardness() {
         return 3;
     }
 
     @Override
-    public double getResistance() {
+    public float getResistance() {
         return 15;
     }
 
@@ -58,7 +58,7 @@ public class BlockOreRedstone extends BlockSolid {
     @Override
     public int onUpdate(int type) {
         if (type == Level.BLOCK_UPDATE_TOUCH) { //type == Level.BLOCK_UPDATE_NORMAL ||
-            this.getLevel().setBlock(this, Block.get(LIT_REDSTONE_ORE), false, false);
+            this.getLevel().setBlock(this.getPosition(), Block.get(LIT_REDSTONE_ORE), false, false);
 
             return Level.BLOCK_UPDATE_WEAK;
         }
@@ -68,7 +68,7 @@ public class BlockOreRedstone extends BlockSolid {
 
     @Override
     public int getDropExp() {
-        return new NukkitRandom().nextRange(1, 5);
+        return ThreadLocalRandom.current().nextInt(1, 6);
     }
 
     @Override

@@ -13,7 +13,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.concurrent.NotThreadSafe;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -33,7 +32,7 @@ public class LevelBuilder {
 
     public LevelBuilder id(String id) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(id), "id is null or empty");
-        this.id = id;
+        this.levelData.setName(this.id = id);
         return this;
     }
 
@@ -50,13 +49,14 @@ public class LevelBuilder {
 
     public LevelBuilder generator(Identifier generatorId) {
         Preconditions.checkNotNull(generatorId, "generatorId");
-        levelData.setGenerator(generatorId);
+        Preconditions.checkArgument(this.server.getGeneratorRegistry().isRegistered(generatorId), "Unknown generator: \"%s\"", generatorId);
+        this.levelData.setGenerator(generatorId);
         return this;
     }
 
     public LevelBuilder generatorOptions(String generatorOptions) {
         Preconditions.checkNotNull(generatorOptions, "generatorOptions");
-        levelData.setGeneratorOptions(generatorOptions);
+        this.levelData.setGeneratorOptions(generatorOptions);
         return this;
     }
 

@@ -4,11 +4,12 @@ import cn.nukkit.entity.impl.BaseEntity;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
 import cn.nukkit.event.entity.EntityRegainHealthEvent;
-import cn.nukkit.network.protocol.MobEffectPacket;
 import cn.nukkit.player.Player;
 import cn.nukkit.utils.ServerException;
+import com.nukkitx.nbt.tag.CompoundTag;
+import com.nukkitx.protocol.bedrock.packet.MobEffectPacket;
 
-import static cn.nukkit.entity.data.EntityFlag.INVISIBLE;
+import static com.nukkitx.protocol.bedrock.data.EntityFlag.INVISIBLE;
 
 /**
  * author: MagicDroidX
@@ -16,10 +17,9 @@ import static cn.nukkit.entity.data.EntityFlag.INVISIBLE;
  */
 public class Effect implements Cloneable {
 
-    public static final int SPEED = 1;
+    public static final int SWIFTNESS = 1;
     public static final int SLOWNESS = 2;
     public static final int HASTE = 3;
-    public static final int SWIFTNESS = 3;
     public static final int FATIGUE = 4;
     public static final int MINING_FATIGUE = 4;
     public static final int STRENGTH = 5;
@@ -47,14 +47,24 @@ public class Effect implements Cloneable {
     public static final int COUNDIT_POWER = 26;
     public static final int SLOW_FALLING = 27;
 
+    private static final String TAG_ID = "Id";
+    private static final String TAG_AMPLIFIER = "Amplifier";
+    private static final String TAG_DURATION = "Duration";
+    private static final String TAG_DURATION_EASY = "DurationEasy";
+    private static final String TAG_DURATION_NORMAL = "DurationNormal";
+    private static final String TAG_DURATION_HARD = "DurationHard";
+    private static final String TAG_AMBIENT = "Ambient";
+    private static final String TAG_SHOW_PARTICLES = "ShowParticles";
+    private static final String TAG_DISPLAY_ON_SCREEN_TEXTURE_ANIMATION = "DisplayOnScreenTextureAnimation";
+
     protected static Effect[] effects;
 
     public static void init() {
         effects = new Effect[256];
 
-        effects[Effect.SPEED] = new Effect(Effect.SPEED, "%potion.moveSpeed", 124, 175, 198);
+        effects[Effect.SWIFTNESS] = new Effect(Effect.SWIFTNESS, "%potion.moveSpeed", 124, 175, 198);
         effects[Effect.SLOWNESS] = new Effect(Effect.SLOWNESS, "%potion.moveSlowdown", 90, 108, 129, true);
-        effects[Effect.SWIFTNESS] = new Effect(Effect.SWIFTNESS, "%potion.digSpeed", 217, 192, 67);
+        effects[Effect.HASTE] = new Effect(Effect.HASTE, "%potion.digSpeed", 217, 192, 67);
         effects[Effect.FATIGUE] = new Effect(Effect.FATIGUE, "%potion.digSlowDown", 74, 66, 23, true);
         effects[Effect.STRENGTH] = new Effect(Effect.STRENGTH, "%potion.damageBoost", 147, 36, 35);
         effects[Effect.HEALING] = new InstantEffect(Effect.HEALING, "%potion.heal", 248, 36, 35);
@@ -84,6 +94,8 @@ public class Effect implements Cloneable {
         effects[Effect.SLOW_FALLING] = new Effect(Effect.SLOW_FALLING, "%potion.slowFalling", 206, 255, 255);
     }
 
+    protected final byte id;
+
     public static Effect getEffect(int id) {
         if (id >= 0 && id < effects.length && effects[id] != null) {
             return effects[id].clone();
@@ -102,13 +114,18 @@ public class Effect implements Cloneable {
         }
     }
 
-    protected final int id;
+    protected byte amplifier;
 
     protected final String name;
 
     protected int duration;
 
-    protected int amplifier = 0;
+    public Effect(int id, String name, int r, int g, int b, boolean isBad) {
+        this.id = (byte) id;
+        this.name = name;
+        this.bad = isBad;
+        this.setColor(r, g, b);
+    }
 
     protected int color;
 
@@ -122,18 +139,19 @@ public class Effect implements Cloneable {
         this(id, name, r, g, b, false);
     }
 
-    public Effect(int id, String name, int r, int g, int b, boolean isBad) {
-        this.id = id;
-        this.name = name;
-        this.bad = isBad;
-        this.setColor(r, g, b);
+    public static Effect getEffect(CompoundTag tag) {
+        return getEffect(tag.getByte(TAG_ID))
+                .setAmbient(tag.getBoolean(TAG_AMBIENT))
+                .setAmplifier(tag.getByte(TAG_AMPLIFIER))
+                .setVisible(tag.getBoolean(TAG_SHOW_PARTICLES))
+                .setDuration(tag.getInt(TAG_DURATION));
     }
 
     public String getName() {
         return name;
     }
 
-    public int getId() {
+    public byte getId() {
         return id;
     }
 
@@ -155,12 +173,12 @@ public class Effect implements Cloneable {
         return this;
     }
 
-    public int getAmplifier() {
+    public byte getAmplifier() {
         return amplifier;
     }
 
     public Effect setAmplifier(int amplifier) {
-        this.amplifier = amplifier;
+        this.amplifier = (byte) amplifier;
         return this;
     }
 
@@ -235,21 +253,21 @@ public class Effect implements Cloneable {
         if (entity instanceof Player) {
             Player player = (Player) entity;
 
-            MobEffectPacket pk = new MobEffectPacket();
-            pk.eid = entity.getUniqueId();
-            pk.effectId = this.getId();
-            pk.amplifier = this.getAmplifier();
-            pk.particles = this.isVisible();
-            pk.duration = this.getDuration();
+            MobEffectPacket packet = new MobEffectPacket();
+            packet.setRuntimeEntityId(entity.getRuntimeId());
+            packet.setEffectId(this.getId());
+            packet.setAmplifier(this.getAmplifier());
+            packet.setParticles(this.isVisible());
+            packet.setDuration(this.getDuration());
             if (oldEffect != null) {
-                pk.eventId = MobEffectPacket.EVENT_MODIFY;
+                packet.setEvent(MobEffectPacket.Event.MODIFY);
             } else {
-                pk.eventId = MobEffectPacket.EVENT_ADD;
+                packet.setEvent(MobEffectPacket.Event.ADD);
             }
 
-            player.dataPacket(pk);
+            player.sendPacket(packet);
 
-            if (this.id == Effect.SPEED) {
+            if (this.id == Effect.SWIFTNESS) {
                 if (oldEffect != null) {
                     player.setMovementSpeed(player.getMovementSpeed() / (1 + 0.2f * (oldEffect.amplifier + 1)), false);
                 }
@@ -265,7 +283,7 @@ public class Effect implements Cloneable {
         }
 
         if (this.id == Effect.INVISIBILITY) {
-            entity.setFlag(INVISIBLE, true);
+            entity.getData().setFlag(INVISIBLE, true);
             entity.setNameTagVisible(false);
         }
 
@@ -277,14 +295,14 @@ public class Effect implements Cloneable {
 
     public void remove(BaseEntity entity) {
         if (entity instanceof Player) {
-            MobEffectPacket pk = new MobEffectPacket();
-            pk.eid = entity.getUniqueId();
-            pk.effectId = this.getId();
-            pk.eventId = MobEffectPacket.EVENT_REMOVE;
+            MobEffectPacket packet = new MobEffectPacket();
+            packet.setRuntimeEntityId(entity.getRuntimeId());
+            packet.setEffectId(this.getId());
+            packet.setEvent(MobEffectPacket.Event.REMOVE);
 
-            ((Player) entity).dataPacket(pk);
+            ((Player) entity).sendPacket(packet);
 
-            if (this.id == Effect.SPEED) {
+            if (this.id == Effect.SWIFTNESS) {
                 ((Player) entity).setMovementSpeed(((Player) entity).getMovementSpeed() / (1 + 0.2f * (this.amplifier + 1)));
             }
             if (this.id == Effect.SLOWNESS) {
@@ -293,13 +311,22 @@ public class Effect implements Cloneable {
         }
 
         if (this.id == Effect.INVISIBILITY) {
-            entity.setFlag(INVISIBLE, false);
+            entity.getData().setFlag(INVISIBLE, false);
             entity.setNameTagVisible(true);
         }
 
         if (this.id == Effect.ABSORPTION) {
             entity.setAbsorption(0);
         }
+    }
+
+    public CompoundTag createTag() {
+        return CompoundTag.builder().byteTag(TAG_ID, getId())
+                .booleanTag(TAG_AMBIENT, isAmbient())
+                .byteTag(TAG_AMPLIFIER, getAmplifier())
+                .booleanTag(TAG_SHOW_PARTICLES, isVisible())
+                .intTag(TAG_DURATION, getDuration())
+                .buildRootTag();
     }
 
     @Override
