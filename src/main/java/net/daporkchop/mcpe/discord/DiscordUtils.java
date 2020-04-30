@@ -48,4 +48,9 @@ public class DiscordUtils {
 
         return token.trim();
     }
+
+    public static String clean(String msg)  {
+        return msg.replaceAll("[^\\x20-\\xff]", "?")
+                .replace("\u00A7", "");
+    }
 }
