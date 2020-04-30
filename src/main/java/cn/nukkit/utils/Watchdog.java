@@ -1,6 +1,7 @@
 package cn.nukkit.utils;
 
 import cn.nukkit.Server;
+import net.daporkchop.mcpe.discord.DiscordMain;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -68,6 +69,7 @@ public class Watchdog extends Thread {
                                 dumpThread(threads[i], logger);
                             }
                             logger.accept("---------------------------------------------");
+                            DiscordMain.shutdown(true);
                         } catch (IOException e) {
                             e.printStackTrace();
                         } finally {

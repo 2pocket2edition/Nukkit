@@ -14,10 +14,12 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -25,18 +27,20 @@ import java.util.StringJoiner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @UtilityClass
 public class DiscordMain {
-    private final Queue<String> SEND_QUEUE = new ConcurrentLinkedQueue<>();
+    private final Queue<String> SEND_QUEUE = new ArrayDeque<>();
     private JDA jda;
     private final StringBuilder BUILDER = new StringBuilder(2000);
+    private final AtomicInteger QUEUED_SENDS = new AtomicInteger(0);
 
     private TextChannel channel;
 
     private final boolean ENABLE = Boolean.parseBoolean(System.getProperty("2p2e.discord", "true"));
 
-    public void submitString(String input) {
+    public synchronized void submitString(String input) {
         if (!ENABLE)    {
             return;
         }
@@ -49,7 +53,7 @@ public class DiscordMain {
         SEND_QUEUE.add(input);
     }
 
-    public void start() {
+    public synchronized void start() {
         if (!ENABLE)    {
             return;
         }
@@ -74,18 +78,20 @@ public class DiscordMain {
                             }
 
                             if (event.getChannel().getIdLong() == 412992591148220418L) {
-                                if (msg.length() > 255) {
+                                if (msg.length() > 256) {
+                                    event.getAuthor().openPrivateChannel().queue(ch -> {
+                                        ch.sendMessage("Your message was too long to be relayed to Minecraft (must be max. 256 characters)").queue();
+                                    });
                                     return;
                                 }
 
                                 String message = TextFormat.colorize(
                                         "<&0[&9Discord&0] &r&f"
                                                 + DiscordColors.getClosestTo(event.getMember().getColor()).ingame
-                                                + event.getAuthor().getName().replaceAll("[^\\x20-\\xff]", "?")
+                                                + DiscordUtils.clean(event.getAuthor().getName())
                                                 + "&f> "
-                                                + msg.replaceAll("[^\\x20-\\xff]", "?"));
+                                                + DiscordUtils.clean(msg));
                                 Server.getInstance().broadcastMessage(message);
-                                //submitString(TextFormat.clean(message));
                             } else if (event.getMessage().getContentRaw().startsWith("!players")) {
                                 if (event.getChannel().getIdLong() == 412888996444635139L) {
                                     return;
@@ -117,13 +123,13 @@ public class DiscordMain {
     }
 
     @SuppressWarnings("deprecation")
-    public void started()   {
+    public synchronized void started()   {
         Server.getInstance().getScheduler().scheduleRepeatingTask(DiscordMain::updateStatus, 30 * 20, true); //30 seconds
         submitString("Server started!");
         Server.getInstance().getScheduler().scheduleRepeatingTask(() -> workOffQueue(false), 30, true); //1.5 seconds
     }
 
-    private static void updateStatus()  {
+    private synchronized void updateStatus()  {
         if (ENABLE) {
             Server server = Server.getInstance();
             jda.getPresence().setStatus(OnlineStatus.ONLINE);
@@ -131,7 +137,7 @@ public class DiscordMain {
         }
     }
 
-    private static void workOffQueue(boolean sync) {
+    private synchronized void workOffQueue(boolean sync) {
         if (!ENABLE || channel == null)    {
             SEND_QUEUE.clear();
             return;
@@ -140,19 +146,21 @@ public class DiscordMain {
         while (SEND_QUEUE.peek() != null && BUILDER.length() + SEND_QUEUE.peek().length() + 1 <= 2000) {
             BUILDER.append(SEND_QUEUE.poll()).append('\n');
         }
-        if (!sync) {
-            SEND_QUEUE.clear(); //if we're getting more than 2000 chars per second there's a good chance something is going wrong
-        }
         if (BUILDER.length() > 0) {
-            channel.sendMessage(BUILDER.toString()).queue();
+            MessageAction action = channel.sendMessage(BUILDER.toString());
+            if (sync)   {
+                action.complete();
+            } else {
+                action.queue();
+            }
         }
     }
 
-    public static void shutdown() {
+    public synchronized void shutdown(boolean stall) {
         if (!ENABLE || jda == null) {
             return;
         }
-        submitString("Server shutting down!");
+        submitString(stall ? "Server stalled, forcibly crashing" : "Server shutting down!");
         while (!SEND_QUEUE.isEmpty()) {
             workOffQueue(true);
         }

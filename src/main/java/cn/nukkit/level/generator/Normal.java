@@ -212,12 +212,6 @@ public class Normal extends Generator {
         //this.populators.add(ravines);
     }
 
-    double[][] seaFloorNoise = new double[16][16],
-            landNoise = new double[16][16],
-            mountainNoise = new double[16][16],
-            baseNoise = new double[16][16],
-            riverNoise = new double[16][16];
-
     @Override
     public void generateChunk(final int chunkX, final int chunkZ) {
         int baseX = chunkX << 4;
