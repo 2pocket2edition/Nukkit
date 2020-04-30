@@ -1106,7 +1106,7 @@ public abstract class Entity extends Location implements Metadatable {
     }
 
     public boolean isAlive() {
-        return this.health > 0 && this.y >= 0.0d && this.y < 100000.0d;
+        return this.health > 0;
     }
 
     public boolean isClosed() {

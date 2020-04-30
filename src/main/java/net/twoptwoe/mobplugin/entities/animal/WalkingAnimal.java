@@ -70,6 +70,12 @@ public abstract class WalkingAnimal extends WalkingEntity implements Animal {
             return false;
         }
 
+        if (this.y < 0.0d || this.y > 1000.0d)  {
+            this.server.getLogger().warning(String.format("Automatically killed %s @ %s", this.getClass().getCanonicalName(), this));
+            this.close();
+            return false;
+        }
+
         if (!this.isAlive()) {
             if (++this.deadTicks >= 23) {
                 this.close();

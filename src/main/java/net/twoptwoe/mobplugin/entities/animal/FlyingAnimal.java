@@ -60,6 +60,12 @@ public abstract class FlyingAnimal extends FlyingEntity implements EntityAgeable
 
     @Override
     public boolean onUpdate(int currentTick) {
+        if (this.y < 0.0d || this.y > 1000.0d)  {
+            this.server.getLogger().warning(String.format("Automatically killed %s @ %s", this.getClass().getCanonicalName(), this));
+            this.close();
+            return false;
+        }
+
         if (!this.isAlive()) {
             if (++this.deadTicks >= 23) {
                 this.close();
