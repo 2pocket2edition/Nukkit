@@ -1465,13 +1465,13 @@ public class Level implements ChunkManager, Metadatable {
 
         List<AxisAlignedBB> collides = new ArrayList<>();
 
-        LOOP:
+        long maxTime = System.currentTimeMillis() + 5L;
         for (int z = minZ; z <= maxZ; ++z) {
             for (int x = minX; x <= maxX; ++x) {
                 for (int y = minY; y <= maxY; ++y) {
-                    if (collides.size() >= 100)  {
-                        this.server.getLogger().debug("Spent too long ticking: " + minX + ' ' + minY + ' ' + minZ + ' ' + maxX + ' ' + maxY + ' ' + maxZ);
-                        break LOOP;
+                    if (System.currentTimeMillis() > maxTime)  {
+                        this.server.getLogger().warning(String.format("getCollisionCubes took too long (entity: %s @ %s, bb: %s, entities: %b, solidEntities: %b)", entity.getClass(), entity, bb, entities, solidEntities));
+                        return collides.toArray(new AxisAlignedBB[collides.size()]);
                     }
                     Block block = this.getBlock(this.temporalVector.setComponents(x, y, z), false);
                     if (!block.canPassThrough() && block.collidesWithBB(bb)) {
@@ -1481,9 +1481,13 @@ public class Level implements ChunkManager, Metadatable {
             }
         }
 
-        if ((entities || solidEntities) && collides.size() < 100) {
+        if (solidEntities) {
             for (Entity ent : this.getCollidingEntities(bb.grow(0.25f, 0.25f, 0.25f), entity)) {
-                if (solidEntities && !ent.canPassThrough()) {
+                if (System.currentTimeMillis() > maxTime)  {
+                    this.server.getLogger().warning(String.format("getCollisionCubes took too long (entity: %s @ %s, bb: %s, entities: %b, solidEntities: %b)", entity.getClass(), entity, bb, entities, solidEntities));
+                    return collides.toArray(new AxisAlignedBB[collides.size()]);
+                }
+                if (!ent.canPassThrough()) {
                     collides.add(ent.boundingBox.clone());
                 }
             }
