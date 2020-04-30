@@ -1456,12 +1456,12 @@ public class Level implements ChunkManager, Metadatable {
     }
 
     public AxisAlignedBB[] getCollisionCubes(Entity entity, AxisAlignedBB bb, boolean entities, boolean solidEntities) {
-        int minX = NukkitMath.floorDouble(bb.getMinX());
-        int minY = NukkitMath.floorDouble(bb.getMinY());
-        int minZ = NukkitMath.floorDouble(bb.getMinZ());
-        int maxX = NukkitMath.ceilDouble(bb.getMaxX());
-        int maxY = NukkitMath.ceilDouble(bb.getMaxY());
-        int maxZ = NukkitMath.ceilDouble(bb.getMaxZ());
+        int minX = NukkitMath.floorDouble(Math.min(bb.getMinX(), bb.getMaxX()));
+        int minY = NukkitMath.floorDouble(Math.min(bb.getMinY(), bb.getMaxY()));
+        int minZ = NukkitMath.floorDouble(Math.min(bb.getMinZ(), bb.getMaxZ()));
+        int maxX = NukkitMath.ceilDouble(Math.max(bb.getMinX(), bb.getMaxX()));
+        int maxY = NukkitMath.ceilDouble(Math.max(bb.getMinY(), bb.getMaxY()));
+        int maxZ = NukkitMath.ceilDouble(Math.max(bb.getMinZ(), bb.getMaxZ()));
 
         List<AxisAlignedBB> collides = new ArrayList<>();
 
