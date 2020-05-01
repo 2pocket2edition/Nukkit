@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class UtilsPE {
     public static final BitSet BANNED_BLOCKS = new BitSet();
 
-    public static final  int SERVER_SHUTDOWN_TIME_SECONDS = (int) TimeUnit.HOURS.toSeconds(6L);
+    public static final  int SERVER_SHUTDOWN_TIME_SECONDS = (int) TimeUnit.HOURS.toSeconds(4L);
     private static final int SHUTDOWN_TICKS               = SERVER_SHUTDOWN_TIME_SECONDS * 20;
 
     static {
