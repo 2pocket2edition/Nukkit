@@ -51,8 +51,9 @@ public class DiscordMain {
         } else if (BUILDER.length() + 1 + input.length() > 2000) {
             doSend(BUILDER);
             BUILDER.setLength(0);
+        } else {
+            BUILDER.append(input).append('\n');
         }
-        BUILDER.append(input).append('\n');
     }
 
     private synchronized void doSend(CharSequence text) {
