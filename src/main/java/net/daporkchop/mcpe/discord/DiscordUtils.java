@@ -1,5 +1,7 @@
 package net.daporkchop.mcpe.discord;
 
+import cn.nukkit.utils.TextFormat;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -49,8 +51,14 @@ public class DiscordUtils {
         return token.trim();
     }
 
+    public static String escape(String msg)  {
+        return TextFormat.clean(msg)
+                .replaceAll("(?<!\\\\)([_*~`])", "\\\\$1");
+    }
+
     public static String clean(String msg)  {
-        return msg.replaceAll("[^\\x20-\\xff]", "?")
-                .replace("\u00A7", "");
+        return TextFormat.clean(msg)
+                .replaceAll("\\\\([_*~`])", "$1")
+                .replaceAll("[^\\x20-\\xff]", "?");
     }
 }
