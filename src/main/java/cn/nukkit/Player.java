@@ -1885,7 +1885,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         }
 
         this.checkTeleportPosition();
-        this.checkInteractNearby();
+        
+        if (currentTick % 10 == 0) {
+            this.checkInteractNearby();
+        }
 
         if (this.spawned && this.dummyBossBars.size() > 0 && currentTick % 100 == 0) {
             this.dummyBossBars.values().forEach(DummyBossBar::updateBossEntityPosition);
@@ -2006,10 +2009,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
             return;
         } else if (this.isBanned()) {
-            this.kick(PlayerKickEvent.Reason.NAME_BANNED, "You are banned");
+            String reason = this.server.getNameBans().getEntires().get(this.getName().toLowerCase()).getReason();
+            this.kick(PlayerKickEvent.Reason.NAME_BANNED, !reason.isEmpty() ? "You are banned. Reason: " + reason : "You are banned");
             return;
         } else if (this.server.getIPBans().isBanned(this.getAddress())) {
-            this.kick(PlayerKickEvent.Reason.IP_BANNED, "You are banned");
+            String reason = this.server.getIPBans().getEntires().get(this.getAddress()).getReason();
+            this.kick(PlayerKickEvent.Reason.IP_BANNED, !reason.isEmpty() ? "You are banned. Reason: " + reason : "You are banned");
             return;
         }
 
@@ -2631,6 +2636,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                             this.respawn();
                             break;
                         case PlayerActionPacket.ACTION_JUMP:
+                            PlayerJumpEvent playerJumpEvent = new PlayerJumpEvent(this);
+                            this.server.getPluginManager().callEvent(playerJumpEvent);
                             break packetswitch;
                         case PlayerActionPacket.ACTION_START_SPRINT:
                             PlayerToggleSprintEvent playerToggleSprintEvent = new PlayerToggleSprintEvent(this, true);
@@ -3128,8 +3135,15 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
                         return;
                     } else if (this.craftingTransaction != null) {
-                        this.server.getLogger().debug("Got unexpected normal inventory action with incomplete crafting transaction from " + this.getName() + ", refusing to execute crafting");
-                        this.craftingTransaction = null;
+                        if(craftingTransaction.checkForCraftingPart(actions)){
+                            for (InventoryAction action : actions) {
+                                craftingTransaction.addAction(action);
+                            }
+                            return;
+                        } else {
+                            this.server.getLogger().debug("Got unexpected normal inventory action with incomplete crafting transaction from " + this.getName() + ", refusing to execute crafting");
+                            this.craftingTransaction = null;
+                        }
                     }
 
                     switch (transactionPacket.transactionType) {
@@ -3452,6 +3466,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     BookEditPacket bookEditPacket = (BookEditPacket) packet;
                     Item oldBook = this.inventory.getItem(bookEditPacket.inventorySlot);
                     if (oldBook.getId() != Item.BOOK_AND_QUILL) {
+                        return;
+                    }
+
+                    if (bookEditPacket.text.length() > 256) {
                         return;
                     }
 
@@ -4833,6 +4851,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         this.checkMovement = checkMovement;
     }
 
+    public boolean isCheckingMovement() {
+        return this.checkMovement;
+    }
+
     public synchronized void setLocale(Locale locale) {
         this.locale.set(locale);
     }
@@ -4845,7 +4867,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     public void setSprinting(boolean value) {
         if (isSprinting() != value) {
             super.setSprinting(value);
-            this.setMovementSpeed(value ? getMovementSpeed() * 1.3f : getMovementSpeed() / 1.3f);
         }
     }
 

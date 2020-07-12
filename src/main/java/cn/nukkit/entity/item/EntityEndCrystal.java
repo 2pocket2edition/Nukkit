@@ -57,7 +57,7 @@ public class EntityEndCrystal extends Entity implements EntityExplosive {
 
     @Override
     public boolean attack(EntityDamageEvent source) {
-    if (source.getCause() == EntityDamageEvent.DamageCause.FIRE || source.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || source.getCause() == EntityDamageEvent.DamageCause.LAVA) {
+        if (source.getCause() == EntityDamageEvent.DamageCause.FIRE || source.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || source.getCause() == EntityDamageEvent.DamageCause.LAVA) {
             return false;
         }
 
@@ -74,6 +74,7 @@ public class EntityEndCrystal extends Entity implements EntityExplosive {
     public void explode() {
         if (!this.detonated) {
             this.detonated = true;
+
             Position pos = this.getPosition();
             Explosion explode = new Explosion(pos, 6, this);
 
@@ -81,8 +82,8 @@ public class EntityEndCrystal extends Entity implements EntityExplosive {
 
             if (this.level.getGameRules().getBoolean(GameRule.MOB_GRIEFING)) {
                 explode.explodeA();
+                explode.explodeB();
             }
-            explode.explodeB();
         }
     }
 
