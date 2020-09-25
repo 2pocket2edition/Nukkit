@@ -80,7 +80,7 @@ public class GamemodeCommand extends VanillaCommand {
                 sender.sendMessage(new TranslationContainer("commands.gamemode.success.self", Server.getGamemodeString(gameMode)));
             } else {
                 target.sendMessage(new TranslationContainer("gameMode.changed"));
-                target.sendMessage(new TranslationContainer("commands.gamemode.success.other", target.getName(), Server.getGamemodeString(gameMode)));
+                target.sendMessage(new TranslationContainer("commands.gamemode.success.other", Server.getGamemodeString(gameMode), target.getName()));
             }
         }
 

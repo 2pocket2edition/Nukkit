@@ -4,6 +4,9 @@ import cn.nukkit.network.protocol.ProtocolInfo;
 import cn.nukkit.utils.ServerKiller;
 import net.daporkchop.mcpe.discord.DiscordMain;
 import com.google.common.base.Preconditions;
+import io.netty.util.ResourceLeakDetector;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.netty.util.internal.logging.Log4J2LoggerFactory;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -62,9 +65,14 @@ public class Nukkit {
         // Force IPv4 since Nukkit is not compatible with IPv6
         System.setProperty("java.net.preferIPv4Stack" , "true");
         System.setProperty("log4j.skipJansi", "false");
+        System.getProperties().putIfAbsent("io.netty.allocator.type", "unpooled"); // Disable memory pooling unless specified
 
         // Force Mapped ByteBuffers for LevelDB till fixed.
         System.setProperty("leveldb.mmap", "true");
+
+        // Netty logger for debug info
+        InternalLoggerFactory.setDefaultFactory(Log4J2LoggerFactory.INSTANCE);
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.PARANOID);
 
         // Define args
         OptionParser parser = new OptionParser();

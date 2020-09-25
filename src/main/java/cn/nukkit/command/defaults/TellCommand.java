@@ -50,12 +50,12 @@ public class TellCommand extends VanillaCommand {
             return true;
         }
 
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            msg += args[i] + " ";
+            msg.append(args[i]).append(" ");
         }
         if (msg.length() > 0) {
-            msg = msg.substring(0, msg.length() - 1);
+            msg = new StringBuilder(msg.substring(0, msg.length() - 1));
         }
 
         sender.sendMessage("\u00A75[\u00A7dme \u00A75-> \u00A7d" + player.getName() + "\u00A75] \u00A7d" + msg);

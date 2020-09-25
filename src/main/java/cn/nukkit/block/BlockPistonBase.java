@@ -183,7 +183,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
             this.level.setBlock(pos.getSide(direction), Block.get(BlockID.AIR), true, false);
         }
         if (calculator == null) {
-            calculator = new BlocksCalculator(this, direction, extending);
+            calculator = new BlocksCalculator(this.level, this, direction, extending);
         }
 
         if (calculator.canMove()) {
@@ -241,7 +241,9 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         return false;
     }
 
-    public class BlocksCalculator {
+    public static class BlocksCalculator {
+
+        private final Level level;
         private final Vector3 pistonPos;
         private final Block blockToMove;
         private final BlockFace moveDirection;
@@ -251,7 +253,8 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
 
         protected Boolean canMove;
 
-        public BlocksCalculator(Block pos, BlockFace facing, boolean extending) {
+        public BlocksCalculator(Level level, Block pos, BlockFace facing, boolean extending) {
+            this.level = level;
             this.pistonPos = pos.getLocation();
 
             if (extending) {

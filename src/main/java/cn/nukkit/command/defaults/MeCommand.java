@@ -41,16 +41,16 @@ public class MeCommand extends VanillaCommand {
             name = sender.getName();
         }
 
-        String msg = "";
+        StringBuilder msg = new StringBuilder();
         for (String arg : args) {
-            msg += arg + " ";
+            msg.append(arg).append(" ");
         }
 
         if (msg.length() > 0) {
-            msg = msg.substring(0, msg.length() - 1);
+            msg = new StringBuilder(msg.substring(0, msg.length() - 1));
         }
 
-        sender.getServer().broadcastMessage(String.format("\u00A7a* %s %s", name, msg));
+        sender.getServer().broadcastMessage(String.format("\u00A7a* %s %s", name, msg.toString()));
 
         return true;
     }
