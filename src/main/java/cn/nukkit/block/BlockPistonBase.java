@@ -105,7 +105,7 @@ public abstract class BlockPistonBase extends BlockSolidMeta implements Faceable
         boolean isPowered = this.isPowered();
 
         if (isPowered && !isExtended()) {
-            BlocksCalculator calculator = new BlocksCalculator(this, facing, true);
+            BlocksCalculator calculator = new BlocksCalculator(this.level, this, facing, true);
             if (calculator.canMove()) {
                 if (!this.doMove(true, calculator)) {
                     return;
