@@ -189,8 +189,6 @@ public abstract class BlockLiquid extends BlockTransparentMeta {
         final int z = this.getFloorZ();
 
         if (type == Level.BLOCK_UPDATE_NORMAL) {
-            if (false && !this.checkForHarden(x, y, z)) {
-            }
             this.level.scheduleUpdate(this, this.tickRate());
             return 0;
         } else if (type == Level.BLOCK_UPDATE_SCHEDULED) {
