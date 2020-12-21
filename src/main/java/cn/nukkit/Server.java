@@ -725,7 +725,7 @@ public class Server {
 
         for (InetSocketAddress i : targets) {
             if (this.players.containsKey(i)) {
-                this.players.get(i).directDataPacket(pk);
+                this.players.get(i).dataPacket(pk);
             }
         }
     }
@@ -1037,6 +1037,13 @@ public class Server {
         pk.type = PlayerListPacket.TYPE_REMOVE;
         pk.entries = new PlayerListPacket.Entry[]{new PlayerListPacket.Entry(uuid)};
         Server.broadcastPacket(players, pk);
+    }
+
+    public void removePlayerListData(UUID uuid, Player player) {
+        PlayerListPacket pk = new PlayerListPacket();
+        pk.type = PlayerListPacket.TYPE_REMOVE;
+        pk.entries = new PlayerListPacket.Entry[]{new PlayerListPacket.Entry(uuid)};
+        player.dataPacket(pk);
     }
 
     public void removePlayerListData(UUID uuid, Collection<Player> players) {
