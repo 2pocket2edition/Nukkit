@@ -25,8 +25,8 @@ public class CraftingDataPacket extends DataPacket {
     public static final String CRAFTING_TAG_SMOKER = "smoker";
 
     private List<Recipe> entries = new ArrayList<>();
-    private List<BrewingRecipe> brewingEntries = new ArrayList<>();
-    private List<ContainerRecipe> containerEntries = new ArrayList<>();
+    private final List<BrewingRecipe> brewingEntries = new ArrayList<>();
+    private final List<ContainerRecipe> containerEntries = new ArrayList<>();
     public boolean cleanRecipes;
 
     public void addShapelessRecipe(ShapelessRecipe... recipe) {
@@ -38,6 +38,10 @@ public class CraftingDataPacket extends DataPacket {
     }
 
     public void addFurnaceRecipe(FurnaceRecipe... recipe) {
+        Collections.addAll(entries, recipe);
+    }
+
+    public void addMultiRecipe(MultiRecipe... recipe) {
         Collections.addAll(entries, recipe);
     }
 
@@ -65,6 +69,8 @@ public class CraftingDataPacket extends DataPacket {
         this.reset();
         this.putUnsignedVarInt(entries.size());
 
+        int recipeNetworkId = 1;
+
         for (Recipe recipe : entries) {
             this.putVarInt(recipe.getType().ordinal());
             switch (recipe.getType()) {
@@ -77,11 +83,11 @@ public class CraftingDataPacket extends DataPacket {
                         this.putRecipeIngredient(ingredient);
                     }
                     this.putUnsignedVarInt(1);
-                    this.putSlot(shapeless.getResult());
+                    this.putSlot(shapeless.getResult(), true);
                     this.putUUID(shapeless.getId());
                     this.putString(CRAFTING_TAG_CRAFTING_TABLE);
                     this.putVarInt(shapeless.getPriority());
-                    this.putUnsignedVarInt(0);
+                    this.putUnsignedVarInt(recipeNetworkId++);
                     break;
                 case SHAPED:
                     ShapedRecipe shaped = (ShapedRecipe) recipe;
@@ -99,12 +105,12 @@ public class CraftingDataPacket extends DataPacket {
                     outputs.addAll(shaped.getExtraResults());
                     this.putUnsignedVarInt(outputs.size());
                     for (Item output : outputs) {
-                        this.putSlot(output);
+                        this.putSlot(output, true);
                     }
                     this.putUUID(shaped.getId());
                     this.putString(CRAFTING_TAG_CRAFTING_TABLE);
                     this.putVarInt(shaped.getPriority());
-                    this.putUnsignedVarInt(0);
+                    this.putUnsignedVarInt(recipeNetworkId++);
                     break;
                 case FURNACE:
                 case FURNACE_DATA:
@@ -114,27 +120,31 @@ public class CraftingDataPacket extends DataPacket {
                     if (recipe.getType() == RecipeType.FURNACE_DATA) {
                         this.putVarInt(input.getDamage());
                     }
-                    this.putSlot(furnace.getResult());
+                    this.putSlot(furnace.getResult(), true);
                     this.putString(CRAFTING_TAG_FURNACE);
+                    break;
+                case MULTI:
+                    this.putUUID(((MultiRecipe) recipe).getId());
+                    this.putUnsignedVarInt(recipeNetworkId++);
                     break;
             }
         }
 
         this.putUnsignedVarInt(this.brewingEntries.size());
         for (BrewingRecipe recipe : brewingEntries) {
-            this.putVarInt(recipe.getInput().getId());
+            this.putVarInt(recipe.getInput().getNetworkId());
             this.putVarInt(recipe.getInput().getDamage());
-            this.putVarInt(recipe.getIngredient().getId());
+            this.putVarInt(recipe.getIngredient().getNetworkId());
             this.putVarInt(recipe.getIngredient().getDamage());
-            this.putVarInt(recipe.getResult().getId());
+            this.putVarInt(recipe.getResult().getNetworkId());
             this.putVarInt(recipe.getResult().getDamage());
         }
 
         this.putUnsignedVarInt(this.containerEntries.size());
         for (ContainerRecipe recipe : containerEntries) {
-            this.putVarInt(recipe.getInput().getId());
-            this.putVarInt(recipe.getIngredient().getId());
-            this.putVarInt(recipe.getResult().getId());
+            this.putVarInt(recipe.getInput().getNetworkId());
+            this.putVarInt(recipe.getIngredient().getNetworkId());
+            this.putVarInt(recipe.getResult().getNetworkId());
         }
 
         this.putBoolean(cleanRecipes);

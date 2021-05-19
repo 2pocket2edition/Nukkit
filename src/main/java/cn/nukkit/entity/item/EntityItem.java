@@ -2,6 +2,7 @@ package cn.nukkit.entity.item;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -105,6 +106,11 @@ public class EntityItem extends Entity {
         this.item = NBTIO.getItemHelper(this.namedTag.getCompound("Item"));
         this.setDataFlag(DATA_FLAGS, DATA_FLAG_GRAVITY, true);
 
+        int id = this.item.getId();
+        if (id >= Item.NETHERITE_INGOT && id <= Item.NETHERITE_SCRAP) {
+            this.fireProof = true; // Netherite items are fireproof
+        }
+
         this.server.getPluginManager().callEvent(new ItemSpawnEvent(this));
     }
 
@@ -167,7 +173,7 @@ public class EntityItem extends Entity {
 
         boolean hasUpdate = this.entityBaseTick(tickDiff);
 
-        if (isInsideOfFire()) {
+        if (!this.fireProof && this.isInsideOfFire()) {
             this.kill();
         }
 
@@ -177,7 +183,7 @@ public class EntityItem extends Entity {
                 if (this.pickupDelay < 0) {
                     this.pickupDelay = 0;
                 }
-            } else {
+            }/* else { // Done in Player#checkNearEntities
                 for (Entity entity : this.level.getNearbyEntities(this.boundingBox.grow(1, 0.5, 1), this)) {
                     if (entity instanceof Player) {
                         if (((Player) entity).pickupEntity(this, true)) {
@@ -185,14 +191,13 @@ public class EntityItem extends Entity {
                         }
                     }
                 }
-            }
+            }*/
 
-            if (this.level.getBlockIdAt((int) this.x, (int) this.boundingBox.getMaxY(), (int) this.z) == 8 || this.level.getBlockIdAt((int) this.x, (int) this.boundingBox.getMaxY(), (int) this.z) == 9) { //item is fully in water or in still water
-                this.motionY -= this.getGravity() * -0.015;
-            } else if (this.isInsideOfWater()) {
-                this.motionY = this.getGravity() - 0.06; //item is going up in water, don't let it go back down too fast
-            } else {
-                this.motionY -= this.getGravity(); //item is not in water
+            int bid = level.getBlockIdAt(this.getFloorX(), this.getFloorY(), this.getFloorZ());
+            if (bid == BlockID.WATER || bid == BlockID.STILL_WATER) {
+                this.motionY = this.getGravity() - 0.06;
+            } else if (!this.isOnGround()) {
+                this.motionY -= this.getGravity();
             }
 
             if (this.checkObstruction(this.x, this.y, this.z)) {

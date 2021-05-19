@@ -117,7 +117,7 @@ public class StartGamePacket extends DataPacket {
         this.putVarInt(this.platformBroadcastIntent);
         this.putBoolean(this.commandsEnabled);
         this.putBoolean(this.isTexturePacksRequired);
-        this.putGameRules(this.gameRules, true); //enabled by default
+        this.putGameRules(this.gameRules);
         this.putLInt(0); // Experiment count
         this.putBoolean(false); // Were experiments previously toggled
         this.putBoolean(this.bonusChest);
@@ -141,7 +141,9 @@ public class StartGamePacket extends DataPacket {
         this.putString(this.worldName);
         this.putString(this.premiumWorldTemplateId);
         this.putBoolean(this.isTrial);
-        this.putVarInt(this.isMovementServerAuthoritative ? 1 : 0); // 2 - rewind
+        this.putUnsignedVarInt(this.isMovementServerAuthoritative ? 1 : 0); // 2 - rewind
+        this.putVarInt(0); // RewindHistorySize
+        this.putBoolean(false); // isServerAuthoritativeBlockBreaking
         this.putLLong(this.currentTick);
         this.putVarInt(this.enchantmentSeed);
         this.putUnsignedVarInt(0); // Custom blocks

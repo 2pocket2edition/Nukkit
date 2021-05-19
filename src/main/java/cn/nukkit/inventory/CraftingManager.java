@@ -2,7 +2,6 @@ package cn.nukkit.inventory;
 
 import cn.nukkit.Server;
 import cn.nukkit.item.Item;
-import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.CraftingDataPacket;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.utils.BinaryStream;
@@ -16,7 +15,6 @@ import lombok.extern.log4j.Log4j2;
 import java.io.File;
 import java.io.InputStream;
 import java.util.*;
-import java.util.zip.Deflater;
 
 /**
  * author: MagicDroidX
@@ -31,6 +29,8 @@ public class CraftingManager {
     protected final Map<Integer, Map<UUID, ShapedRecipe>> shapedRecipes = new Int2ObjectOpenHashMap<>();
 
     public final Map<Integer, FurnaceRecipe> furnaceRecipes = new Int2ObjectOpenHashMap<>();
+
+    public final Map<UUID, MultiRecipe> multiRecipes = new HashMap<>();
 
     public final Map<Integer, BrewingRecipe> brewingRecipes = new Int2ObjectOpenHashMap<>();
     public final Map<Integer, ContainerRecipe> containerRecipes = new Int2ObjectOpenHashMap<>();
@@ -153,6 +153,9 @@ public class CraftingManager {
                         }
                         this.registerRecipe(new FurnaceRecipe(resultItem, inputItem));
                         break;
+                    case 4:
+                        this.registerRecipe(new MultiRecipe(UUID.fromString((String) recipe.get("uuid"))));
+                        break;
                     default:
                         break;
                 }
@@ -201,6 +204,10 @@ public class CraftingManager {
             pk.addFurnaceRecipe(recipe);
         }
 
+        for (MultiRecipe recipe : this.multiRecipes.values()) {
+            pk.addMultiRecipe(recipe);
+        }
+
         for (BrewingRecipe recipe : brewingRecipes.values()) {
             pk.addBrewingRecipe(recipe);
         }
@@ -209,7 +216,7 @@ public class CraftingManager {
             pk.addContainerRecipe(recipe);
         }
 
-        pk.encode();
+        pk.tryEncode();
         // TODO: find out whats wrong with compression
         // packet = pk.compress(Deflater.BEST_COMPRESSION);
         packet = pk;
@@ -379,6 +386,10 @@ public class CraftingManager {
             return recipe.matchItems(inputList, extraOutputList, multiplier);
         }
         return false;
+    }
+
+    public void registerMultiRecipe(MultiRecipe recipe) {
+        this.multiRecipes.put(recipe.getId(), recipe);
     }
 
     public static class Entry {
