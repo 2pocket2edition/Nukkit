@@ -1752,17 +1752,6 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     public void checkNetwork() {
-        if (!this.packetQueue.isEmpty()) {
-            Player[] pArr = new Player[]{this};
-            List<DataPacket> toBatch = new ArrayList<>();
-            DataPacket packet;
-            while ((packet = this.packetQueue.poll()) != null) {
-                toBatch.add(packet);
-            }
-            DataPacket[] arr = toBatch.toArray(new DataPacket[0]);
-            this.server.batchPackets(pArr, arr, false);
-        }
-
         if (!this.isOnline()) {
             return;
         }

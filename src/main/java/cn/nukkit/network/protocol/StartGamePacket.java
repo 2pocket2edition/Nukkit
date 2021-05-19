@@ -117,7 +117,7 @@ public class StartGamePacket extends DataPacket {
         this.putVarInt(this.platformBroadcastIntent);
         this.putBoolean(this.commandsEnabled);
         this.putBoolean(this.isTexturePacksRequired);
-        this.putGameRules(this.gameRules);
+        this.putGameRules(this.gameRules, true);
         this.putLInt(0); // Experiment count
         this.putBoolean(false); // Were experiments previously toggled
         this.putBoolean(this.bonusChest);
