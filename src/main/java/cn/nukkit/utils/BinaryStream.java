@@ -4,7 +4,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.entity.Attribute;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.item.*;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.GameRules;
 import cn.nukkit.level.GlobalBlockPalette;
@@ -375,14 +374,10 @@ public class BinaryStream {
     }
 
     public Item getSlot() {
-        int networkId = getVarInt();
-        if (networkId == 0) {
+        int id = getVarInt();
+        if (id == 0) {
             return Item.get(0, 0, 0);
         }
-
-        int legacyFullId = RuntimeItems.getRuntimeMapping().getLegacyFullId(networkId);
-        int id = RuntimeItems.getId(legacyFullId);
-        boolean hasData = RuntimeItems.hasData(legacyFullId);
 
         int count = getLShort();
         int damage = (int) getUnsignedVarInt();
@@ -392,9 +387,6 @@ public class BinaryStream {
 
         /*boolean hasData = RuntimeItems.hasData(fullId); // Unnecessary when the damage is read from NBT
         if (hasData) {
-            // Swap data using legacy full id
-            data = RuntimeItems.getData(legacyFullId);
-        } else if (hasData) {
             damage = RuntimeItems.getData(fullId);
         }*/
 

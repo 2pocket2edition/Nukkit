@@ -3,7 +3,6 @@ package cn.nukkit.block;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemSeedsWheat;
 import cn.nukkit.item.ItemWheat;
-import net.daporkchop.mcpe.UtilsPE;
 
 /**
  * Created on 2015/12/2 by xtypr.
@@ -39,7 +38,7 @@ public class BlockWheat extends BlockCrops {
         if (this.getDamage() >= 0x07) {
             return new Item[]{
                     new ItemWheat(),
-                    new ItemSeedsWheat(0, UtilsPE.rand(1, 4))
+                    new ItemSeedsWheat(0, (int) (4d * Math.random()))
             };
         } else {
             return new Item[]{

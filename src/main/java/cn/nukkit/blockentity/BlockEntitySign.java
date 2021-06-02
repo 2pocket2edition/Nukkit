@@ -28,8 +28,10 @@ public class BlockEntitySign extends BlockEntitySpawnable {
         text = new String[4];
 
         if (!namedTag.contains("Text")) {
+
             for (int i = 1; i <= 4; i++) {
                 String key = "Text" + i;
+
                 if (namedTag.contains(key)) {
                     String line = namedTag.getString(key);
 

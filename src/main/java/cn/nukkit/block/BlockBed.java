@@ -112,6 +112,7 @@ public class BlockBed extends BlockTransparentMeta implements Faceable {
             player.sendMessage(new TranslationContainer("tile.bed.occupied"));
         }
 
+
         return true;
     }
 
